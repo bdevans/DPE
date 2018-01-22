@@ -144,7 +144,7 @@ norm_EMD_dev = emd_dev_from_fit / emd_21
 
 # Deviation from fit
 median_error = np.median(norm_EMD_dev, axis=2)
-plt.contourf(proportions, sample_sizes, median_error, cmap='viridis')
+plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
 plt.colorbar()
 
 levels = 100 * np.array([0.001, 0.01]) * np.amax(norm_EMD_dev)
@@ -153,13 +153,13 @@ plt.clabel(CS, inline=1, fontsize=10)
 
 plt.xlabel('Proportion (Type 1)')
 plt.ylabel('Sample size')
-plt.title('Median propotion error from true proportion (as a % of maximum EMD error)')
+plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
 
 # Error p2
 plt.figure()
 rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
-plt.contourf(proportions, sample_sizes, rel_err_31, cmap='viridis')
+plt.contourf(proportions, sample_sizes, rel_err_31, cmap='viridis_r')
 plt.colorbar()
 #input_prop=repmat(0.01:0.02:0.99,30,1,10); %set proportion
 #surf(100*median(((1-mat_emd_31/iemd_21)-input_prop)./input_prop,3))
@@ -184,8 +184,9 @@ plt.title('Relative % error from Type 1 population')
 
 # Error p1
 plt.figure()
-rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions)/proportions
-plt.contourf(proportions, sample_sizes, rel_err_32, cmap='viridis')
+proportions_rev = proportions[::-1]
+rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions_rev)/proportions_rev
+plt.contourf(proportions, sample_sizes, rel_err_32, cmap='viridis_r')
 plt.colorbar()
 #input_prop=repmat(0.99:-0.02:0.01,30,1,10); %set original proportion
 #surf(100*median(((1-mat_emd_32/iemd_21)-input_prop)./input_prop,3))
@@ -221,12 +222,12 @@ plt.title('Relative % error from Type 2 population')
 
 ers = np.zeros((len(sample_sizes), len(proportions), 2))
 # N.B. Swapped indicies
-ers[:,:,0] = 100*(np.median(1-mat_emd_31/iemd_21, axis=2) - proportions)/proportions
+ers[:,:,0] = 100*(np.median(1-mat_emd_31/iemd_21, axis=2) - proportions_rev)/proportions_rev
 ers[:,:,1] = 100*(np.median(1-mat_emd_32/iemd_21, axis=2) - proportions)/proportions
 max_ers = np.amax(ers, axis=2)
 
 plt.figure()
-plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis')
+plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis_r')
 plt.colorbar()
 
 #input_prop=repmat(0.99:-0.02:0.01,30,1,10); %set original proportion
