@@ -123,6 +123,17 @@ for b in range(bootstraps):
             RM = np.concatenate((R1, R2))
             #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
             
+            
+            ################### Difference of Means method ###################
+            
+            
+            ####################### Subtraction method #######################
+            
+            
+            ########################### KDE method ###########################
+            
+            
+            ########################### EMD method ###########################
             # Interpolated cdf (to compute emd)
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
