@@ -76,17 +76,21 @@ i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
 
 # EMDs computed with interpolated CDFs
 i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bin_width * max_emd
-#i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
-#i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
+i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
+i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
 
-
-print("Proportions based on Earth Mover's Distance:")
-print('% of Type 1:', 1-EMD_31/EMD_21)
-print('% of Type 2:', 1-EMD_32/EMD_21)
 
 print('Proportions based on counts')
 print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
 print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
+
+print("Proportions based on Earth Mover's Distance (histogram values):")
+print('% of Type 1:', 1-EMD_31/EMD_21)
+print('% of Type 2:', 1-EMD_32/EMD_21)
+
+print("Proportions based on Earth Mover's Distance (interpolated values):")
+print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
+print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
 
 
 print('--------------------------------------------------------------------------------\n\n')
