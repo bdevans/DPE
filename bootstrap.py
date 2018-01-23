@@ -50,6 +50,11 @@ bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 (hc3, _) = np.histogram(Mix, bins=bin_edges)
 counts = {'T1': hc1, 'T2': hc2, 'Mix': hc3}  # Binned score frequencies
 
+# EMDs computed with histograms (compute pair-wise EMDs between the 3 histograms)
+max_emd = bin_edges[-1] - bin_edges[0]
+emd_21 = sum(abs(np.cumsum(hc2/sum(hc2))-np.cumsum(hc1/sum(hc1))))*bin_width*max_emd
+emd_31 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc1/sum(hc1))))*bin_width*max_emd
+emd_32 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc2/sum(hc2))))*bin_width*max_emd
 
 
 
@@ -69,13 +74,7 @@ y_Mix = np.linspace(0, 1, len(x_Mix))
 (iv, ii) = np.unique(x_Mix, return_index=True)
 i_cdf3 = np.interp(bin_centers, iv, y_Mix[ii])
 
-# emds computed with histograms (compute pair-wise emds between the 3 histograms)
-max_emd = bin_edges[-1] - bin_edges[0]
-emd_21 = sum(abs(np.cumsum(hc2/sum(hc2))-np.cumsum(hc1/sum(hc1))))*bin_width*max_emd
-emd_31 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc1/sum(hc1))))*bin_width*max_emd
-emd_32 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc2/sum(hc2))))*bin_width*max_emd
-
-# emds computed with interpolated cdfs
+# EMDs computed with interpolated CDFs
 iemd_21=sum(abs(i_cdf2-i_cdf1))*bin_width*max_emd
 iemd_31=sum(abs(i_cdf3-i_cdf1))*bin_width*max_emd
 iemd_32=sum(abs(i_cdf3-i_cdf2))*bin_width*max_emd
@@ -116,11 +115,11 @@ for rn in range(max_rn):
             R2 = np.random.choice(T2, nT2, replace=True)
 
             # Bootstrap mixture
-            RM = np.sort(np.concatenate((R1, R2)))
-            xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
+            RM = np.concatenate((R1, R2))
+            #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
             
             # Interpolated cdf (to compute emd)
-            x = [0.095, *RM, 0.35]
+            x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
             (iv, ii) = np.unique(x, return_index=True)
             si_cdf3 = np.interp(bin_centers, iv, y[ii])
