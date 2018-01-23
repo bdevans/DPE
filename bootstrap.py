@@ -145,12 +145,12 @@ norm_mat_EMD_32 = mat_emd_32 / emd_21
 norm_EMD_dev = emd_dev_from_fit / emd_21
 
 # Deviation from fit
-median_error = np.median(norm_EMD_dev, axis=2)
+median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
 plt.colorbar()
 
-levels = 100 * np.array([0.001, 0.01]) * np.amax(norm_EMD_dev)
-CS = plt.contour(proportions, sample_sizes, 100*median_error, levels)
+levels = np.array([0.1, 1.0]) * np.amax(norm_EMD_dev)  # Percentage
+CS = plt.contour(proportions, sample_sizes, median_error, levels)
 plt.clabel(CS, inline=1, fontsize=10)
 
 plt.xlabel('Proportion (Type 1)')
