@@ -52,9 +52,9 @@ counts = {'T1': hc1, 'T2': hc2, 'Mix': hc3}  # Binned score frequencies
 
 # EMDs computed with histograms (compute pair-wise EMDs between the 3 histograms)
 max_emd = bin_edges[-1] - bin_edges[0]
-emd_21 = sum(abs(np.cumsum(hc2/sum(hc2))-np.cumsum(hc1/sum(hc1))))*bin_width*max_emd
-emd_31 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc1/sum(hc1))))*bin_width*max_emd
-emd_32 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc2/sum(hc2))))*bin_width*max_emd
+EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
+EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
+EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width * max_emd
 
 
 
@@ -62,27 +62,27 @@ emd_32 = sum(abs(np.cumsum(hc3/sum(hc3))-np.cumsum(hc2/sum(hc2))))*bin_width*max
 x_T1 = [0.095, *sorted(T1), 0.35]
 y_T1 = np.linspace(0, 1, len(x_T1))
 (iv, ii) = np.unique(x_T1, return_index=True)
-i_cdf1 = np.interp(bin_centers, iv, y_T1[ii])
+i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
 
 x_T2 = [0.095, *sorted(T2), 0.35]
 y_T2 = np.linspace(0, 1, len(x_T2))
 (iv, ii) = np.unique(x_T2, return_index=True)
-i_cdf2 = np.interp(bin_centers, iv, y_T2[ii])
+i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
 
 x_Mix = [0.095, *sorted(Mix), 0.35]
 y_Mix = np.linspace(0, 1, len(x_Mix))
 (iv, ii) = np.unique(x_Mix, return_index=True)
-i_cdf3 = np.interp(bin_centers, iv, y_Mix[ii])
+i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
 
 # EMDs computed with interpolated CDFs
-iemd_21=sum(abs(i_cdf2-i_cdf1))*bin_width*max_emd
-iemd_31=sum(abs(i_cdf3-i_cdf1))*bin_width*max_emd
-iemd_32=sum(abs(i_cdf3-i_cdf2))*bin_width*max_emd
+i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bin_width * max_emd
+#i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
+#i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
 
 
 print("Proportions based on Earth Mover's Distance:")
-print('% of Type 1:', 1-emd_31/emd_21)
-print('% of Type 2:', 1-emd_32/emd_21)
+print('% of Type 1:', 1-EMD_31/EMD_21)
+print('% of Type 2:', 1-EMD_32/EMD_21)
 
 print('Proportions based on counts')
 print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
@@ -98,8 +98,8 @@ proportions = np.arange(0.01, 1.01, 0.02)
 
 emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-mat_emd_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-mat_emd_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 t = time.time()  # Start timer
 for b in range(bootstraps):
@@ -123,26 +123,26 @@ for b in range(bootstraps):
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
             (iv, ii) = np.unique(x, return_index=True)
-            si_cdf3 = np.interp(bin_centers, iv, y[ii])
+            si_CDF_3 = np.interp(bin_centers, iv, y[ii])
             
             # Compute EMDs
-            iemd_31 = sum(abs(si_cdf3-i_cdf1)) * bin_width * max_emd;
-            iemd_32 = sum(abs(si_cdf3-i_cdf2)) * bin_width * max_emd;
-            mat_emd_31[s, p, b] = iemd_31  # emds to compute proportions
-            mat_emd_32[s, p, b] = iemd_32  # emds to compute proportions
+            i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd;
+            i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd;
+            mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
+            mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
             
-            EMD_diff = si_cdf3 - ((1-iemd_31/iemd_21)*i_cdf1 + (1-iemd_32/iemd_21)*i_cdf2)
+            EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
             emd_dev_from_fit[s, p, b] = sum(EMD_diff) * bin_width * max_emd  # deviations from fit measured with emd
-            rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_cdf3)  # deviations from fit measured with rms
+            rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
 
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds'.format(elapsed))
 
 
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
-norm_mat_EMD_31 = mat_emd_31 / emd_21
-norm_mat_EMD_32 = mat_emd_32 / emd_21
-norm_EMD_dev = emd_dev_from_fit / emd_21
+norm_mat_EMD_31 = mat_EMD_31 / EMD_21
+norm_mat_EMD_32 = mat_EMD_32 / EMD_21
+norm_EMD_dev = emd_dev_from_fit / EMD_21
 
 # Deviation from fit
 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
@@ -188,7 +188,7 @@ plt.xlim(0.99, 0.01)  # Reverse axis
 plt.xlabel('Proportion (Type 2)')
 plt.ylabel('Sample size')
 plt.title('Relative % error from Type 2 population')
-#contour3(100*median(((1-mat_emd_32/iemd_21)-input_prop)./input_prop,3),[5 5],'r','LineWidth',3)
+#contour3(100*median(((1-mat_EMD_32/i_EMD_21)-input_prop)./input_prop,3),[5 5],'r','LineWidth',3)
 #hold off
 #set(gca,'xtick',linspace(1,50,21),'xticklabel',[99 99:-5:5 1])
 #xlabel('% proportion')
@@ -200,8 +200,8 @@ plt.title('Relative % error from Type 2 population')
 
 # Max Error
 ers = np.zeros((len(sample_sizes), len(proportions), 2))
-ers[:,:,0] = 100*(np.median(1-mat_emd_31/iemd_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
-ers[:,:,1] = 100*(np.median(1-mat_emd_32/iemd_21, axis=2) - proportions)/proportions
+ers[:,:,0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
+ers[:,:,1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
 max_ers = np.amax(ers, axis=2)
 
 plt.figure()
@@ -224,11 +224,11 @@ plt.title('Maximum % relative error from either population')
 
 if False:
     print('Root mean square fit of CDF with EMDs:')
-    p_emd_1 = 1-emd_31/emd_21  # Proportions of Type 1 in Mix based on EMD
-    p_emd_2 = 1-emd_32/emd_21  # Proportions of Type 2 in Mix based on EMD
-    print(np.sqrt(sum((i_cdf3-(p_emd_2*i_cdf2 + p_emd_1*i_cdf1))**2))/len(i_cdf3))
+    p_emd_1 = 1-EMD_31/EMD_21  # Proportions of Type 1 in Mix based on EMD
+    p_emd_2 = 1-EMD_32/EMD_21  # Proportions of Type 2 in Mix based on EMD
+    print(np.sqrt(sum((i_CDF_3-(p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1))**2))/len(i_CDF_3))
     print('Root mean square fit of CDF with counts:')
-    print(np.sqrt(sum((i_cdf3-(0.6085*i_cdf2+0.3907*i_cdf1))**2))/len(i_cdf3))
+    print(np.sqrt(sum((i_CDF_3-(0.6085*i_CDF_2+0.3907*i_CDF_1))**2))/len(i_CDF_3))
     
     ## Some test of the quality of the fit using CDFs
     # plot experimental cdfs
@@ -238,13 +238,13 @@ if False:
     plt.plot(x_Mix, y_Mix, label='Mixture')
     
     # plot interpolated CDFs
-    plt.plot(bin_centers, i_cdf1, '.-', label='Type 1 CDF')
-    plt.plot(bin_centers, i_cdf2, '.-', label='Type 2 CDF')
-    plt.plot(bin_centers, i_cdf3, '.-', label='Mixture CDF')
+    plt.plot(bin_centers, i_CDF_1, '.-', label='Type 1 CDF')
+    plt.plot(bin_centers, i_CDF_2, '.-', label='Type 2 CDF')
+    plt.plot(bin_centers, i_CDF_3, '.-', label='Mixture CDF')
     
     # plot linear combinations of the two original distributions
-    plt.plot(bin_centers, p_emd_2*i_cdf2 + p_emd_1*i_cdf1, 'p-', label='EMD-based combination')  # emds
-    plt.plot(bin_centers, 0.6085*i_cdf2 + 0.3907*i_cdf1, 'o-', label='HC-based combination')  # counts
+    plt.plot(bin_centers, p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1, 'p-', label='EMD-based combination')  # emds
+    plt.plot(bin_centers, 0.6085*i_CDF_2 + 0.3907*i_CDF_1, 'o-', label='HC-based combination')  # counts
     #axis([0.095 0.35 -0.01 1.01])
     plt.legend()
     
