@@ -79,6 +79,7 @@ iemd_21=sum(abs(i_cdf2-i_cdf1))*bin_width*max_emd
 iemd_31=sum(abs(i_cdf3-i_cdf1))*bin_width*max_emd
 iemd_32=sum(abs(i_cdf3-i_cdf2))*bin_width*max_emd
 
+
 print("Proportions based on Earth Mover's Distance:")
 print('% of Type 1:', 1-emd_31/emd_21)
 print('% of Type 2:', 1-emd_32/emd_21)
@@ -91,17 +92,17 @@ print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
 print('--------------------------------------------------------------------------------\n\n')
 
 
-max_rn = 100
+bootstraps = 100
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
-emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), max_rn))
-rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), max_rn))
-mat_emd_31 = np.zeros((len(sample_sizes), len(proportions), max_rn))
-mat_emd_32 = np.zeros((len(sample_sizes), len(proportions), max_rn))
+emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+mat_emd_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+mat_emd_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 t = time.time()  # Start timer
-for rn in range(max_rn):
+for b in range(bootstraps):
     for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
             
@@ -127,12 +128,12 @@ for rn in range(max_rn):
             # Compute EMDs
             iemd_31 = sum(abs(si_cdf3-i_cdf1)) * bin_width * max_emd;
             iemd_32 = sum(abs(si_cdf3-i_cdf2)) * bin_width * max_emd;
-            mat_emd_31[s, p, rn] = iemd_31  # emds to compute proportions
-            mat_emd_32[s, p, rn] = iemd_32  # emds to compute proportions
+            mat_emd_31[s, p, b] = iemd_31  # emds to compute proportions
+            mat_emd_32[s, p, b] = iemd_32  # emds to compute proportions
             
             EMD_diff = si_cdf3 - ((1-iemd_31/iemd_21)*i_cdf1 + (1-iemd_32/iemd_21)*i_cdf2)
-            emd_dev_from_fit[s, p, rn] = sum(EMD_diff) * bin_width * max_emd  # deviations from fit measured with emd
-            rms_dev_from_fit[s, p, rn] = math.sqrt(sum(EMD_diff**2)) / len(si_cdf3)  # deviations from fit measured with rms
+            emd_dev_from_fit[s, p, b] = sum(EMD_diff) * bin_width * max_emd  # deviations from fit measured with emd
+            rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_cdf3)  # deviations from fit measured with rms
 
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds'.format(elapsed))
