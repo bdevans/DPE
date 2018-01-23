@@ -136,7 +136,7 @@ for b in range(bootstraps):
             mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
             
             EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
-            emd_dev_from_fit[s, p, b] = sum(EMD_diff) * bin_width * max_emd  # deviations from fit measured with emd
+            emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
             rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
 
 elapsed = time.time() - t
@@ -146,7 +146,7 @@ print('Elapsed time = {:.3f} seconds'.format(elapsed))
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
 norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
 norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-norm_EMD_dev = emd_dev_from_fit / i_EMD_21
+norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
 
 # Deviation from fit
 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
