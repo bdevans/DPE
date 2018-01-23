@@ -140,9 +140,9 @@ print('Elapsed time = {:.3f} seconds'.format(elapsed))
 
 
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
-norm_mat_EMD_31 = mat_EMD_31 / EMD_21
-norm_mat_EMD_32 = mat_EMD_32 / EMD_21
-norm_EMD_dev = emd_dev_from_fit / EMD_21
+norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
+norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
+norm_EMD_dev = emd_dev_from_fit / i_EMD_21
 
 # Deviation from fit
 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
