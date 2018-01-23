@@ -188,14 +188,6 @@ plt.xlim(0.99, 0.01)  # Reverse axis
 plt.xlabel('Proportion (Type 2)')
 plt.ylabel('Sample size')
 plt.title('Relative % error from Type 2 population')
-#contour3(100*median(((1-mat_EMD_32/i_EMD_21)-input_prop)./input_prop,3),[5 5],'r','LineWidth',3)
-#hold off
-#set(gca,'xtick',linspace(1,50,21),'xticklabel',[99 99:-5:5 1])
-#xlabel('% proportion')
-#set(gca,'ytick',[1 5:5:30],'yticklabel',[100 500:500:3000],'Ydir','reverse')
-#ylim([1 30])
-#ylabel('sample size')
-
 
 
 # Max Error
