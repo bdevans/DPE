@@ -176,7 +176,7 @@ plt.title('Median propotion error from true proportion (as a % of maximum EMD er
 # Error T1
 plt.figure()
 rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
-plt.contourf(proportions, sample_sizes, rel_err_31, cmap='viridis_r')
+plt.contourf(proportions, sample_sizes, rel_err_31, cmap='bwr')
 plt.colorbar()
 
 # 1 & 5% relative error contour the other proportion
@@ -192,7 +192,7 @@ plt.title('Relative % error from Type 1 population')
 plt.figure()
 proportions_rev = proportions[::-1]
 rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions_rev)/proportions_rev
-plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='viridis_r')
+plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='bwr')
 plt.colorbar()
 
 # 1 & 5% relative error contour the other proportion
