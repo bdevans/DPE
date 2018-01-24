@@ -209,7 +209,7 @@ plt.title('Relative % error from Type 2 population')
 ers = np.zeros((len(sample_sizes), len(proportions), 2))
 ers[:,:,0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
 ers[:,:,1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
-max_ers = np.amax(ers, axis=2)
+max_ers = np.amax(abs(ers), axis=2)
 
 plt.figure()
 plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis_r')
