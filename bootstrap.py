@@ -165,7 +165,7 @@ plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
 plt.colorbar()
 
 levels = np.array([0.1, 1.0]) * np.amax(norm_EMD_dev)  # Percentage
-CS = plt.contour(proportions, sample_sizes, median_error, levels)
+CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels)
 plt.clabel(CS, inline=1, fontsize=10)
 
 plt.xlabel('Proportion (Type 1)')
