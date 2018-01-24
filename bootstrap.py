@@ -45,6 +45,9 @@ bin_edges = np.arange(0.095, 0.35+bin_width, bin_width)
 #bin_centers = np.arange(0.095+bin_width/2, 0.35+bin_width/2, bin_width)
 bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 
+
+################################# EMD method #################################
+
 (hc1, _) = np.histogram(T1, bins=bin_edges)
 (hc2, _) = np.histogram(T2, bins=bin_edges)
 (hc3, _) = np.histogram(Mix, bins=bin_edges)
@@ -55,7 +58,6 @@ max_emd = bin_edges[-1] - bin_edges[0]
 EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
 EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
 EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width * max_emd
-
 
 
 # Interpolate the cdfs at the same points for comparison
@@ -158,6 +160,9 @@ print('Elapsed time = {:.3f} seconds'.format(elapsed))
 norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
 norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
 norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
+median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+
+################################ Plot results ################################
 
 # Deviation from fit
 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
