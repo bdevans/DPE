@@ -33,6 +33,9 @@ data = pd.read_csv('data.csv', usecols=[1,2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 data.describe()
 
+# Excess method median of T1GRS from the whole population in Biobank
+population_median = 0.23103448748588562
+
 # Arrays of T1GRS scores for each group
 T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
 T2 = data.loc[data['type'] == 2, 'T1GRS'].as_matrix()
@@ -263,17 +266,16 @@ for b in range(bootstraps):
             ################### Difference of Means method ###################
             # means method
             proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
-            means_T1D[s,p,b] = proportion_of_T1
+            means_T1D[s, p, b] = proportion_of_T1
 
 
             ####################### Subtraction method #######################
-            #excess method median = 0.23103448748588562
-            number_low = len(RM[RM <=0.23103448748588562])
-            number_high = len(RM[RM >0.23103448748588562])
-            high= number_high - number_low
-            low= 2* number_low
-            proportion_t1 =100*(high/(low+high))
-            excess_T1D[s,p,b] = proportion_t1
+            number_low = len(RM[RM <= population_median])
+            number_high = len(RM[RM > population_median])
+            high = number_high - number_low
+            low = 2*number_low
+            proportion_t1 = 100*(high/(low+high))
+            excess_T1D[s, p, b] = proportion_t1
 
 
             ########################### KDE method ###########################
