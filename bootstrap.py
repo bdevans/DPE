@@ -331,55 +331,75 @@ plt.ylabel('Sample size')
 plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
 
-# Error T1
-plt.figure()
-rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
-plt.contourf(proportions, sample_sizes, rel_err_31, cmap='bwr')
-plt.colorbar()
+if verbose:
+    # Deviation from fit
+    plt.figure()
+    plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
+    plt.colorbar()
 
-# 1 & 5% relative error contour the other proportion
-CS = plt.contour(proportions, sample_sizes, rel_err_31, [1, 5])
-plt.clabel(CS, inline=1, fontsize=10)
+    #contour3(median(emd_dev_from_fit/0.0128,3),[0.01 0.001]*max(emd_dev_from_fit(:)/0.0128),'r','LineWidth',3)
+    levels = np.array([0.1, 1.0]) * np.amax(norm_EMD_dev)  # Percentage
+    CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels)
+    plt.clabel(CS, inline=1, fontsize=10)
 
-plt.xlabel('Proportion (Type 1)')
-plt.ylabel('Sample size')
-plt.title('Relative % error from Type 1 population')
-
-
-# Error T2
-plt.figure()
-proportions_rev = proportions[::-1]
-rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions_rev)/proportions_rev
-plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='bwr')
-plt.colorbar()
-
-# 1 & 5% relative error contour the other proportion
-CS = plt.contour(proportions_rev, sample_sizes, rel_err_32, [1, 5])
-plt.clabel(CS, inline=1, fontsize=10)
-
-plt.xlim(0.99, 0.01)  # Reverse axis
-plt.xlabel('Proportion (Type 2)')
-plt.ylabel('Sample size')
-plt.title('Relative % error from Type 2 population')
+    plt.xlabel('Proportion (Type 1)')
+    plt.ylabel('Sample size')
+    plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
 
-# Max Error
-ers = np.zeros((len(sample_sizes), len(proportions), 2))
-ers[:,:,0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
-ers[:,:,1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
-max_ers = np.amax(abs(ers), axis=2)
+    # Error T1
+    plt.figure()
+    rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
+    plt.contourf(proportions, sample_sizes, rel_err_31, cmap='bwr')
+    plt.colorbar()
+    lim = np.amax(abs(rel_err_31))
+    plt.clim(-lim, lim)
 
-plt.figure()
-plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis_r')
-plt.colorbar()
+    # 1 & 5% relative error contour the other proportion
+    CS = plt.contour(proportions, sample_sizes, rel_err_31, [1, 5])
+    plt.clabel(CS, inline=1, fontsize=10)
 
-# 1 & 5% relative error contour the max error proportion
-CS = plt.contour(proportions, sample_sizes, max_ers, [1, 5])
-plt.clabel(CS, inline=1, fontsize=10)
+    plt.xlabel('Proportion (Type 1)')
+    plt.ylabel('Sample size')
+    plt.title('Relative % error from Type 1 population')
 
-plt.xlabel('Proportion (Type 1)')
-plt.ylabel('Sample size')
-plt.title('Maximum % relative error from either population')
+
+    # Error T2
+    plt.figure()
+    proportions_rev = proportions[::-1]
+    rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions_rev)/proportions_rev
+    plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='bwr')
+    plt.colorbar()
+    lim = np.amax(abs(rel_err_32))
+    plt.clim(-lim, lim)
+
+    # 1 & 5% relative error contour the other proportion
+    CS = plt.contour(proportions_rev, sample_sizes, rel_err_32, [1, 5])
+    plt.clabel(CS, inline=1, fontsize=10)
+
+    plt.xlim(0.99, 0.01)  # Reverse axis
+    plt.xlabel('Proportion (Type 2)')
+    plt.ylabel('Sample size')
+    plt.title('Relative % error from Type 2 population')
+
+
+    # Max Error
+    ers = np.zeros((len(sample_sizes), len(proportions), 2))
+    ers[:,:,0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
+    ers[:,:,1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
+    max_ers = np.amax(abs(ers), axis=2)
+
+    plt.figure()
+    plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis_r')
+    plt.colorbar()
+
+    # 1 & 5% relative error contour the max error proportion
+    CS = plt.contour(proportions, sample_sizes, max_ers, [1, 5])
+    plt.clabel(CS, inline=1, fontsize=10)
+
+    plt.xlabel('Proportion (Type 1)')
+    plt.ylabel('Sample size')
+    plt.title('Maximum % relative error from either population')
 
 
 
