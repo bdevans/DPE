@@ -45,6 +45,9 @@ bin_edges = np.arange(0.095, 0.35+bin_width, bin_width)
 #bin_centers = np.arange(0.095+bin_width/2, 0.35+bin_width/2, bin_width)
 bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 
+
+################################# EMD method #################################
+
 (hc1, _) = np.histogram(T1, bins=bin_edges)
 (hc2, _) = np.histogram(T2, bins=bin_edges)
 (hc3, _) = np.histogram(Mix, bins=bin_edges)
@@ -106,27 +109,31 @@ means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 t = time.time()  # Start timer
-for b in range(bootstraps): 
+for b in range(bootstraps):
    for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
-            
+
             nT1 = int(round(sample_size * prop_T1))
             nT2 = sample_size - nT1
-            
+
             # Random sample from T1
             R1 = np.random.choice(T1, nT1, replace=True)
-            
+
             # Random sample from T2
             R2 = np.random.choice(T2, nT2, replace=True)
 
             # Bootstrap mixture
             RM = np.concatenate((R1, R2))
             #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
-            
+
+
+            ################### Difference of Means method ###################
             # means method
             proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
             means_T1D[s,p,b] = proportion_of_T1
-            
+
+
+            ####################### Subtraction method #######################
             #excess method median = 0.23103448748588562
             number_low = len(RM[RM <=0.23103448748588562])
             number_high = len(RM[RM >0.23103448748588562])
@@ -134,22 +141,26 @@ for b in range(bootstraps):
             low= 2* number_low
             proportion_t1 =100*(high/(low+high))
             excess_T1D[s,p,b] = proportion_t1
-            
+
+            ########################### KDE method ###########################
+
+
+            ########################### EMD method ###########################
             # Interpolated cdf (to compute emd)
-            
+
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
             (iv, ii) = np.unique(x, return_index=True)
             si_CDF_3 = np.interp(bin_centers, iv, y[ii])
-            
+
             # Compute EMDs
             i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd;
             i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd;
             mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
             mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
-            
+
             EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
-            emd_dev_from_fit[s, p, b] = sum(EMD_diff) * bin_width * max_emd  # deviations from fit measured with emd
+            emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
             rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
 
 elapsed = time.time() - t
@@ -159,7 +170,10 @@ print('Elapsed time = {:.3f} seconds'.format(elapsed))
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
 norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
 norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-norm_EMD_dev = emd_dev_from_fit / i_EMD_21
+norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
+median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+
+################################ Plot results ################################
 
 # Deviation from fit
 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
@@ -167,7 +181,7 @@ plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
 plt.colorbar()
 
 levels = np.array([0.1, 1.0]) * np.amax(norm_EMD_dev)  # Percentage
-CS = plt.contour(proportions, sample_sizes, median_error, levels)
+CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels)
 plt.clabel(CS, inline=1, fontsize=10)
 
 plt.xlabel('Proportion (Type 1)')
@@ -178,7 +192,7 @@ plt.title('Median propotion error from true proportion (as a % of maximum EMD er
 # Error T1
 plt.figure()
 rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
-plt.contourf(proportions, sample_sizes, rel_err_31, cmap='viridis_r')
+plt.contourf(proportions, sample_sizes, rel_err_31, cmap='bwr')
 plt.colorbar()
 
 # 1 & 5% relative error contour the other proportion
@@ -194,7 +208,7 @@ plt.title('Relative % error from Type 1 population')
 plt.figure()
 proportions_rev = proportions[::-1]
 rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions_rev)/proportions_rev
-plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='viridis_r')
+plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='bwr')
 plt.colorbar()
 
 # 1 & 5% relative error contour the other proportion
@@ -211,7 +225,7 @@ plt.title('Relative % error from Type 2 population')
 ers = np.zeros((len(sample_sizes), len(proportions), 2))
 ers[:,:,0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
 ers[:,:,1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
-max_ers = np.amax(ers, axis=2)
+max_ers = np.amax(abs(ers), axis=2)
 
 plt.figure()
 plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis_r')
@@ -238,26 +252,26 @@ if False:
     print(np.sqrt(sum((i_CDF_3-(p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1))**2))/len(i_CDF_3))
     print('Root mean square fit of CDF with counts:')
     print(np.sqrt(sum((i_CDF_3-(0.6085*i_CDF_2+0.3907*i_CDF_1))**2))/len(i_CDF_3))
-    
+
     ## Some test of the quality of the fit using CDFs
     # plot experimental cdfs
     plt.figure()
     plt.plot(x_T1, y_T1, label='Type 1')
     plt.plot(x_T2, y_T2, label='Type 2')
     plt.plot(x_Mix, y_Mix, label='Mixture')
-    
+
     # plot interpolated CDFs
     plt.plot(bin_centers, i_CDF_1, '.-', label='Type 1 CDF')
     plt.plot(bin_centers, i_CDF_2, '.-', label='Type 2 CDF')
     plt.plot(bin_centers, i_CDF_3, '.-', label='Mixture CDF')
-    
+
     # plot linear combinations of the two original distributions
     plt.plot(bin_centers, p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1, 'p-', label='EMD-based combination')  # emds
     plt.plot(bin_centers, 0.6085*i_CDF_2 + 0.3907*i_CDF_1, 'o-', label='HC-based combination')  # counts
     #axis([0.095 0.35 -0.01 1.01])
     plt.legend()
-    
-    ## addtional test normalised bar plot using the proportion from the EMD 
+
+    ## addtional test normalised bar plot using the proportion from the EMD
     plt.figure()
     plt.subplot(2,1,1)
     # br=bar(bin_centers,[hc1*0.2429; hc2*0.7563]'./max(sum([hc1*0.2429; hc2*0.7563])),'stacked');
@@ -265,10 +279,10 @@ if False:
     norm_fact = np.sum(np.vstack((hc1*p_emd_1, hc2*p_emd_2)), axis=0)
     plt.bar(bin_centers, height=hc1*p_emd_1/norm_fact, bottom=hc2*p_emd_2/norm_fact, width=bin_width)
     plt.bar(bin_centers, height=hc2*p_emd_2/norm_fact, width=bin_width)
-    
-    
+
+
     plt.subplot(2,1,2)
     plt.bar(bin_centers, height=hc3/max(hc3), width=bin_width)  # bar(bin_centers,hc3/max(hc3))
-    
+
 # means method out put
 print ("proporton mean method", round(proportion_of_T1,1))
