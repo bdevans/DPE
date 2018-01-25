@@ -56,8 +56,6 @@ EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width
 EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
 EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width * max_emd
 
-
-
 # Interpolate the cdfs at the same points for comparison
 x_T1 = [0.095, *sorted(T1), 0.35]
 y_T1 = np.linspace(0, 1, len(x_T1))
@@ -104,10 +102,12 @@ emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 t = time.time()  # Start timer
-for b in range(bootstraps):
-    for s, sample_size in enumerate(sample_sizes):
+for b in range(bootstraps): 
+   for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
             
             nT1 = int(round(sample_size * prop_T1))
@@ -123,7 +123,20 @@ for b in range(bootstraps):
             RM = np.concatenate((R1, R2))
             #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
             
+            # means method
+            proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
+            means_T1D[s,p,b] = proportion_of_T1
+            
+            #excess method median = 0.23103448748588562
+            number_low = len(RM[RM <=0.23103448748588562])
+            number_high = len(RM[RM >0.23103448748588562])
+            high= number_high - number_low
+            low= 2* number_low
+            proportion_t1 =100*(high/(low+high))
+            excess_T1D[s,p,b] = proportion_t1
+            
             # Interpolated cdf (to compute emd)
+            
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
             (iv, ii) = np.unique(x, return_index=True)
@@ -257,3 +270,5 @@ if False:
     plt.subplot(2,1,2)
     plt.bar(bin_centers, height=hc3/max(hc3), width=bin_width)  # bar(bin_centers,hc3/max(hc3))
     
+# means method out put
+print ("proporton mean method", round(proportion_of_T1,1))
