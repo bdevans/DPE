@@ -82,6 +82,119 @@ i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
 i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
 
 
+verbose = False
+
+################################# KDE method #################################
+
+bw = bin_width  # Bandwidth
+
+kdes = {}
+labels = ['Type 1', 'Type 2', 'Mixture']
+
+if False:
+    fig, axes = plt.subplots(3, 1, sharex=True) #, squeeze=False)
+    X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
+
+    for data, label, ax in zip([T1, T2, Mix], labels, axes):
+        
+        kdes[label] = {}
+        X = data[:, np.newaxis]
+    
+        for kernel in ['gaussian', 'tophat', 'epanechnikov']:
+            kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
+            log_dens = kde.score_samples(X_plot)
+            ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
+                    label="kernel = '{0}'; bandwidth = {1}".format(kernel, bw))
+            kdes[label][kernel] = kde  #np.exp(log_dens)
+        
+        #ax.text(6, 0.38, "N={0} points".format(N))
+        
+        ax.legend(loc='upper left')
+        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
+        ax.set_ylabel(label)
+        
+        #ax.set_xlim(-4, 9)
+        #ax.set_ylim(-0.02, 0.4)
+        #plt.show()
+
+
+#sp.interpolate.interp1d(X, y, X_new, y_new)
+
+for data, label in zip([T1, T2, Mix], labels):
+    kdes[label] = {}
+    X = data[:, np.newaxis]
+    for kernel in ['gaussian', 'tophat', 'epanechnikov']:
+        kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
+        kdes[label][kernel] = kde
+
+kernel = 'gaussian' #'epanechnikov'
+
+# TODO: Rethink
+n_bins = int(np.floor(np.sqrt(N)))
+(freqs_T1, bins) = np.histogram(T1, bins=n_bins)
+(freqs_T2, bins) = np.histogram(T2, bins=n_bins)
+(freqs_Mix, bins) = np.histogram(Mix, bins=n_bins)
+
+x = np.array((bins[:-1] + bins[1:])) / 2  # Bin centres
+y = Mix
+
+
+# Define the KDE models
+
+def kde_T1(x, amp_T1):
+    return amp_T1 * np.exp(kdes['Type 1'][kernel].score_samples(x[:, np.newaxis]))
+
+def kde_T2(x, amp_T2):
+    return amp_T2 * np.exp(kdes['Type 2'][kernel].score_samples(x[:, np.newaxis]))
+
+model_T1 = lmfit.Model(kde_T1)
+model_T2 = lmfit.Model(kde_T2)
+
+
+plt.figure()
+fig, (axP, axM, axR, axI) = plt.subplots(4, 1, sharex=True, sharey=False)
+
+model = model_T1 + model_T2
+params_mix = model.make_params()
+params_mix['amp_T1'].value = 1
+params_mix['amp_T2'].value = 1
+
+res_mix = model.fit(freqs_Mix, x=x, params=params_mix)
+
+plt.sca(axM)
+res_mix.plot_fit()
+
+dely = res_mix.eval_uncertainty(sigma=3)
+axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
+#plt.show()
+
+plt.sca(axR)
+res_mix.plot_residuals()
+
+amp_T1 = res_mix.params['amp_T1'].value
+amp_T2 = res_mix.params['amp_T2'].value
+
+kde1 = kde_T1(x, amp_T1)
+kde2 = kde_T2(x, amp_T2)
+axP.stackplot(x, np.vstack((kde1/(kde1+kde2), kde2/(kde1+kde2))), labels=labels[:-1])
+legend = axP.legend(facecolor='grey')
+#legend.get_frame().set_facecolor('grey')
+axP.set_title('Proportions of Type 1 and Type 2 vs T1GRS')
+
+#plt.sca(axI)
+axI.plot(x, kde1, label='Type 1')
+axI.plot(x, kde2, label='Type 2')
+
+if verbose:
+    print(res_mix.fit_report())
+    print('T2/T1 =', amp_T2/amp_T1)
+    print('')
+    print('\nParameter confidence intervals:')
+    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
+
+
+############## Summarise proportions for the whole distribution ##############
+
 print('Proportions based on counts')
 print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
 print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
@@ -94,6 +207,9 @@ print("Proportions based on Earth Mover's Distance (interpolated values):")
 print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
 print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
 
+print('Proportions based on KDEs')
+print('% of Type 2:', amp_T1/(amp_T1+amp_T2))
+print('% of Type 2:', amp_T2/(amp_T1+amp_T2))
 
 print('--------------------------------------------------------------------------------\n\n')
 
@@ -101,6 +217,10 @@ print('-------------------------------------------------------------------------
 bootstraps = 100
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
+
+#KDE_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+#KDE_rms_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
@@ -133,6 +253,16 @@ for b in range(bootstraps):
             
             
             ########################### KDE method ###########################
+            #n_bins = int(np.floor(np.sqrt(sample_size)))
+            #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
+            #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
+            #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
+            x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+            mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
+            res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+            amp_T1 = res_mix.params['amp_T1'].value
+            amp_T2 = res_mix.params['amp_T2'].value
+            KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
             
             
             ########################### EMD method ###########################
