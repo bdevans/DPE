@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 #import seaborn as sns
 import pandas as pd
 import numpy as np
-import scipy as sp
+#import scipy as sp
 #from scipy import stats
 #from fitter import Fitter
 from sklearn.neighbors import KernelDensity
@@ -252,11 +252,12 @@ for b in range(bootstraps):
             
             # Random sample from T2
             R2 = np.random.choice(T2, nT2, replace=True)
-
+            
             # Bootstrap mixture
             RM = np.concatenate((R1, R2))
             #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
             
+            #x = np.array([0.095, *np.sort(RM), 0.35])
             
             ################### Difference of Means method ###################
             
@@ -278,7 +279,7 @@ for b in range(bootstraps):
             
             
             ########################### EMD method ###########################
-            # Interpolated cdf (to compute emd)
+            # Interpolated cdf (to compute EMD)
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
             (iv, ii) = np.unique(x, return_index=True)
