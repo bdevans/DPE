@@ -8,6 +8,7 @@ Created on Fri Jan 19 14:39:28 2018
 
 import time
 import math
+import sys
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -227,7 +228,18 @@ rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
+# Setup progress bar
+iterations = KDE_fits.size
+max_bars = 78    # number of dots in progress bar
+if iterations < max_bars:
+    max_bars = iterations   # if less than 20 points in scan, shorten bar
+print("|" + max_bars*"-" + "|     Bootstrap progress")
+sys.stdout.write('|'); sys.stdout.flush();  # print start of progress bar
+
+
 t = time.time()  # Start timer
+it = 0
+bar_element = 0
 for b in range(bootstraps):
     for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
@@ -281,9 +293,19 @@ for b in range(bootstraps):
             EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
             emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
             rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
+            
+            if (it >= bar_element*iterations/max_bars):
+                sys.stdout.write('*'); sys.stdout.flush();
+                bar_element += 1
+            if (it >= iterations-1):
+                sys.stdout.write('|     done  \n'); sys.stdout.flush();
+            it += 1
+            
 
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds'.format(elapsed))
+
+
 
 
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
