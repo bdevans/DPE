@@ -34,7 +34,9 @@ data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 data.describe()
 
 # Excess method median of T1GRS from the whole population in Biobank
-population_median = 0.23103448748588562
+population_median = 0.23137931525707245
+high =((len(Mix[Mix > population_median])-len(Mix[Mix <= population_median])))
+low=(2*len(Mix[Mix <= population_median]))
 
 # Arrays of T1GRS scores for each group
 T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
@@ -193,10 +195,16 @@ if verbose:
     print('T2/T1 =', amp_T2/amp_T1)
     print('')
     print('\nParameter confidence intervals:')
-    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
-
+    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()  
 
 ############## Summarise proportions for the whole distribution ##############
+print('Proportions based on means')
+print('% of Type 1:', (Mix.mean()-T2.mean())/(T1.mean()-T2.mean()))
+print('% of Type 2:', (1-(Mix.mean()-T2.mean())/(T1.mean()-T2.mean())))
+
+print('Proportions based on excess')
+print('% of Type 1:', (high/(low+high)))
+print('% of Type 2:',(1-(high/(low+high))))
 
 print('Proportions based on counts')
 print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
