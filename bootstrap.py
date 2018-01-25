@@ -215,7 +215,7 @@ print('% of Type 2:', amp_T2/(amp_T1+amp_T2))
 print('--------------------------------------------------------------------------------\n\n')
 
 
-bootstraps = 100
+bootstraps = 3
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
