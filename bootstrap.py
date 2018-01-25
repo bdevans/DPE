@@ -242,7 +242,7 @@ t = time.time()  # Start timer
 it = 0
 bar_element = 0
 for b in range(bootstraps):
-   for s, sample_size in enumerate(sample_sizes):
+    for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
 
             nT1 = int(round(sample_size * prop_T1))
