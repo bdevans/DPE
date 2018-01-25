@@ -317,18 +317,20 @@ median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
 ################################ Plot results ################################
 
-# Deviation from fit
-median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
-plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-plt.colorbar()
 
-levels = np.array([0.1, 1.0]) * np.amax(norm_EMD_dev)  # Percentage
-CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels)
+plt.figure()
+#plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
+#plt.colorbar()
+
+levels = np.array([1.0]) #np.array([0.1, 1.0])  # Percentage
+CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels*np.amax(norm_EMD_dev), colors='r')
 plt.clabel(CS, inline=1, fontsize=10)
+
+plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions, levels*np.amax(KDE_fits), colors='b')
 
 plt.xlabel('Proportion (Type 1)')
 plt.ylabel('Sample size')
-plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
+#plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
 
 if verbose:
