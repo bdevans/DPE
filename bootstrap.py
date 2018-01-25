@@ -97,23 +97,23 @@ if False:
     X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
 
     for data, label, ax in zip([T1, T2, Mix], labels, axes):
-        
+
         kdes[label] = {}
         X = data[:, np.newaxis]
-    
+
         for kernel in ['gaussian', 'tophat', 'epanechnikov']:
             kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
             log_dens = kde.score_samples(X_plot)
             ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
                     label="kernel = '{0}'; bandwidth = {1}".format(kernel, bw))
             kdes[label][kernel] = kde  #np.exp(log_dens)
-        
+
         #ax.text(6, 0.38, "N={0} points".format(N))
-        
+
         ax.legend(loc='upper left')
         ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
         ax.set_ylabel(label)
-        
+
         #ax.set_xlim(-4, 9)
         #ax.set_ylim(-0.02, 0.4)
         #plt.show()
@@ -243,28 +243,28 @@ bar_element = 0
 for b in range(bootstraps):
     for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
-            
+
             nT1 = int(round(sample_size * prop_T1))
             nT2 = sample_size - nT1
-            
+
             # Random sample from T1
             R1 = np.random.choice(T1, nT1, replace=True)
-            
+
             # Random sample from T2
             R2 = np.random.choice(T2, nT2, replace=True)
-            
+
             # Bootstrap mixture
             RM = np.concatenate((R1, R2))
             #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
-            
+
             #x = np.array([0.095, *np.sort(RM), 0.35])
-            
+
             ################### Difference of Means method ###################
-            
-            
+
+
             ####################### Subtraction method #######################
-            
-            
+
+
             ########################### KDE method ###########################
             #n_bins = int(np.floor(np.sqrt(sample_size)))
             #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
@@ -276,32 +276,32 @@ for b in range(bootstraps):
             amp_T1 = res_mix.params['amp_T1'].value
             amp_T2 = res_mix.params['amp_T2'].value
             KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
-            
-            
+
+
             ########################### EMD method ###########################
             # Interpolated cdf (to compute EMD)
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
             (iv, ii) = np.unique(x, return_index=True)
             si_CDF_3 = np.interp(bin_centers, iv, y[ii])
-            
+
             # Compute EMDs
             i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd;
             i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd;
             mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
             mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
-            
+
             EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
             emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
             rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
-            
+
             if (it >= bar_element*iterations/max_bars):
                 sys.stdout.write('*'); sys.stdout.flush();
                 bar_element += 1
             if (it >= iterations-1):
                 sys.stdout.write('|     done  \n'); sys.stdout.flush();
             it += 1
-            
+
 
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds'.format(elapsed))
@@ -416,26 +416,26 @@ if False:
     print(np.sqrt(sum((i_CDF_3-(p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1))**2))/len(i_CDF_3))
     print('Root mean square fit of CDF with counts:')
     print(np.sqrt(sum((i_CDF_3-(0.6085*i_CDF_2+0.3907*i_CDF_1))**2))/len(i_CDF_3))
-    
+
     ## Some test of the quality of the fit using CDFs
     # plot experimental cdfs
     plt.figure()
     plt.plot(x_T1, y_T1, label='Type 1')
     plt.plot(x_T2, y_T2, label='Type 2')
     plt.plot(x_Mix, y_Mix, label='Mixture')
-    
+
     # plot interpolated CDFs
     plt.plot(bin_centers, i_CDF_1, '.-', label='Type 1 CDF')
     plt.plot(bin_centers, i_CDF_2, '.-', label='Type 2 CDF')
     plt.plot(bin_centers, i_CDF_3, '.-', label='Mixture CDF')
-    
+
     # plot linear combinations of the two original distributions
     plt.plot(bin_centers, p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1, 'p-', label='EMD-based combination')  # emds
     plt.plot(bin_centers, 0.6085*i_CDF_2 + 0.3907*i_CDF_1, 'o-', label='HC-based combination')  # counts
     #axis([0.095 0.35 -0.01 1.01])
     plt.legend()
-    
-    ## addtional test normalised bar plot using the proportion from the EMD 
+
+    ## addtional test normalised bar plot using the proportion from the EMD
     plt.figure()
     plt.subplot(2,1,1)
     # br=bar(bin_centers,[hc1*0.2429; hc2*0.7563]'./max(sum([hc1*0.2429; hc2*0.7563])),'stacked');
@@ -443,8 +443,7 @@ if False:
     norm_fact = np.sum(np.vstack((hc1*p_emd_1, hc2*p_emd_2)), axis=0)
     plt.bar(bin_centers, height=hc1*p_emd_1/norm_fact, bottom=hc2*p_emd_2/norm_fact, width=bin_width)
     plt.bar(bin_centers, height=hc2*p_emd_2/norm_fact, width=bin_width)
-    
-    
+
+
     plt.subplot(2,1,2)
     plt.bar(bin_centers, height=hc3/max(hc3), width=bin_width)  # bar(bin_centers,hc3/max(hc3))
-    
