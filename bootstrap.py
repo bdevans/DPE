@@ -33,16 +33,16 @@ data = pd.read_csv('data.csv', usecols=[1,2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 data.describe()
 
-# Excess method median of T1GRS from the whole population in Biobank
-population_median = 0.23137931525707245
-high =((len(Mix[Mix > population_median])-len(Mix[Mix <= population_median])))
-low=(2*len(Mix[Mix <= population_median]))
-
 # Arrays of T1GRS scores for each group
 T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
 T2 = data.loc[data['type'] == 2, 'T1GRS'].as_matrix()
 Mix = data.loc[data['type'] == 3, 'T1GRS'].as_matrix()
 scores = {'T1': T1, 'T2': T2, 'Mix': Mix}  # Raw T1GRS scores
+
+# Excess method median of T1GRS from the whole population in Biobank
+population_median = 0.23137931525707245
+high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
+low = 2*len(Mix[Mix <= population_median])
 
 #------------------------------ Bin the data ---------------------------------
 N = data.count()[0]
