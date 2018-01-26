@@ -12,24 +12,19 @@ import sys
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-#import seaborn as sns
 import pandas as pd
 import numpy as np
-#import scipy as sp
-#from scipy import stats
-#from fitter import Fitter
 from sklearn.neighbors import KernelDensity
 import lmfit
 
 
-#sns.color_palette('pastel')
 mpl.style.use('seaborn')
 mpl.rc('figure', figsize=(12, 10))
 np.seterr(divide='ignore', invalid='ignore')
 
 #xls = pd.ExcelFile("data.xls")
 #data = xls.parse()
-data = pd.read_csv('data.csv', usecols=[1,2])
+data = pd.read_csv('data.csv', usecols=[1, 2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 data.describe()
 
