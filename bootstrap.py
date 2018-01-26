@@ -88,6 +88,7 @@ i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
 
 
 verbose = False
+run_KDE = False
 
 ################################# KDE method #################################
 
@@ -289,16 +290,17 @@ for b in range(bootstraps):
 
 
             ########################### KDE method ###########################
-            #n_bins = int(np.floor(np.sqrt(sample_size)))
-            #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
-            #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
-            #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
-            x_KDE = np.array([0.095, *np.sort(RM), 0.35])
-            mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
-            res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-            amp_T1 = res_mix.params['amp_T1'].value
-            amp_T2 = res_mix.params['amp_T2'].value
-            KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
+            if run_KDE:
+                #n_bins = int(np.floor(np.sqrt(sample_size)))
+                #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
+                #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
+                #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
+                x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+                mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
+                res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+                amp_T1 = res_mix.params['amp_T1'].value
+                amp_T2 = res_mix.params['amp_T2'].value
+                KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
 
 
             ########################### EMD method ###########################
@@ -350,8 +352,9 @@ CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
                  levels*np.amax(norm_EMD_dev), colors='r')
 plt.clabel(CS, inline=1, fontsize=10)
 
-plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
-            levels*np.amax(KDE_fits), colors='b')
+if run_KDE:
+    plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
+                levels*np.amax(KDE_fits), colors='b')
 
 plt.xlabel('Proportion (Type 1)')
 plt.ylabel('Sample size')
