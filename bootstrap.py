@@ -425,11 +425,6 @@ if verbose:
     plt.title('Maximum % relative error from either population')
 
 
-
-
-
-
-
 if False:
     print('Root mean square fit of CDF with EMDs:')
     p_emd_1 = 1-EMD_31/EMD_21  # Proportions of Type 1 in Mix based on EMD
