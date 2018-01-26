@@ -197,7 +197,7 @@ if verbose:
     print('T2/T1 =', amp_T2/amp_T1)
     print('')
     print('\nParameter confidence intervals:')
-    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()  
+    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
 
 ############## Summarise proportions for the whole distribution ##############
 print('Proportions based on means')
@@ -206,7 +206,7 @@ print('% of Type 2:', (1-(Mix.mean()-T2.mean())/(T1.mean()-T2.mean())))
 
 print('Proportions based on excess')
 print('% of Type 1:', (high/(low+high)))
-print('% of Type 2:',(1-(high/(low+high))))
+print('% of Type 2:', (1-(high/(low+high))))
 
 print('Proportions based on counts')
 print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
@@ -227,7 +227,7 @@ print('% of Type 2:', amp_T2/(amp_T1+amp_T2))
 print('--------------------------------------------------------------------------------\n\n')
 
 
-bootstraps = 3
+bootstraps = 100
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
