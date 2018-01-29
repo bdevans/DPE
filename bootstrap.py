@@ -149,10 +149,8 @@ y = Mix
 def kde_T1(x, amp_T1):
     return amp_T1 * np.exp(kdes['Type 1'][kernel].score_samples(x[:, np.newaxis]))
 
-
 def kde_T2(x, amp_T2):
     return amp_T2 * np.exp(kdes['Type 2'][kernel].score_samples(x[:, np.newaxis]))
-
 
 model_T1 = lmfit.Model(kde_T1)
 model_T2 = lmfit.Model(kde_T2)
@@ -173,6 +171,7 @@ res_mix.plot_fit()
 
 dely = res_mix.eval_uncertainty(sigma=3)
 axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
+#plt.show()
 
 plt.sca(axR)
 res_mix.plot_residuals()
@@ -247,8 +246,7 @@ max_bars = 78    # number of dots in progress bar
 if iterations < max_bars:
     max_bars = iterations   # if less than 20 points in scan, shorten bar
 print("|" + max_bars*"-" + "|     Bootstrap progress")
-sys.stdout.write('|')
-sys.stdout.flush()  # print start of progress bar
+sys.stdout.write('|'); sys.stdout.flush();  # print start of progress bar
 
 
 t = time.time()  # Start timer
@@ -309,8 +307,8 @@ for b in range(bootstraps):
             si_CDF_3 = np.interp(bin_centers, iv, y[ii])
 
             # Compute EMDs
-            i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd
-            i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd
+            i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd;
+            i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd;
             mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
             mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
 
@@ -319,17 +317,17 @@ for b in range(bootstraps):
             rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
 
             if (it >= bar_element*iterations/max_bars):
-                sys.stdout.write('*')
-                sys.stdout.flush()
+                sys.stdout.write('*'); sys.stdout.flush();
                 bar_element += 1
             if (it >= iterations-1):
-                sys.stdout.write('|     done  \n')
-                sys.stdout.flush()
+                sys.stdout.write('|     done  \n'); sys.stdout.flush();
             it += 1
 
 
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds'.format(elapsed))
+
+
 
 
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
@@ -345,13 +343,11 @@ plt.figure()
 #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
 #plt.colorbar()
 
-levels = np.array([1.0])  # np.array([0.1, 1.0])  # Percentage
-CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
-                 levels*np.amax(norm_EMD_dev), colors='r')
+levels = np.array([1.0]) #np.array([0.1, 1.0])  # Percentage
+CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels*np.amax(norm_EMD_dev), colors='r')
 plt.clabel(CS, inline=1, fontsize=10)
 
-plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
-            levels*np.amax(KDE_fits), colors='b')
+plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions, levels*np.amax(KDE_fits), colors='b')
 
 plt.xlabel('Proportion (Type 1)')
 plt.ylabel('Sample size')
@@ -373,6 +369,7 @@ if verbose:
     plt.ylabel('Sample size')
     plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
+
     # Error T1
     plt.figure()
     rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
@@ -388,6 +385,7 @@ if verbose:
     plt.xlabel('Proportion (Type 1)')
     plt.ylabel('Sample size')
     plt.title('Relative % error from Type 1 population')
+
 
     # Error T2
     plt.figure()
@@ -407,10 +405,11 @@ if verbose:
     plt.ylabel('Sample size')
     plt.title('Relative % error from Type 2 population')
 
+
     # Max Error
     ers = np.zeros((len(sample_sizes), len(proportions), 2))
-    ers[:, :, 0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
-    ers[:, :, 1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
+    ers[:,:,0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
+    ers[:,:,1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
     max_ers = np.amax(abs(ers), axis=2)
 
     plt.figure()
