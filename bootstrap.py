@@ -176,6 +176,8 @@ if run_KDE:
     dely = res_mix.eval_uncertainty(sigma=3)
     axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
 
+    plt.sca(axR)
+    res_mix.plot_residuals()
 
     amp_T1 = res_mix.params['amp_T1'].value
     amp_T2 = res_mix.params['amp_T2'].value
