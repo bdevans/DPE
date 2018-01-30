@@ -47,6 +47,7 @@ run_means = True
 run_excess = True
 run_KDE = False
 run_EMD = True
+check_EMD = False
 
 if run_excess:
     # Excess method median of T1GRS from the whole population in Biobank
@@ -322,10 +323,11 @@ for b in range(bootstraps):
                 mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
                 mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
 
-                # These were computed to check that the EMD computed propotions fit the mixture's CDF
-                #EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
-                #emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
-                #rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
+                if check_EMD:
+                    # These were computed to check that the EMD computed propotions fit the mixture's CDF
+                    EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
+                    emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
+                    rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
 
             if (it >= bar_element*iterations/max_bars):
                 sys.stdout.write('*')
@@ -345,8 +347,9 @@ print('Elapsed time = {:.3f} seconds'.format(elapsed))
 if run_EMD:
     norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
     norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-    #norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
-    #median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+    if check_EMD:
+        norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
+        median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
 ################################ Plot results ################################
 
