@@ -12,21 +12,31 @@ import sys
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+#import seaborn as sns
 import pandas as pd
 import numpy as np
+#import scipy as sp
+#from scipy import stats
+#from fitter import Fitter
 from sklearn.neighbors import KernelDensity
 import lmfit
 
 
+#sns.color_palette('pastel')
 mpl.style.use('seaborn')
 mpl.rc('figure', figsize=(12, 10))
 np.seterr(divide='ignore', invalid='ignore')
 
 #xls = pd.ExcelFile("data.xls")
 #data = xls.parse()
-data = pd.read_csv('data.csv', usecols=[1, 2])
+data = pd.read_csv('data.csv', usecols=[1,2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 data.describe()
+
+# Excess method median of T1GRS from the whole population in Biobank
+population_median = 0.23137931525707245
+high =((len(Mix[Mix > population_median])-len(Mix[Mix <= population_median])))
+low=(2*len(Mix[Mix <= population_median]))
 
 # Arrays of T1GRS scores for each group
 T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
@@ -42,18 +52,6 @@ bin_edges = np.arange(0.095, 0.35+bin_width, bin_width)
 bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 
 
-verbose = False
-run_means = True
-run_excess = True
-run_KDE = False
-run_EMD = True
-
-if run_excess:
-    # Excess method median of T1GRS from the whole population in Biobank
-    population_median = 0.23137931525707245
-    high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
-    low = 2*len(Mix[Mix <= population_median])
-
 ################################# EMD method #################################
 
 (hc1, _) = np.histogram(T1, bins=bin_edges)
@@ -61,205 +59,186 @@ if run_excess:
 (hc3, _) = np.histogram(Mix, bins=bin_edges)
 counts = {'T1': hc1, 'T2': hc2, 'Mix': hc3}  # Binned score frequencies
 
-if run_EMD:
-    # EMDs computed with histograms (compute pair-wise EMDs between the 3 histograms)
-    max_emd = bin_edges[-1] - bin_edges[0]
-    EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
-    EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
-    EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width * max_emd
+# EMDs computed with histograms (compute pair-wise EMDs between the 3 histograms)
+max_emd = bin_edges[-1] - bin_edges[0]
+EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
+EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
+EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width * max_emd
 
-    # Interpolate the cdfs at the same points for comparison
-    x_T1 = [0.095, *sorted(T1), 0.35]
-    y_T1 = np.linspace(0, 1, len(x_T1))
-    (iv, ii) = np.unique(x_T1, return_index=True)
-    i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
+# Interpolate the cdfs at the same points for comparison
+x_T1 = [0.095, *sorted(T1), 0.35]
+y_T1 = np.linspace(0, 1, len(x_T1))
+(iv, ii) = np.unique(x_T1, return_index=True)
+i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
 
-    x_T2 = [0.095, *sorted(T2), 0.35]
-    y_T2 = np.linspace(0, 1, len(x_T2))
-    (iv, ii) = np.unique(x_T2, return_index=True)
-    i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
+x_T2 = [0.095, *sorted(T2), 0.35]
+y_T2 = np.linspace(0, 1, len(x_T2))
+(iv, ii) = np.unique(x_T2, return_index=True)
+i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
 
-    x_Mix = [0.095, *sorted(Mix), 0.35]
-    y_Mix = np.linspace(0, 1, len(x_Mix))
-    (iv, ii) = np.unique(x_Mix, return_index=True)
-    i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
+x_Mix = [0.095, *sorted(Mix), 0.35]
+y_Mix = np.linspace(0, 1, len(x_Mix))
+(iv, ii) = np.unique(x_Mix, return_index=True)
+i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
 
-    # EMDs computed with interpolated CDFs
-    i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bin_width * max_emd
-    i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
-    i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
+# EMDs computed with interpolated CDFs
+i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bin_width * max_emd
+i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
+i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
 
 
-if run_KDE:
-    ################################# KDE method #################################
+verbose = False
 
-    bw = bin_width  # Bandwidth
+################################# KDE method #################################
 
-    kdes = {}
-    labels = ['Type 1', 'Type 2', 'Mixture']
+bw = bin_width  # Bandwidth
 
-    if False:
-        fig, axes = plt.subplots(3, 1, sharex=True) #, squeeze=False)
-        X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
+kdes = {}
+labels = ['Type 1', 'Type 2', 'Mixture']
 
-        for data, label, ax in zip([T1, T2, Mix], labels, axes):
+if False:
+    fig, axes = plt.subplots(3, 1, sharex=True) #, squeeze=False)
+    X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
 
-            kdes[label] = {}
-            X = data[:, np.newaxis]
+    for data, label, ax in zip([T1, T2, Mix], labels, axes):
 
-            for kernel in ['gaussian', 'tophat', 'epanechnikov']:
-                kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
-                log_dens = kde.score_samples(X_plot)
-                ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
-                        label="kernel = '{0}'; bandwidth = {1}".format(kernel, bw))
-                kdes[label][kernel] = kde  #np.exp(log_dens)
-
-            #ax.text(6, 0.38, "N={0} points".format(N))
-
-            ax.legend(loc='upper left')
-            ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
-            ax.set_ylabel(label)
-
-            #ax.set_xlim(-4, 9)
-            #ax.set_ylim(-0.02, 0.4)
-            #plt.show()
-
-    #sp.interpolate.interp1d(X, y, X_new, y_new)
-
-    for data, label in zip([T1, T2, Mix], labels):
         kdes[label] = {}
         X = data[:, np.newaxis]
+
         for kernel in ['gaussian', 'tophat', 'epanechnikov']:
             kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
-            kdes[label][kernel] = kde
+            log_dens = kde.score_samples(X_plot)
+            ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
+                    label="kernel = '{0}'; bandwidth = {1}".format(kernel, bw))
+            kdes[label][kernel] = kde  #np.exp(log_dens)
 
-    kernel = 'gaussian' #'epanechnikov'
+        #ax.text(6, 0.38, "N={0} points".format(N))
 
-    # TODO: Rethink
-    n_bins = int(np.floor(np.sqrt(N)))
-    (freqs_T1, bins) = np.histogram(T1, bins=n_bins)
-    (freqs_T2, bins) = np.histogram(T2, bins=n_bins)
-    (freqs_Mix, bins) = np.histogram(Mix, bins=n_bins)
+        ax.legend(loc='upper left')
+        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
+        ax.set_ylabel(label)
 
-    x = np.array((bins[:-1] + bins[1:])) / 2  # Bin centres
-    y = Mix
+        #ax.set_xlim(-4, 9)
+        #ax.set_ylim(-0.02, 0.4)
+        #plt.show()
 
-    # Define the KDE models
 
-    def kde_T1(x, amp_T1):
-        return amp_T1 * np.exp(kdes['Type 1'][kernel].score_samples(x[:, np.newaxis]))
+#sp.interpolate.interp1d(X, y, X_new, y_new)
 
-<<<<<<< HEAD
+for data, label in zip([T1, T2, Mix], labels):
+    kdes[label] = {}
+    X = data[:, np.newaxis]
+    for kernel in ['gaussian', 'tophat', 'epanechnikov']:
+        kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
+        kdes[label][kernel] = kde
+
+kernel = 'gaussian' #'epanechnikov'
+
+# TODO: Rethink
+n_bins = int(np.floor(np.sqrt(N)))
+(freqs_T1, bins) = np.histogram(T1, bins=n_bins)
+(freqs_T2, bins) = np.histogram(T2, bins=n_bins)
+(freqs_Mix, bins) = np.histogram(Mix, bins=n_bins)
+
+x = np.array((bins[:-1] + bins[1:])) / 2  # Bin centres
+y = Mix
+
+
+# Define the KDE models
+
+def kde_T1(x, amp_T1):
+    return amp_T1 * np.exp(kdes['Type 1'][kernel].score_samples(x[:, np.newaxis]))
+
 def kde_T2(x, amp_T2):
     return amp_T2 * np.exp(kdes['Type 2'][kernel].score_samples(x[:, np.newaxis]))
 
 model_T1 = lmfit.Model(kde_T1)
 model_T2 = lmfit.Model(kde_T2)
-=======
-
-    def kde_T2(x, amp_T2):
-        return amp_T2 * np.exp(kdes['Type 2'][kernel].score_samples(x[:, np.newaxis]))
 
 
-    model_T1 = lmfit.Model(kde_T1)
-    model_T2 = lmfit.Model(kde_T2)
->>>>>>> dfb6ac7797741841ae47220d438e8e7e99be9043
+plt.figure()
+fig, (axP, axM, axR, axI) = plt.subplots(4, 1, sharex=True, sharey=False)
 
-    plt.figure()
-    fig, (axP, axM, axR, axI) = plt.subplots(4, 1, sharex=True, sharey=False)
+model = model_T1 + model_T2
+params_mix = model.make_params()
+params_mix['amp_T1'].value = 1
+params_mix['amp_T2'].value = 1
 
-    model = model_T1 + model_T2
-    params_mix = model.make_params()
-    params_mix['amp_T1'].value = 1
-    params_mix['amp_T2'].value = 1
+res_mix = model.fit(freqs_Mix, x=x, params=params_mix)
 
-    res_mix = model.fit(freqs_Mix, x=x, params=params_mix)
+plt.sca(axM)
+res_mix.plot_fit()
 
-    plt.sca(axM)
-    res_mix.plot_fit()
-
-    dely = res_mix.eval_uncertainty(sigma=3)
-    axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
-
-<<<<<<< HEAD
 dely = res_mix.eval_uncertainty(sigma=3)
 axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
 #plt.show()
-=======
-    plt.sca(axR)
-    res_mix.plot_residuals()
->>>>>>> dfb6ac7797741841ae47220d438e8e7e99be9043
 
-    amp_T1 = res_mix.params['amp_T1'].value
-    amp_T2 = res_mix.params['amp_T2'].value
+plt.sca(axR)
+res_mix.plot_residuals()
 
-    kde1 = kde_T1(x, amp_T1)
-    kde2 = kde_T2(x, amp_T2)
-    axP.stackplot(x, np.vstack((kde1/(kde1+kde2), kde2/(kde1+kde2))), labels=labels[:-1])
-    legend = axP.legend(facecolor='grey')
-    #legend.get_frame().set_facecolor('grey')
-    axP.set_title('Proportions of Type 1 and Type 2 vs T1GRS')
+amp_T1 = res_mix.params['amp_T1'].value
+amp_T2 = res_mix.params['amp_T2'].value
 
-    #plt.sca(axI)
-    axI.plot(x, kde1, label='Type 1')
-    axI.plot(x, kde2, label='Type 2')
+kde1 = kde_T1(x, amp_T1)
+kde2 = kde_T2(x, amp_T2)
+axP.stackplot(x, np.vstack((kde1/(kde1+kde2), kde2/(kde1+kde2))), labels=labels[:-1])
+legend = axP.legend(facecolor='grey')
+#legend.get_frame().set_facecolor('grey')
+axP.set_title('Proportions of Type 1 and Type 2 vs T1GRS')
 
-    if verbose:
-        print(res_mix.fit_report())
-        print('T2/T1 =', amp_T2/amp_T1)
-        print('')
-        print('\nParameter confidence intervals:')
-        print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
+#plt.sca(axI)
+axI.plot(x, kde1, label='Type 1')
+axI.plot(x, kde2, label='Type 2')
+
+if verbose:
+    print(res_mix.fit_report())
+    print('T2/T1 =', amp_T2/amp_T1)
+    print('')
+    print('\nParameter confidence intervals:')
+    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()  
 
 ############## Summarise proportions for the whole distribution ##############
-if run_means:
-    print('Proportions based on means')
-    print('% of Type 1:', (Mix.mean()-T2.mean())/(T1.mean()-T2.mean()))
-    print('% of Type 2:', (1-(Mix.mean()-T2.mean())/(T1.mean()-T2.mean())))
+print('Proportions based on means')
+print('% of Type 1:', (Mix.mean()-T2.mean())/(T1.mean()-T2.mean()))
+print('% of Type 2:', (1-(Mix.mean()-T2.mean())/(T1.mean()-T2.mean())))
 
-if run_excess:
-    print('Proportions based on excess')
-    print('% of Type 1:', (high/(low+high)))
-    print('% of Type 2:', (1-(high/(low+high))))
+print('Proportions based on excess')
+print('% of Type 1:', (high/(low+high)))
+print('% of Type 2:',(1-(high/(low+high))))
 
 print('Proportions based on counts')
 print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
 print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
 
-if run_EMD:
-    print("Proportions based on Earth Mover's Distance (histogram values):")
-    print('% of Type 1:', 1-EMD_31/EMD_21)
-    print('% of Type 2:', 1-EMD_32/EMD_21)
+print("Proportions based on Earth Mover's Distance (histogram values):")
+print('% of Type 1:', 1-EMD_31/EMD_21)
+print('% of Type 2:', 1-EMD_32/EMD_21)
 
-    print("Proportions based on Earth Mover's Distance (interpolated values):")
-    print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
-    print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
+print("Proportions based on Earth Mover's Distance (interpolated values):")
+print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
+print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
 
-if run_KDE:
-    print('Proportions based on KDEs')
-    print('% of Type 2:', amp_T1/(amp_T1+amp_T2))
-    print('% of Type 2:', amp_T2/(amp_T1+amp_T2))
+print('Proportions based on KDEs')
+print('% of Type 2:', amp_T1/(amp_T1+amp_T2))
+print('% of Type 2:', amp_T2/(amp_T1+amp_T2))
 
 print('--------------------------------------------------------------------------------\n\n')
 
 
-bootstraps = 10
+bootstraps = 3
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
-if run_KDE:
-    #KDE_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    #KDE_rms_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-if run_EMD:
-    emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-if run_means:
-    means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-if run_excess:
-    excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+#KDE_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+#KDE_rms_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
+emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 # Setup progress bar
 iterations = KDE_fits.size
@@ -293,37 +272,34 @@ for b in range(bootstraps):
             #x = np.array([0.095, *np.sort(RM), 0.35])
 
             ################### Difference of Means method ###################
-            if run_means:
-                proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
-                means_T1D[s, p, b] = proportion_of_T1
+            # means method
+            proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
+            means_T1D[s, p, b] = proportion_of_T1
 
 
             ####################### Subtraction method #######################
-            if run_excess:
-                number_low = len(RM[RM <= population_median])
-                number_high = len(RM[RM > population_median])
-                high = number_high - number_low
-                low = 2*number_low
-                proportion_t1 = 100*(high/(low+high))
-                excess_T1D[s, p, b] = proportion_t1
+            number_low = len(RM[RM <= population_median])
+            number_high = len(RM[RM > population_median])
+            high = number_high - number_low
+            low = 2*number_low
+            proportion_t1 = 100*(high/(low+high))
+            excess_T1D[s, p, b] = proportion_t1
 
 
             ########################### KDE method ###########################
-            if run_KDE:
-                #n_bins = int(np.floor(np.sqrt(sample_size)))
-                #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
-                #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
-                #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
-                x_KDE = np.array([0.095, *np.sort(RM), 0.35])
-                mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
-                res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-                amp_T1 = res_mix.params['amp_T1'].value
-                amp_T2 = res_mix.params['amp_T2'].value
-                KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
+            #n_bins = int(np.floor(np.sqrt(sample_size)))
+            #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
+            #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
+            #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
+            x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+            mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
+            res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+            amp_T1 = res_mix.params['amp_T1'].value
+            amp_T2 = res_mix.params['amp_T2'].value
+            KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
 
 
             ########################### EMD method ###########################
-<<<<<<< HEAD
             # Interpolated cdf (to compute EMD)
             x = [0.095, *np.sort(RM), 0.35]
             y = np.linspace(0, 1, num=len(x), endpoint=True)
@@ -339,24 +315,6 @@ for b in range(bootstraps):
             EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
             emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
             rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
-=======
-            if run_EMD:
-                # Interpolated cdf (to compute EMD)
-                x = [0.095, *np.sort(RM), 0.35]
-                y = np.linspace(0, 1, num=len(x), endpoint=True)
-                (iv, ii) = np.unique(x, return_index=True)
-                si_CDF_3 = np.interp(bin_centers, iv, y[ii])
-
-                # Compute EMDs
-                i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd
-                i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd
-                mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
-                mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
-
-                EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
-                emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
-                rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
->>>>>>> dfb6ac7797741841ae47220d438e8e7e99be9043
 
             if (it >= bar_element*iterations/max_bars):
                 sys.stdout.write('*'); sys.stdout.flush();
@@ -373,74 +331,28 @@ print('Elapsed time = {:.3f} seconds'.format(elapsed))
 
 
 # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
-if run_EMD:
-    norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
-    norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-    norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
-    median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
+norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
+norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
+median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
 ################################ Plot results ################################
 
-if False:
-    plt.figure()
-    plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-    plt.colorbar()
-
-    levels = np.array([0.1, 1.0])  # np.array([0.1, 1.0])  # Percentage
-    CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
-                     levels*np.amax(norm_EMD_dev), colors='r')
-    plt.clabel(CS, inline=1, fontsize=10)
-
-    if run_means:
-        CS = plt.contour(proportions, sample_sizes, np.amax(means_T1D, axis=2),
-                         levels*np.amax(means_T1D), colors='k')
-
-    if run_excess:
-        CS = plt.contour(proportions, sample_sizes, np.amax(excess_T1D, axis=2),
-                         levels*np.amax(excess_T1D), colors='g')
-
-    if run_KDE:
-        plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
-                    levels*np.amax(KDE_fits), colors='b')
-
-    plt.xlabel('Proportion (Type 1)')
-    plt.ylabel('Sample size')
-    #plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
-
-
-
-levels = np.array([0.1])  # Percentage relative error
 
 plt.figure()
 #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
 #plt.colorbar()
 
-<<<<<<< HEAD
 levels = np.array([1.0]) #np.array([0.1, 1.0])  # Percentage
 CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels*np.amax(norm_EMD_dev), colors='r')
 plt.clabel(CS, inline=1, fontsize=10)
 
 plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions, levels*np.amax(KDE_fits), colors='b')
-=======
-relative_error_EMD = 100*(median_error/100-proportions)/proportions
-CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_EMD),
-                 levels, colors='r')
 
-relative_error_means = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
-CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_means),
-                 levels, colors='k')
->>>>>>> dfb6ac7797741841ae47220d438e8e7e99be9043
+plt.xlabel('Proportion (Type 1)')
+plt.ylabel('Sample size')
+#plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
-relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess),
-                 levels, colors='g')
-
-
-plt.figure()
-fig, (axEMD, axMeans, axExcess) = plt.subplots(3, 1, sharex=True, sharey=False)
-axEMD.contourf(proportions, sample_sizes, relative_error_EMD)
-axMeans.contourf(proportions, sample_sizes, relative_error_means)
-axExcess.contourf(proportions, sample_sizes, relative_error_excess)
 
 if verbose:
     # Deviation from fit
