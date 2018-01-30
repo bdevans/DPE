@@ -108,6 +108,7 @@ if run_KDE:
             kdes[label] = {}
             X = data[:, np.newaxis]
 
+            # [‘gaussian’, ’tophat’, ’epanechnikov’, ’exponential’, ’linear’, ’cosine’]
             for kernel in ['gaussian', 'tophat', 'epanechnikov']:
                 kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
                 log_dens = kde.score_samples(X_plot)
