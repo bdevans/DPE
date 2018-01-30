@@ -248,7 +248,7 @@ if run_excess:
     excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
 # Setup progress bar
-iterations = KDE_fits.size
+iterations = len(sample_sizes) * len(proportions) * bootstraps  #KDE_fits.size
 max_bars = 78    # number of dots in progress bar
 if iterations < max_bars:
     max_bars = iterations   # if less than 20 points in scan, shorten bar
