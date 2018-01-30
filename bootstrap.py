@@ -399,9 +399,18 @@ CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess),
 
 plt.figure()
 fig, (axEMD, axMeans, axExcess) = plt.subplots(3, 1, sharex=True, sharey=False)
-axEMD.contourf(proportions, sample_sizes, relative_error_EMD)
-axMeans.contourf(proportions, sample_sizes, relative_error_means)
-axExcess.contourf(proportions, sample_sizes, relative_error_excess)
+axEMD.contourf(proportions, sample_sizes, relative_error_EMD, cmap='bwr')
+#plt.colorbar()
+#lim = np.amax(abs(relative_error_EMD))
+#plt.clim(-lim, lim)
+axMeans.contourf(proportions, sample_sizes, relative_error_means, cmap='bwr')
+#plt.colorbar()
+#lim = np.amax(abs(relative_error_Means))
+#plt.clim(-lim, lim)
+axExcess.contourf(proportions, sample_sizes, relative_error_excess, cmap='bwr')
+#fig.colorbar()
+#lim = np.amax(abs(relative_error_Excess))
+#plt.clim(-lim, lim)
 
 if verbose:
     # Deviation from fit
