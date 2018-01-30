@@ -241,10 +241,11 @@ if run_KDE:
     #KDE_rms_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 if run_EMD:
-    emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+    if check_EMD:
+        emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+        rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 if run_means:
     means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 if run_excess:
