@@ -174,12 +174,6 @@ if run_KDE:
     dely = res_mix.eval_uncertainty(sigma=3)
     axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
 
-if verbose:
-    print(res_mix.fit_report())
-    print('T2/T1 =', amp_T2/amp_T1)
-    print('')
-    print('\nParameter confidence intervals:')
-    print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
 
     amp_T1 = res_mix.params['amp_T1'].value
     amp_T2 = res_mix.params['amp_T2'].value
