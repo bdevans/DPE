@@ -302,7 +302,9 @@ for b in range(bootstraps):
                 #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
                 #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
                 #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
-                x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+
+                x_KDE = np.linspace(0.095, 0.35, len(RM)+2)
+                #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
                 mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
                 res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
                 amp_T1 = res_mix.params['amp_T1'].value
