@@ -390,24 +390,29 @@ plt.figure()
 #plt.colorbar()
 
 levels = np.array([1.0]) #np.array([0.1, 1.0])  # Percentage
-CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
-                 levels*np.amax(norm_EMD_dev), colors='r')
-plt.clabel(CS, inline=1, fontsize=10)
+if run_EMD:
+    CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
+                     levels*np.amax(norm_EMD_dev), colors='r')
+    plt.clabel(CS, inline=1, fontsize=10)
 
-CS = plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
-                 levels*np.amax(KDE_fits), colors='b')
+if run_KDE:
+    CS = plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
+                     levels*np.amax(KDE_fits), colors='b')
 
-relative_error_EMD = 100*(median_error/100-proportions)/proportions
-CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_EMD),
-                 levels, colors='r')
+if run_EMD:
+    relative_error_EMD = 100*(median_error/100-proportions)/proportions
+    CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_EMD),
+                     levels, colors='r')
 
-relative_error_means = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
-CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_means),
-                 levels, colors='k')
+if run_means:
+    relative_error_means = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
+    CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_means),
+                     levels, colors='k')
 
-relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess),
-                 levels, colors='g')
+if run_excess:
+    relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
+    CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess),
+                     levels, colors='g')
 
 
 plt.figure()
