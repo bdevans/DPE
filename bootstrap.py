@@ -353,32 +353,6 @@ if run_EMD:
 
 ################################ Plot results ################################
 
-if False:
-    plt.figure()
-    plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-    plt.colorbar()
-
-    levels = np.array([0.1, 1.0])  # np.array([0.1, 1.0])  # Percentage
-    CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
-                     levels*np.amax(norm_EMD_dev), colors='r')
-    plt.clabel(CS, inline=1, fontsize=10)
-
-    if run_means:
-        CS = plt.contour(proportions, sample_sizes, np.amax(means_T1D, axis=2),
-                         levels*np.amax(means_T1D), colors='k')
-
-    if run_excess:
-        CS = plt.contour(proportions, sample_sizes, np.amax(excess_T1D, axis=2),
-                         levels*np.amax(excess_T1D), colors='g')
-
-    if run_KDE:
-        plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
-                    levels*np.amax(KDE_fits), colors='b')
-
-    plt.xlabel('Proportion (Type 1)')
-    plt.ylabel('Sample size')
-    #plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
-
 
 plot_relative_error = True
 plot_absolute_error = False
@@ -437,6 +411,34 @@ if plot_absolute_error:
         CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess),
                          levels, colors='g')
 
+
+
+
+if False:
+    plt.figure()
+    plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
+    plt.colorbar()
+
+    levels = np.array([0.1, 1.0])  # np.array([0.1, 1.0])  # Percentage
+    CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
+                     levels*np.amax(norm_EMD_dev), colors='r')
+    plt.clabel(CS, inline=1, fontsize=10)
+
+    if run_means:
+        CS = plt.contour(proportions, sample_sizes, np.amax(means_T1D, axis=2),
+                         levels*np.amax(means_T1D), colors='k')
+
+    if run_excess:
+        CS = plt.contour(proportions, sample_sizes, np.amax(excess_T1D, axis=2),
+                         levels*np.amax(excess_T1D), colors='g')
+
+    if run_KDE:
+        plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
+                    levels*np.amax(KDE_fits), colors='b')
+
+    plt.xlabel('Proportion (Type 1)')
+    plt.ylabel('Sample size')
+    #plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
 
 
 
