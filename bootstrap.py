@@ -232,7 +232,7 @@ if run_KDE:
 print('--------------------------------------------------------------------------------\n\n')
 
 
-bootstraps = 10
+bootstraps = 1000
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
@@ -359,9 +359,10 @@ if run_EMD:
 
 ################################ Plot results ################################
 
-
-plot_relative_error = True
-plot_absolute_error = False
+proportions_rev = proportions[::-1]
+plot_relative_error = False
+plot_absolute_error = True
+plot_standard_deviation = False
 
 if plot_relative_error:
     #TODO: Plot SD around estimated proportion
@@ -386,39 +387,79 @@ if plot_relative_error:
         CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_means),
                          levels, colors='k')
 
-    if run_excess:
+    #if run_excess:
         #relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-        relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-        relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
-        max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
-        CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
-                         levels, colors='g')
-
+        #relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
+        #relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
+        #max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
+        #CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
+                         #levels, colors='g')
+    if run_excess:
+        # adjusted for fact underestimates by 8%
+        relative_error_excess_T1_adj = 100*(np.median((excess_T1D/0.92)/100, axis=2)-proportions)/proportions
+        relative_error_excess_T2_adj = 100*(np.median(1-(excess_T1D/0.92)/100, axis=2)-proportions_rev)/proportions_rev
+        max_relative_error_excess_adj = np.maximum(relative_error_excess_T1_adj, relative_error_excess_T2_adj)
+        CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess_adj),
+                         levels, colors='b')
 
 if plot_absolute_error:
     plt.figure()
     #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
     #plt.colorbar()
 
-    levels = np.array([5.0]) #np.array([0.1, 1.0])  # # Percentage relative error
+    levels = np.array([1.1]) #np.array([0.1, 1.0])  # # Percentage relative error
 
     if run_EMD:
-        relative_error_EMD = 100*(np.median(1-norm_mat_EMD_31, axis=2)-proportions)
-        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_EMD),
+        relative_error_EMD_T1D = ((np.median(1-norm_mat_EMD_31, axis=2))/proportions)
+        #relative_error_EMD_T2D = ((1-(np.median(1-norm_mat_EMD_31, axis=2)))/proportions_rev)
+        #max_relative_error_emd_abs = np.maximum(relative_error_EMD_T1D, relative_error_EMD_T2D)
+        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_EMD_T1D),
                          levels, colors='r')
 
     if run_means:
-        relative_error_means = 100*(np.median(means_T1D/100, axis=2)-proportions)
-        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_means),
+        relative_error_means_T1D = ((np.median(means_T1D/100, axis=2))/proportions)
+        #relative_error_means_T2D = ((1-(np.median(means_T1D/100, axis=2)))/proportions_rev)
+        #max_relative_error_means_abs = np.maximum(relative_error_means_T1D, relative_error_means_T2D)
+        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_means_T1D),
                          levels, colors='k')
 
     if run_excess:
-        relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)
-        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess),
+        excess_T1D = (excess_T1D/0.92) #adjustment for missing 8%
+        relative_error_excess_T1D = ((np.median(excess_T1D/100, axis=2))/proportions)
+       # relative_error_excess_T2D = ((1-(np.median(excess_T1D/100, axis=2)))/proportions_rev)
+        #max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
+        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess_T1D),
                          levels, colors='g')
 
+if plot_standard_deviation:
+    plt.figure()
+    #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
+    #plt.colorbar()
 
+    levels = np.array([3.0]) #np.array([0.1, 1.0])  # # Percentage relative error
 
+    if run_EMD:
+        adjusted_EMD = 100*(1-norm_mat_EMD_31)
+        dev_EMD_t1 = np.std(adjusted_EMD, axis=2)
+        dev_EMD_t2 = np.std(100-adjusted_EMD, axis=2)
+        max_dev_EMD = np.maximum(dev_EMD_t1, dev_EMD_t2)
+        CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_EMD),
+                         levels, colors='r')
+
+    if run_means:
+        dev_means_t1 = np.std(means_T1D, axis=2)
+        dev_means_t2 = np.std(100-means_T1D, axis=2)
+        max_dev_means = np.maximum(dev_means_t1, dev_means_t2)
+        CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_means),
+                         levels, colors='k')
+
+    if run_excess:
+        excess_T1D = (excess_T1D/0.92) #adjustment for missing 8%
+        dev_excess_t1 = np.std(excess_T1D, axis=2)
+        dev_excess_t2 = np.std(100-excess_T1D, axis=2)
+        max_dev_excess = np.maximum(dev_excess_t1, dev_excess_t2)
+        CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_excess),
+                         levels, colors='g')
 
 if False:
     plt.figure()
@@ -445,7 +486,6 @@ if False:
     plt.xlabel('Proportion (Type 1)')
     plt.ylabel('Sample size')
     #plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
-
 
 
 
