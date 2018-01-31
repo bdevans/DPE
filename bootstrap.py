@@ -232,7 +232,7 @@ if run_KDE:
 print('--------------------------------------------------------------------------------\n\n')
 
 
-bootstraps = 1000
+bootstraps = 100
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
@@ -362,7 +362,7 @@ if run_EMD:
 proportions_rev = proportions[::-1]
 plot_relative_error = False
 plot_absolute_error = True
-plot_standard_deviation = False
+plot_standard_deviation = True
 
 if plot_relative_error:
     #TODO: Plot SD around estimated proportion
@@ -407,28 +407,28 @@ if plot_absolute_error:
     #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
     #plt.colorbar()
 
-    levels = np.array([1.1]) #np.array([0.1, 1.0])  # # Percentage relative error
+    levels = np.array([(0.05)]) #np.array([0.1, 1.0])  # # Percentage relative error
 
     if run_EMD:
-        relative_error_EMD_T1D = ((np.median(1-norm_mat_EMD_31, axis=2))/proportions)
-        #relative_error_EMD_T2D = ((1-(np.median(1-norm_mat_EMD_31, axis=2)))/proportions_rev)
-        #max_relative_error_emd_abs = np.maximum(relative_error_EMD_T1D, relative_error_EMD_T2D)
-        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_EMD_T1D),
+        relative_error_EMD_T1D = np.abs(((np.mean(1-norm_mat_EMD_31, axis=2))/proportions)-1)
+        relative_error_EMD_T2D = np.abs(((1-(np.mean(1-norm_mat_EMD_31, axis=2)))/proportions_rev)-1)
+        max_relative_error_emd_abs = np.maximum(relative_error_EMD_T1D, relative_error_EMD_T2D)
+        CS = plt.contour(proportions, sample_sizes, (max_relative_error_emd_abs),
                          levels, colors='r')
 
     if run_means:
-        relative_error_means_T1D = ((np.median(means_T1D/100, axis=2))/proportions)
-        #relative_error_means_T2D = ((1-(np.median(means_T1D/100, axis=2)))/proportions_rev)
-        #max_relative_error_means_abs = np.maximum(relative_error_means_T1D, relative_error_means_T2D)
-        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_means_T1D),
+        relative_error_means_T1D = np.abs(((np.mean(means_T1D/100, axis=2))/proportions)-1)
+        relative_error_means_T2D = np.abs(((1-(np.mean(means_T1D/100, axis=2)))/proportions_rev)-1)
+        max_relative_error_means_abs = np.maximum(relative_error_means_T1D, relative_error_means_T2D)
+        CS = plt.contour(proportions, sample_sizes, (max_relative_error_means_abs),
                          levels, colors='k')
 
     if run_excess:
         excess_T1D = (excess_T1D/0.92) #adjustment for missing 8%
-        relative_error_excess_T1D = ((np.median(excess_T1D/100, axis=2))/proportions)
-       # relative_error_excess_T2D = ((1-(np.median(excess_T1D/100, axis=2)))/proportions_rev)
-        #max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
-        CS = plt.contour(proportions, sample_sizes, np.abs(relative_error_excess_T1D),
+        relative_error_excess_T1D = np.abs(((np.mean(excess_T1D/100, axis=2))/proportions)-1)
+        relative_error_excess_T2D = np.abs(((1-(np.mean(excess_T1D/100, axis=2)))/proportions_rev)-1)
+        max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
+        CS = plt.contour(proportions, sample_sizes, (max_relative_error_excess_abs),
                          levels, colors='g')
 
 if plot_standard_deviation:
@@ -454,9 +454,9 @@ if plot_standard_deviation:
                          levels, colors='k')
 
     if run_excess:
-        excess_T1D = (excess_T1D/0.92) #adjustment for missing 8%
-        dev_excess_t1 = np.std(excess_T1D, axis=2)
-        dev_excess_t2 = np.std(100-excess_T1D, axis=2)
+        excess_T1D_adj = (excess_T1D) #adjustment for missing 8%
+        dev_excess_t1 = np.std(excess_T1D_adj, axis=2)
+        dev_excess_t2 = np.std(100-excess_T1D_adj, axis=2)
         max_dev_excess = np.maximum(dev_excess_t1, dev_excess_t2)
         CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_excess),
                          levels, colors='g')
