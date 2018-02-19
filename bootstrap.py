@@ -233,6 +233,7 @@ print('-------------------------------------------------------------------------
 
 
 bootstraps = 100
+
 sample_sizes = np.array(range(100, 3100, 100))
 proportions = np.arange(0.01, 1.01, 0.02)
 
@@ -285,7 +286,7 @@ for b in range(bootstraps):
 
             ################### Difference of Means method ###################
             if run_means:
-                proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
+                proportion_of_T1 = 100*((RM.median()-T2.median())/(T1.mean()-T2.median()))
                 means_T1D[s, p, b] = proportion_of_T1
 
 
@@ -407,7 +408,7 @@ if plot_absolute_error:
     #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
     #plt.colorbar()
 
-    levels = np.array([(0.05)]) #np.array([0.1, 1.0])  # # Percentage relative error
+    levels = np.array([(0.01)]) #np.array([0.1, 1.0])  # # Percentage relative error
 
     if run_EMD:
         relative_error_EMD_T1D = np.abs(((np.mean(1-norm_mat_EMD_31, axis=2))/proportions)-1)
@@ -424,9 +425,9 @@ if plot_absolute_error:
                          levels, colors='k')
 
     if run_excess:
-        excess_T1D = (excess_T1D/0.92) #adjustment for missing 8%
-        relative_error_excess_T1D = np.abs(((np.mean(excess_T1D/100, axis=2))/proportions)-1)
-        relative_error_excess_T2D = np.abs(((1-(np.mean(excess_T1D/100, axis=2)))/proportions_rev)-1)
+        excess_T1D_adj = (excess_T1D/0.92) #adjustment for missing 8%
+        relative_error_excess_T1D = np.abs(((np.mean(excess_T1D_adj/100, axis=2))/proportions)-1)
+        relative_error_excess_T2D = np.abs(((1-(np.mean(excess_T1D_adj/100, axis=2)))/proportions_rev)-1)
         max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
         CS = plt.contour(proportions, sample_sizes, (max_relative_error_excess_abs),
                          levels, colors='g')
