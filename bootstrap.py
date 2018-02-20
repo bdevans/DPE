@@ -45,6 +45,7 @@ bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 verbose = False
 run_means = True
 run_excess = True
+adjust_excess = True
 run_KDE = False
 run_EMD = True
 check_EMD = False
@@ -372,7 +373,7 @@ if plot_relative_error:
     #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
     #plt.colorbar()
 
-    levels = np.array([5.0]) #np.array([0.1, 1.0])  # Percentage relative error
+    levels = np.array([10]) #np.array([0.1, 1.0])  # Percentage relative error
 
     if run_EMD:
         relative_error_EMD_T1 = 100*(np.median(1-norm_mat_EMD_31, axis=2)-proportions)/proportions
@@ -389,20 +390,17 @@ if plot_relative_error:
         CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_means),
                          levels, colors='k')
 
-    #if run_excess:
-        #relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-        #relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-        #relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
-        #max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
-        #CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
-                         #levels, colors='g')
     if run_excess:
-        # adjusted for fact underestimates by 8%
-        relative_error_excess_T1_adj = 100*(np.median((excess_T1D/0.92)/100, axis=2)-proportions)/proportions
-        relative_error_excess_T2_adj = 100*(np.median(1-(excess_T1D/0.92)/100, axis=2)-proportions_rev)/proportions_rev
-        max_relative_error_excess_adj = np.maximum(relative_error_excess_T1_adj, relative_error_excess_T2_adj)
-        CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess_adj),
-                         levels, colors='b')
+        if adjust_excess:
+            # adjusted for fact underestimates by 8%
+            relative_error_excess_T1 = 100*(np.median((excess_T1D/0.92)/100, axis=2)-proportions)/proportions
+            relative_error_excess_T2 = 100*(np.median(1-(excess_T1D/0.92)/100, axis=2)-proportions_rev)/proportions_rev
+        else:
+            relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
+            relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
+        max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
+        CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
+                         levels, colors='g')
 
 if plot_absolute_error:
     plt.figure()
