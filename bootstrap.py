@@ -24,8 +24,10 @@ np.seterr(divide='ignore', invalid='ignore')
 
 #xls = pd.ExcelFile("data.xls")
 #data = xls.parse()
+#data = pd.read_csv('t1d_t2d_bootstrap_data.csv', usecols=[1, 2]) #t2 included data
 data = pd.read_csv('data.csv', usecols=[1, 2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
+#data.rename(columns={'diabetes_type': 'type', 't2GRS': 'T1GRS'}, inplace=True) # looking at T2GRS
 data.describe()
 
 # Arrays of T1GRS scores for each group
@@ -38,6 +40,9 @@ scores = {'T1': T1, 'T2': T2, 'Mix': Mix}  # Raw T1GRS scores
 N = data.count()[0]
 bin_width = 0.005
 bin_edges = np.arange(0.095, 0.35+bin_width, bin_width)
+#bin_width = 0.1 # t2dgrs
+#bin_edges = np.arange(4.7, 8.9+bin_width, bin_width) #t2dgrs
+
 #bin_centers = np.arange(0.095+bin_width/2, 0.35+bin_width/2, bin_width)
 bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 
@@ -53,6 +58,7 @@ check_EMD = False
 if run_excess:
     # Excess method median of T1GRS from the whole population in Biobank
     population_median = 0.23137931525707245
+    #population_median = 6.78826 #t2dgrs
     high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
     low = 2*len(Mix[Mix <= population_median])
 
@@ -72,16 +78,19 @@ if run_EMD:
 
     # Interpolate the cdfs at the same points for comparison
     x_T1 = [0.095, *sorted(T1), 0.35]
+    #x_T1 = [4.74976, *sorted(T1),  8.88045] #t2dgrs
     y_T1 = np.linspace(0, 1, len(x_T1))
     (iv, ii) = np.unique(x_T1, return_index=True)
     i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
 
     x_T2 = [0.095, *sorted(T2), 0.35]
+    #x_T1 = [4.74976, *sorted(T1),  8.88045] #t2dgrs
     y_T2 = np.linspace(0, 1, len(x_T2))
     (iv, ii) = np.unique(x_T2, return_index=True)
     i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
 
     x_Mix = [0.095, *sorted(Mix), 0.35]
+    #x_T1 = [4.74976, *sorted(T1),  8.88045] #t2dgrs
     y_Mix = np.linspace(0, 1, len(x_Mix))
     (iv, ii) = np.unique(x_Mix, return_index=True)
     i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
