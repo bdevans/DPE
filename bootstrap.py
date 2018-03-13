@@ -9,6 +9,7 @@ Created on Fri Jan 19 14:39:28 2018
 import time
 import math
 import sys
+import multiprocessing
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -22,6 +23,8 @@ from joblib import Memory
 mem = Memory(cachedir='/tmp')
 
 #if __name__ == '__main__':
+nprocs = multiprocessing.cpu_count()
+print('Running with {} processors...'.format(nprocs))
 
 # Set random seed
 np.random.seed(42)
@@ -360,7 +363,7 @@ t = time.time()  # Start timer
 it = 0
 bar_element = 0
 #for b in range(bootstraps):
-with Parallel(n_jobs=8) as parallel:
+with Parallel(n_jobs=nprocs) as parallel:
     for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
 
