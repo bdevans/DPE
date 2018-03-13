@@ -22,8 +22,8 @@ mpl.style.use('seaborn')
 mpl.rc('figure', figsize=(12, 10))
 np.seterr(divide='ignore', invalid='ignore')
 
-#xls = pd.ExcelFile("data.xls")
-#data = xls.parse()
+# xls = pd.ExcelFile("data.xls")
+# data = xls.parse()
 data = pd.read_csv('data.csv', usecols=[1, 2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 data.describe()
@@ -34,7 +34,7 @@ T2 = data.loc[data['type'] == 2, 'T1GRS'].as_matrix()
 Mix = data.loc[data['type'] == 3, 'T1GRS'].as_matrix()
 scores = {'T1': T1, 'T2': T2, 'Mix': Mix}  # Raw T1GRS scores
 
-#------------------------------ Bin the data ---------------------------------
+# ----------------------------- Bin the data ---------------------------------
 N = data.count()[0]
 bin_width = 0.005
 bin_edges = np.arange(0.095, 0.35+bin_width, bin_width)
@@ -55,7 +55,7 @@ if run_excess:
     high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
     low = 2*len(Mix[Mix <= population_median])
 
-################################# EMD method #################################
+# -------------------------------- EMD method --------------------------------
 
 (hc1, _) = np.histogram(T1, bins=bin_edges)
 (hc2, _) = np.histogram(T2, bins=bin_edges)
@@ -92,7 +92,7 @@ if run_EMD:
 
 
 if run_KDE:
-    ################################# KDE method #################################
+    # ------------------------------ KDE method ------------------------------
 
     bw = bin_width  # Bandwidth
 
@@ -155,7 +155,6 @@ if run_KDE:
     def kde_T2(x, amp_T2):
         return amp_T2 * np.exp(kdes['Type 2'][kernel].score_samples(x[:, np.newaxis]))
 
-
     model_T1 = lmfit.Model(kde_T1)
     model_T2 = lmfit.Model(kde_T2)
 
@@ -200,7 +199,7 @@ if run_KDE:
         print('\nParameter confidence intervals:')
         print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
 
-############## Summarise proportions for the whole distribution ##############
+# ------------ Summarise proportions for the whole distribution --------------
 if run_means:
     print('Proportions based on means')
     print('% of Type 1:', (Mix.mean()-T2.mean())/(T1.mean()-T2.mean()))
@@ -246,8 +245,10 @@ if run_EMD:
     if check_EMD:
         emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
         rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
 if run_means:
     means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
 if run_excess:
     excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
@@ -357,7 +358,9 @@ if run_EMD:
         norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
         median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
-################################ Plot results ################################
+
+
+# ------------------------------- Plot results -------------------------------
 
 proportions_rev = proportions[::-1]
 plot_relative_error = False
