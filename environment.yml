@@ -1,0 +1,20 @@
+
+name: dpe
+channels:
+  - conda-forge
+dependencies:
+  - python=3.6
+  - pip
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - lmfit
+  - emcee
+  - corner
+  - dill
+  - joblib
+  - h5py
+  - numexpr
