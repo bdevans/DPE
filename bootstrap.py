@@ -18,9 +18,9 @@ import lmfit
 
 from joblib import Parallel, delayed, cpu_count
 from joblib import Memory
-#mem = Memory(cachedir='/tmp')
+# mem = Memory(cachedir='/tmp')
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 nprocs = multiprocessing.cpu_count()
 print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
 
@@ -449,13 +449,6 @@ if plot_results:
             CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_means),
                              levels, colors='k')
 
-        #if run_excess:
-            #relative_error_excess = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-            #relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-            #relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
-            #max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
-            #CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
-                             #levels, colors='g')
         if run_excess:
             # adjusted for fact underestimates by 8%
             relative_error_excess_T1_adj = 100*(np.median((excess_T1D/0.92)/100, axis=2)-proportions)/proportions
@@ -522,34 +515,6 @@ if plot_results:
             max_dev_excess = np.maximum(dev_excess_t1, dev_excess_t2)
             CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_excess),
                              levels, colors='g')
-
-    if False:
-        plt.figure()
-        plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-        plt.colorbar()
-
-        levels = np.array([0.1, 1.0])  # np.array([0.1, 1.0])  # Percentage
-        CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2),
-                         levels*np.amax(norm_EMD_dev), colors='r')
-        plt.clabel(CS, inline=1, fontsize=10)
-
-        if run_means:
-            CS = plt.contour(proportions, sample_sizes, np.amax(means_T1D, axis=2),
-                             levels*np.amax(means_T1D), colors='k')
-
-        if run_excess:
-            CS = plt.contour(proportions, sample_sizes, np.amax(excess_T1D, axis=2),
-                             levels*np.amax(excess_T1D), colors='g')
-
-        if run_KDE:
-            plt.contour(proportions, sample_sizes, np.amax(KDE_fits, axis=2)-proportions,
-                        levels*np.amax(KDE_fits), colors='b')
-
-        plt.xlabel('Proportion (Type 1)')
-        plt.ylabel('Sample size')
-        #plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
-
-
 
     if verbose:
         plt.figure()
@@ -633,43 +598,3 @@ if plot_results:
         plt.xlabel('Proportion (Type 1)')
         plt.ylabel('Sample size')
         plt.title('Maximum % relative error from either population')
-
-
-    if False:
-        print('Root mean square fit of CDF with EMDs:')
-        p_emd_1 = 1-EMD_31/EMD_21  # Proportions of Type 1 in Mix based on EMD
-        p_emd_2 = 1-EMD_32/EMD_21  # Proportions of Type 2 in Mix based on EMD
-        print(np.sqrt(sum((i_CDF_3-(p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1))**2))/len(i_CDF_3))
-        print('Root mean square fit of CDF with counts:')
-        print(np.sqrt(sum((i_CDF_3-(0.6085*i_CDF_2+0.3907*i_CDF_1))**2))/len(i_CDF_3))
-
-        ## Some test of the quality of the fit using CDFs
-        # plot experimental cdfs
-        plt.figure()
-        plt.plot(x_T1, y_T1, label='Type 1')
-        plt.plot(x_T2, y_T2, label='Type 2')
-        plt.plot(x_Mix, y_Mix, label='Mixture')
-
-        # plot interpolated CDFs
-        plt.plot(bin_centers, i_CDF_1, '.-', label='Type 1 CDF')
-        plt.plot(bin_centers, i_CDF_2, '.-', label='Type 2 CDF')
-        plt.plot(bin_centers, i_CDF_3, '.-', label='Mixture CDF')
-
-        # plot linear combinations of the two original distributions
-        plt.plot(bin_centers, p_emd_2*i_CDF_2 + p_emd_1*i_CDF_1, 'p-', label='EMD-based combination')  # emds
-        plt.plot(bin_centers, 0.6085*i_CDF_2 + 0.3907*i_CDF_1, 'o-', label='HC-based combination')  # counts
-        #axis([0.095 0.35 -0.01 1.01])
-        plt.legend()
-
-        ## addtional test normalised bar plot using the proportion from the EMD
-        plt.figure()
-        plt.subplot(2,1,1)
-        # br=bar(bin_centers,[hc1*0.2429; hc2*0.7563]'./max(sum([hc1*0.2429; hc2*0.7563])),'stacked');
-        #br = plt.bar(bin_centers, np.vstack((hc1*p_emd_1, hc2*p_emd_2))/max(np.sum(np.vstack((hc1*p_emd_1, hc2*p_emd_2)), axis=0)), 'stacked')
-        norm_fact = np.sum(np.vstack((hc1*p_emd_1, hc2*p_emd_2)), axis=0)
-        plt.bar(bin_centers, height=hc1*p_emd_1/norm_fact, bottom=hc2*p_emd_2/norm_fact, width=bin_width)
-        plt.bar(bin_centers, height=hc2*p_emd_2/norm_fact, width=bin_width)
-
-
-        plt.subplot(2,1,2)
-        plt.bar(bin_centers, height=hc3/max(hc3), width=bin_width)  # bar(bin_centers,hc3/max(hc3))
