@@ -17,6 +17,9 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 import lmfit
 
+# Set random seed
+np.random.seed(42)
+# rng = np.random.RandomState(42)
 
 mpl.style.use('seaborn')
 mpl.rc('figure', figsize=(12, 10))
