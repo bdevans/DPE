@@ -97,9 +97,9 @@ if run_EMD:
     i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
 
     # EMDs computed with interpolated CDFs
-    i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bin_width * max_emd
-    i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width * max_emd
-    i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width * max_emd
+    i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bin_width / max_emd
+    i_EMD_31 = sum(abs(i_CDF_3-i_CDF_1)) * bin_width / max_emd
+    i_EMD_32 = sum(abs(i_CDF_3-i_CDF_2)) * bin_width / max_emd
 
 
 if run_KDE:
@@ -395,7 +395,7 @@ if run_EMD:
     norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
     norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
     if check_EMD:
-        norm_EMD_dev = emd_dev_from_fit * bin_width * max_emd / i_EMD_21
+        norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
         median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
 
