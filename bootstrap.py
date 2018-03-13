@@ -60,6 +60,10 @@ run_KDE = True
 run_EMD = True
 check_EMD = False
 
+bootstraps = 100
+sample_sizes = np.array(range(100, 2000, 200)) #np.array(range(100, 3100, 100))
+proportions = np.arange(0.01, 1.01, 0.02)
+
 if plot_results:
     import matplotlib as mpl
     from matplotlib import pyplot as plt
@@ -248,10 +252,6 @@ if run_KDE:
 
 print('--------------------------------------------------------------------------------\n\n')
 
-
-bootstraps = 100
-sample_sizes = np.array(range(100, 2000, 200)) #np.array(range(100, 3100, 100))
-proportions = np.arange(0.01, 1.01, 0.02)
 
 if run_KDE:
     #KDE_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
