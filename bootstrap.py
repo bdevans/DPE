@@ -11,8 +11,6 @@ import math
 import sys
 import multiprocessing
 
-import matplotlib as mpl
-from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
@@ -20,7 +18,7 @@ import lmfit
 
 from joblib import Parallel, delayed, cpu_count
 from joblib import Memory
-mem = Memory(cachedir='/tmp')
+#mem = Memory(cachedir='/tmp')
 
 #if __name__ == '__main__':
 nprocs = multiprocessing.cpu_count()
@@ -30,8 +28,6 @@ print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
 np.random.seed(42)
 # rng = np.random.RandomState(42)
 
-mpl.style.use('seaborn')
-mpl.rc('figure', figsize=(12, 10))
 np.seterr(divide='ignore', invalid='ignore')
 
 # xls = pd.ExcelFile("data.xls")
@@ -63,6 +59,12 @@ run_excess = True
 run_KDE = True
 run_EMD = True
 check_EMD = False
+
+if plot_results:
+    import matplotlib as mpl
+    from matplotlib import pyplot as plt
+    mpl.style.use('seaborn')
+    mpl.rc('figure', figsize=(12, 10))
 
 if run_excess:
     # Excess method median of T1GRS from the whole population in Biobank
