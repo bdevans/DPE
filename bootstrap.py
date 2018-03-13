@@ -32,8 +32,10 @@ np.seterr(divide='ignore', invalid='ignore')
 
 # xls = pd.ExcelFile("data.xls")
 # data = xls.parse()
+# data = pd.read_csv('t1d_t2d_bootstrap_data.csv', usecols=[1, 2]) #t2 included data
 data = pd.read_csv('data.csv', usecols=[1, 2])
 data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
+#data.rename(columns={'diabetes_type': 'type', 't2GRS': 'T1GRS'}, inplace=True) # looking at T2GRS
 data.describe()
 
 # Arrays of T1GRS scores for each group
@@ -48,6 +50,9 @@ T2_mean = T2.mean()
 N = data.count()[0]
 bin_width = 0.005
 bin_edges = np.arange(0.095, 0.35+bin_width, bin_width)
+#bin_width = 0.1 # t2dgrs
+#bin_edges = np.arange(4.7, 8.9+bin_width, bin_width) #t2dgrs
+
 #bin_centers = np.arange(0.095+bin_width/2, 0.35+bin_width/2, bin_width)
 bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Bin centres
 
@@ -56,6 +61,7 @@ verbose = False
 plot_results = False
 run_means = True
 run_excess = True
+adjust_excess = True
 run_KDE = True
 run_EMD = True
 check_EMD = False
@@ -73,6 +79,7 @@ if plot_results:
 if run_excess:
     # Excess method median of T1GRS from the whole population in Biobank
     population_median = 0.23137931525707245
+    #population_median = 6.78826 #t2dgrs
     high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
     low = 2*len(Mix[Mix <= population_median])
 
@@ -92,16 +99,19 @@ if run_EMD:
 
     # Interpolate the cdfs at the same points for comparison
     x_T1 = [0.095, *sorted(T1), 0.35]
+    #x_T1 = [4.74976, *sorted(T1),  8.88045] #t2dgrs
     y_T1 = np.linspace(0, 1, len(x_T1))
     (iv, ii) = np.unique(x_T1, return_index=True)
     i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
 
     x_T2 = [0.095, *sorted(T2), 0.35]
+    #x_T1 = [4.74976, *sorted(T1),  8.88045] #t2dgrs
     y_T2 = np.linspace(0, 1, len(x_T2))
     (iv, ii) = np.unique(x_T2, return_index=True)
     i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
 
     x_Mix = [0.095, *sorted(Mix), 0.35]
+    #x_T1 = [4.74976, *sorted(T1),  8.88045] #t2dgrs
     y_Mix = np.linspace(0, 1, len(x_Mix))
     (iv, ii) = np.unique(x_Mix, return_index=True)
     i_CDF_3 = np.interp(bin_centers, iv, y_Mix[ii])
@@ -418,9 +428,11 @@ if plot_results:
     plot_relative_error = False
     plot_absolute_error = True
     plot_standard_deviation = True
+    if run_excess and adjust_excess:
+        excess_T1D = excess_T1D/0.92  # adjusted for fact underestimates by 8%
 
     if plot_relative_error:
-        #TODO: Plot SD around estimated proportion
+        # TODO: Plot SD around estimated proportion
         plt.figure()
         levels = np.array([5.0])  # np.array([0.1, 1.0])  # Percentage relative error
 
@@ -440,12 +452,11 @@ if plot_results:
                              levels, colors='k')
 
         if run_excess:
-            # adjusted for fact underestimates by 8%
-            relative_error_excess_T1_adj = 100*(np.median((excess_T1D/0.92)/100, axis=2)-proportions)/proportions
-            relative_error_excess_T2_adj = 100*(np.median(1-(excess_T1D/0.92)/100, axis=2)-proportions_rev)/proportions_rev
-            max_relative_error_excess_adj = np.maximum(relative_error_excess_T1_adj, relative_error_excess_T2_adj)
-            CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess_adj),
-                             levels, colors='b')
+            relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
+            relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
+            max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
+            CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
+                             levels, colors='g')
 
     if plot_absolute_error:
         plt.figure()
@@ -469,7 +480,6 @@ if plot_results:
                              levels, colors='k')
 
         if run_excess:
-            excess_T1D = (excess_T1D/0.92) #adjustment for missing 8%
             relative_error_excess_T1D = np.abs(((np.mean(excess_T1D/100, axis=2))/proportions)-1)
             relative_error_excess_T2D = np.abs(((1-(np.mean(excess_T1D/100, axis=2)))/proportions_rev)-1)
             max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
