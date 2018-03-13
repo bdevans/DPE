@@ -82,9 +82,9 @@ counts = {'T1': hc1, 'T2': hc2, 'Mix': hc3}  # Binned score frequencies
 if run_EMD:
     # EMDs computed with histograms (compute pair-wise EMDs between the 3 histograms)
     max_emd = bin_edges[-1] - bin_edges[0]
-    EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
-    EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width * max_emd
-    EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width * max_emd
+    EMD_21 = sum(abs(np.cumsum(hc2/sum(hc2)) - np.cumsum(hc1/sum(hc1)))) * bin_width / max_emd
+    EMD_31 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc1/sum(hc1)))) * bin_width / max_emd
+    EMD_32 = sum(abs(np.cumsum(hc3/sum(hc3)) - np.cumsum(hc2/sum(hc2)))) * bin_width / max_emd
 
     # Interpolate the cdfs at the same points for comparison
     x_T1 = [0.095, *sorted(T1), 0.35]
