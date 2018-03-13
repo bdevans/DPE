@@ -17,6 +17,12 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 import lmfit
 
+from joblib import Parallel, delayed
+from joblib import Memory
+mem = Memory(cachedir='/tmp')
+
+#if __name__ == '__main__':
+
 # Set random seed
 np.random.seed(42)
 # rng = np.random.RandomState(42)
@@ -36,6 +42,8 @@ T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
 T2 = data.loc[data['type'] == 2, 'T1GRS'].as_matrix()
 Mix = data.loc[data['type'] == 3, 'T1GRS'].as_matrix()
 scores = {'T1': T1, 'T2': T2, 'Mix': Mix}  # Raw T1GRS scores
+T1_mean = T1.mean()
+T2_mean = T2.mean()
 
 # ----------------------------- Bin the data ---------------------------------
 N = data.count()[0]
@@ -242,6 +250,18 @@ if run_KDE:
     #KDE_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     #KDE_rms_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
+    #@mem.cache
+    def fit_KDE(RM, model, params_mix, kernel, bw):
+        x_KDE = np.linspace(0.095, 0.35, len(RM)+2)
+        #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+        mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
+        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+        amp_T1 = res_mix.params['amp_T1'].value
+        amp_T2 = res_mix.params['amp_T2'].value
+        #KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
+        return amp_T1/(amp_T1+amp_T2)
+
 if run_EMD:
     mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
@@ -255,8 +275,76 @@ if run_means:
 if run_excess:
     excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
+
+def estimate_T1D(sample_size, prop_T1, b):
+
+    nT1 = int(round(sample_size * prop_T1))
+    nT2 = sample_size - nT1
+
+    # Random sample from T1
+    R1 = np.random.choice(T1, nT1, replace=True)
+
+    # Random sample from T2
+    R2 = np.random.choice(T2, nT2, replace=True)
+
+    # Bootstrap mixture
+    RM = np.concatenate((R1, R2))
+    #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
+
+    #x = np.array([0.095, *np.sort(RM), 0.35])
+    results = {}
+
+    # ---------------------- Difference of Means method ----------------------
+    if run_means:
+        proportion_of_T1 = 100*((RM.mean()-T2_mean)/(T1_mean-T2_mean))
+        #means_T1D[s, p, b] = abs(proportion_of_T1)
+        results['means'] = abs(proportion_of_T1)
+
+
+    # -------------------------- Subtraction method --------------------------
+    if run_excess:
+        number_low = len(RM[RM <= population_median])
+        number_high = len(RM[RM > population_median])
+        high = number_high - number_low
+        low = 2*number_low
+        proportion_T1 = 100*(high/(low+high))
+        #excess_T1D[s, p, b] = proportion_T1
+        results['excess'] = proportion_T1
+
+
+    # ------------------------------ KDE method ------------------------------
+    if run_KDE:
+        #KDE_fits[s, p, b] = fit_KDE(RM, model, params_mix, kernel, bw)
+        results['KDE'] = fit_KDE(RM, model, params_mix, kernel, bw)
+
+
+    # ------------------------------ EMD method ------------------------------
+    if run_EMD:
+        # Interpolated cdf (to compute EMD)
+        x = [0.095, *np.sort(RM), 0.35]
+        y = np.linspace(0, 1, num=len(x), endpoint=True)
+        (iv, ii) = np.unique(x, return_index=True)
+        si_CDF_3 = np.interp(bin_centers, iv, y[ii])
+
+        # Compute EMDs
+        i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width / max_emd
+        i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width / max_emd
+        #mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
+        #mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
+
+        if check_EMD:
+            # These were computed to check that the EMD computed propotions fit the mixture's CDF
+            EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
+            emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
+            rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
+
+        results['EMD_31'] = i_EMD_31
+        results['EMD_32'] = i_EMD_32
+
+    return results
+
 # Setup progress bar
-iterations = len(sample_sizes) * len(proportions) * bootstraps  #KDE_fits.size
+iterations = len(sample_sizes) * len(proportions) # * bootstraps  #KDE_fits.size
 max_bars = 78    # number of dots in progress bar
 if iterations < max_bars:
     max_bars = iterations   # if less than 20 points in scan, shorten bar
@@ -268,76 +356,25 @@ sys.stdout.flush()  # print start of progress bar
 t = time.time()  # Start timer
 it = 0
 bar_element = 0
-for b in range(bootstraps):
+#for b in range(bootstraps):
+with Parallel(n_jobs=8) as parallel:
     for s, sample_size in enumerate(sample_sizes):
         for p, prop_T1 in enumerate(proportions):
 
-            nT1 = int(round(sample_size * prop_T1))
-            nT2 = sample_size - nT1
+            # Parallelise over bootstraps
+            results = parallel(delayed(estimate_T1D)(sample_size, prop_T1, b)
+                               for b in range(bootstraps))
 
-            # Random sample from T1
-            R1 = np.random.choice(T1, nT1, replace=True)
-
-            # Random sample from T2
-            R2 = np.random.choice(T2, nT2, replace=True)
-
-            # Bootstrap mixture
-            RM = np.concatenate((R1, R2))
-            #xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
-
-            #x = np.array([0.095, *np.sort(RM), 0.35])
-
-            ################### Difference of Means method ###################
-            if run_means:
-                proportion_of_T1 = 100*((RM.mean()-T2.mean())/(T1.mean()-T2.mean()))
-                means_T1D[s, p, b] = proportion_of_T1
-
-
-            ####################### Subtraction method #######################
-            if run_excess:
-                number_low = len(RM[RM <= population_median])
-                number_high = len(RM[RM > population_median])
-                high = number_high - number_low
-                low = 2*number_low
-                proportion_t1 = 100*(high/(low+high))
-                excess_T1D[s, p, b] = proportion_t1
-
-
-            ########################### KDE method ###########################
-            if run_KDE:
-                #n_bins = int(np.floor(np.sqrt(sample_size)))
-                #(freqs_RM, bins) = np.histogram(RM, bins=n_bins)
-                #x = (bins[:-1] + bins[1:]) / 2  # Bin centres
-                #res_mix = model.fit(freqs_RM, x=x, params=params_mix)
-
-                x_KDE = np.linspace(0.095, 0.35, len(RM)+2)
-                #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
-                mix_kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(RM[:, np.newaxis])
-                res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-                amp_T1 = res_mix.params['amp_T1'].value
-                amp_T2 = res_mix.params['amp_T2'].value
-                KDE_fits[s, p, b] = amp_T1/(amp_T1+amp_T2)
-
-
-            ########################### EMD method ###########################
-            if run_EMD:
-                # Interpolated cdf (to compute EMD)
-                x = [0.095, *np.sort(RM), 0.35]
-                y = np.linspace(0, 1, num=len(x), endpoint=True)
-                (iv, ii) = np.unique(x, return_index=True)
-                si_CDF_3 = np.interp(bin_centers, iv, y[ii])
-
-                # Compute EMDs
-                i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width * max_emd
-                i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width * max_emd
-                mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
-                mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
-
-                if check_EMD:
-                    # These were computed to check that the EMD computed propotions fit the mixture's CDF
-                    EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
-                    emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
-                    rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
+            for b in range(bootstraps):
+                if run_means:
+                    means_T1D[s, p, b] = results[b]['means']
+                if run_excess:
+                    excess_T1D[s, p, b] = results[b]['excess']
+                if run_KDE:
+                    KDE_fits[s, p, b] = results[b]['KDE']
+                if run_EMD:
+                    mat_EMD_31[s, p, b] = results[b]['EMD_31']
+                    mat_EMD_32[s, p, b] = results[b]['EMD_32']
 
             if (it >= bar_element*iterations/max_bars):
                 sys.stdout.write('*')
