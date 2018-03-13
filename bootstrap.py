@@ -18,13 +18,13 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 import lmfit
 
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, cpu_count
 from joblib import Memory
 mem = Memory(cachedir='/tmp')
 
 #if __name__ == '__main__':
 nprocs = multiprocessing.cpu_count()
-print('Running with {} processors...'.format(nprocs))
+print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
 
 # Set random seed
 np.random.seed(42)
