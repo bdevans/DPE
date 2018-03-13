@@ -407,16 +407,16 @@ if run_EMD:
         median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
 if run_means:
-    np.save('means', means_T1D)
+    np.save('data/means', means_T1D)
 if run_excess:
-    np.save('excess', excess_T1D)
+    np.save('data/excess', excess_T1D)
 if run_KDE:
-    np.save('kde', KDE_fits)
+    np.save('data/kde', KDE_fits)
 if run_EMD:
-    np.save('emd_31', norm_mat_EMD_31)
-    np.save('emd_32', norm_mat_EMD_32)
-np.save('sample_sizes', sample_sizes)
-np.save('proportions', proportions)
+    np.save('data/emd_31', norm_mat_EMD_31)
+    np.save('data/emd_32', norm_mat_EMD_32)
+np.save('data/sample_sizes', sample_sizes)
+np.save('data/proportions', proportions)
 
 # ------------------------------- Plot results -------------------------------
 
