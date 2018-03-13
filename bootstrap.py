@@ -254,8 +254,6 @@ print('-------------------------------------------------------------------------
 
 
 if run_KDE:
-    #KDE_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-    #KDE_rms_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
     KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
     #@mem.cache
@@ -307,7 +305,6 @@ def estimate_T1D(sample_size, prop_T1, b):
         #means_T1D[s, p, b] = abs(proportion_of_T1)
         results['means'] = abs(proportion_of_T1)
 
-
     # -------------------------- Subtraction method --------------------------
     if run_excess:
         number_low = len(RM[RM <= population_median])
@@ -318,12 +315,10 @@ def estimate_T1D(sample_size, prop_T1, b):
         #excess_T1D[s, p, b] = proportion_T1
         results['excess'] = proportion_T1
 
-
     # ------------------------------ KDE method ------------------------------
     if run_KDE:
         #KDE_fits[s, p, b] = fit_KDE(RM, model, params_mix, kernel, bw)
         results['KDE'] = fit_KDE(RM, model, params_mix, kernel, bw)
-
 
     # ------------------------------ EMD method ------------------------------
     if run_EMD:
@@ -336,8 +331,6 @@ def estimate_T1D(sample_size, prop_T1, b):
         # Compute EMDs
         i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width / max_emd
         i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width / max_emd
-        #mat_EMD_31[s, p, b] = i_EMD_31  # emds to compute proportions
-        #mat_EMD_32[s, p, b] = i_EMD_32  # emds to compute proportions
 
         if check_EMD:
             # These were computed to check that the EMD computed proportions fit the mixture's CDF
@@ -429,10 +422,7 @@ if plot_results:
     if plot_relative_error:
         #TODO: Plot SD around estimated proportion
         plt.figure()
-        #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-        #plt.colorbar()
-
-        levels = np.array([5.0]) #np.array([0.1, 1.0])  # Percentage relative error
+        levels = np.array([5.0])  # np.array([0.1, 1.0])  # Percentage relative error
 
         if run_EMD:
             relative_error_EMD_T1 = 100*(np.median(1-norm_mat_EMD_31, axis=2)-proportions)/proportions
