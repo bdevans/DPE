@@ -509,9 +509,8 @@ if plot_results:
                              levels, colors='k')
 
         if run_excess:
-            excess_T1D_adj = (excess_T1D) #adjustment for missing 8%
-            dev_excess_t1 = np.std(excess_T1D_adj, axis=2)
-            dev_excess_t2 = np.std(100-excess_T1D_adj, axis=2)
+            dev_excess_t1 = np.std(excess_T1D, axis=2)
+            dev_excess_t2 = np.std(100-excess_T1D, axis=2)
             max_dev_excess = np.maximum(dev_excess_t1, dev_excess_t2)
             CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_excess),
                              levels, colors='g')
