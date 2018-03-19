@@ -311,7 +311,7 @@ def estimate_T1D(sample_size, prop_T1, b):
 
     # ---------------------- Difference of Means method ----------------------
     if run_means:
-        proportion_of_T1 = 100*((RM.mean()-T2_mean)/(T1_mean-T2_mean))
+        proportion_of_T1 = (RM.mean()-T2_mean)/(T1_mean-T2_mean)
         #means_T1D[s, p, b] = abs(proportion_of_T1)
         results['means'] = abs(proportion_of_T1)
 
@@ -321,7 +321,7 @@ def estimate_T1D(sample_size, prop_T1, b):
         number_high = len(RM[RM > population_median])
         high = number_high - number_low
         low = 2*number_low
-        proportion_T1 = 100*(high/(low+high))
+        proportion_T1 = (high/(low+high))
         #excess_T1D[s, p, b] = proportion_T1
         results['excess'] = proportion_T1
 
