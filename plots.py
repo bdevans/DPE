@@ -11,137 +11,184 @@ from matplotlib import pyplot as plt
 mpl.style.use('seaborn')
 mpl.rc('figure', figsize=(12, 10))
 
-proportions = np.load('data/proportions.npy')
-sample_sizes = np.load('data/sample_sizes.npy')
-proportions_rev = proportions[::-1]
+# Configure plots
+PLOT_RELATIVE_ERROR = True
+PLOT_ABSOLUTE_ERROR = True
+PLOT_STANDARD_DEVIATION = True
+ADJUST_EXCESS = True
+
+LABELS = ['Means', 'Excess', 'EMD', 'KDE']
+COLOURS = ['r', 'g', 'b', 'k']
+average = np.mean
+deviation = np.std
+
+PROPORTIONS_T1D = np.load('data/proportions.npy')
+SAMPLE_SIZES = np.load('data/sample_sizes.npy')
+PROPORTIONS_T2D = PROPORTIONS_T1D[::-1]
+
+MEANS_T1D = np.load('data/means.npy')
+MEANS_T2D = 1 - MEANS_T1D
+EXCESS_T1D = np.load('data/excess.npy')
+EXCESS_T2D = 1 - EXCESS_T1D
+EMD_31 = np.load('data/emd_31.npy')
+EMD_32 = np.load('data/emd_32.npy')
+KDE_T1D = np.load('data/kde.npy')
+KDE_T2D = 1 - KDE_T1D
+
+if ADJUST_EXCESS:
+    EXCESS_T1D /= 0.92  # adjusted for fact underestimates by 8%
 
 
-plot_relative_error = True
-plot_absolute_error = True
-plot_standard_deviation = True
-adjust_excess = True
-
-norm_mat_EMD_31 = np.load('data/emd_31.npy')
-norm_mat_EMD_32 = np.load('data/emd_32.npy')
-means_T1D = np.load('data/means.npy')
-excess_T1D = np.load('data/excess.npy')
-kde_T1D = np.load('data/kde.npy')
-
-if adjust_excess:
-    excess_T1D = excess_T1D/0.92  # adjusted for fact underestimates by 8%
-
-
-if plot_relative_error:
+if PLOT_RELATIVE_ERROR:
     # Relative error
+
+    LEVELS = np.array([5.0])  # Percentage relative error
+
     plt.figure()
+    plt.title('Maximum absolute relative average percentage error\nContours at {}'.format(LEVELS))
     plt.xlabel('Proportion T1D')
     plt.ylabel('Sample size')
-    #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-    #plt.colorbar()
-    levels = np.array([5.0])  # np.array([0.1, 1.0])  # Percentage relative error
 
-    relative_error_EMD_T1 = 100*(np.median(1-norm_mat_EMD_31, axis=2)-proportions)/proportions
-    relative_error_EMD_T2 = 100*(np.median(1-norm_mat_EMD_32, axis=2)-proportions_rev)/proportions_rev
+    relative_error_EMD_T1 = 100*(average(1-EMD_31, axis=2)-PROPORTIONS_T1D)/PROPORTIONS_T1D
+    relative_error_EMD_T2 = 100*(average(1-EMD_32, axis=2)-PROPORTIONS_T2D)/PROPORTIONS_T2D
     max_relative_error_EMD = np.maximum(np.abs(relative_error_EMD_T1), np.abs(relative_error_EMD_T2))
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_EMD,
-                     levels, colors='r')
 
     #if run_means:
-    #relative_error_means = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
-    relative_error_means_T1 = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
-    relative_error_means_T2 = 100*(np.median(1-means_T1D/100, axis=2)-proportions_rev)/proportions_rev
-    max_relative_error_means = np.maximum(np.abs(relative_error_means_T1), np.abs(relative_error_means_T2))
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_means,
-                     levels, colors='k')
+    relative_error_MEANS_T1 = 100*(average(MEANS_T1D, axis=2)-PROPORTIONS_T1D)/PROPORTIONS_T1D
+    relative_error_MEANS_T2 = 100*(average(MEANS_T2D, axis=2)-PROPORTIONS_T2D)/PROPORTIONS_T2D
+    max_relative_error_MEANS = np.maximum(np.abs(relative_error_MEANS_T1), np.abs(relative_error_MEANS_T2))
 
     #if run_excess:
-    relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-    relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
-    max_relative_error_excess = np.maximum(np.abs(relative_error_excess_T1), np.abs(relative_error_excess_T2))
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_excess,
-                     levels, colors='g')
+    relative_error_EXCESS_T1 = 100*(average(EXCESS_T1D, axis=2)-PROPORTIONS_T1D)/PROPORTIONS_T1D
+    relative_error_EXCESS_T2 = 100*(average(EXCESS_T2D, axis=2)-PROPORTIONS_T2D)/PROPORTIONS_T2D
+    max_relative_error_EXCESS = np.maximum(np.abs(relative_error_EXCESS_T1), np.abs(relative_error_EXCESS_T2))
 
-    relative_error_kde_T1 = 100*(np.median(kde_T1D, axis=2)-proportions)/proportions
-    relative_error_kde_T2 = 100*(np.median(1-kde_T1D, axis=2)-proportions_rev)/proportions_rev
-    max_relative_error_kde = np.maximum(np.abs(relative_error_kde_T1), np.abs(relative_error_kde_T2))
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_kde,
-                     levels, colors='b')
+    relative_error_KDE_T1 = 100*(average(KDE_T1D, axis=2)-PROPORTIONS_T1D)/PROPORTIONS_T1D
+    relative_error_KDE_T2 = 100*(average(KDE_T2D, axis=2)-PROPORTIONS_T2D)/PROPORTIONS_T2D
+    max_relative_error_KDE = np.maximum(np.abs(relative_error_KDE_T1), np.abs(relative_error_KDE_T2))
 
-    plt.contourf(proportions, sample_sizes, max_relative_error_kde, cmap='viridis_r')
-    plt.colorbar()
 
-if plot_absolute_error:
+    datasets = [max_relative_error_MEANS, max_relative_error_EXCESS,
+                max_relative_error_EMD, max_relative_error_KDE]
+
+    for label, colour, data in zip(LABELS, COLOURS, datasets):
+        CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
+        CS.collections[0].set_label(label)
+    plt.legend()
+
+
+    # Plot shaded regions for each method on individual subplots
+    #SHADING_LEVELS = np.array([0, 2.5, 5.0, 10, 15, 25, 50, 100, 150])
+    SHADING_LEVELS = np.arange(0, 100, 2.5)
+
+    fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
+    plt.suptitle('Maximum absolute relative average percentage error\nContours at {}'.format(LEVELS))
+    for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
+        ax.set_title(label)
+        CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
+                         cmap='viridis_r', extend='max')
+        ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
+        fig.colorbar(CS, ax=ax)
+
+
+if PLOT_ABSOLUTE_ERROR:
     # Absolute error
+
+    LEVELS = np.array([0.05])  # Percentage relative error
+
     plt.figure()
+    plt.title('Maximum absolute average proportion error\nContours at {}'.format(LEVELS))
     plt.xlabel('Proportion T1D')
     plt.ylabel('Sample size')
-    #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-    #plt.colorbar()
-
-    levels = np.array([(0.05)]) #np.array([0.1, 1.0])  # # Percentage relative error
 
     #if run_EMD:
-    relative_error_EMD_T1D = np.abs(((np.mean(1-norm_mat_EMD_31, axis=2))/proportions)-1)
-    relative_error_EMD_T2D = np.abs(((1-(np.mean(1-norm_mat_EMD_31, axis=2)))/proportions_rev)-1)
-    max_relative_error_emd_abs = np.maximum(relative_error_EMD_T1D, relative_error_EMD_T2D)
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_emd_abs,
-                     levels, colors='r')
+    abs_error_EMD_T1 = np.abs((average(1-EMD_31, axis=2)/PROPORTIONS_T1D)-1)
+    abs_error_EMD_T2 = np.abs((average(1-EMD_32, axis=2)/PROPORTIONS_T2D)-1)
+    max_abs_error_EMD = np.maximum(abs_error_EMD_T1, abs_error_EMD_T2)
 
     #if run_means:
-    relative_error_means_T1D = np.abs(((np.mean(means_T1D/100, axis=2))/proportions)-1)
-    relative_error_means_T2D = np.abs(((1-(np.mean(means_T1D/100, axis=2)))/proportions_rev)-1)
-    max_relative_error_means_abs = np.maximum(relative_error_means_T1D, relative_error_means_T2D)
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_means_abs,
-                     levels, colors='k')
+    abs_error_MEANS_T1 = np.abs((average(MEANS_T1D, axis=2)/PROPORTIONS_T1D)-1)
+    abs_error_MEANS_T2 = np.abs((average(MEANS_T2D, axis=2)/PROPORTIONS_T2D)-1)
+    max_abs_error_MEANS = np.maximum(abs_error_MEANS_T1, abs_error_MEANS_T2)
 
     #if run_excess:
-    relative_error_excess_T1D = np.abs(((np.mean(excess_T1D/100, axis=2))/proportions)-1)
-    relative_error_excess_T2D = np.abs(((1-(np.mean(excess_T1D/100, axis=2)))/proportions_rev)-1)
-    max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_excess_abs,
-                     levels, colors='g')
+    abs_error_EXCESS_T1 = np.abs((average(EXCESS_T1D, axis=2)/PROPORTIONS_T1D)-1)
+    abs_error_EXCESS_T2 = np.abs((average(EXCESS_T2D, axis=2)/PROPORTIONS_T2D)-1)
+    max_abs_error_EXCESS = np.maximum(abs_error_EXCESS_T1, abs_error_EXCESS_T2)
 
-    relative_error_kde_T1D = np.abs(((np.mean(kde_T1D, axis=2))/proportions)-1)
-    relative_error_kde_T2D = np.abs(((1-(np.mean(kde_T1D, axis=2)))/proportions_rev)-1)
-    max_relative_error_kde_abs = np.maximum(relative_error_kde_T1D, relative_error_kde_T2D)
-    CS = plt.contour(proportions, sample_sizes, max_relative_error_kde_abs,
-                     levels, colors='b')
+    abs_error_KDE_T1 = np.abs((average(KDE_T1D, axis=2)/PROPORTIONS_T1D)-1)
+    abs_error_KDE_T2 = np.abs((average(KDE_T2D, axis=2)/PROPORTIONS_T2D)-1)
+    max_abs_error_KDE = np.maximum(abs_error_KDE_T1, abs_error_KDE_T2)
 
-    plt.contourf(proportions, sample_sizes, max_relative_error_kde_abs, cmap='viridis_r')
-    plt.colorbar()
 
-if plot_standard_deviation:
+    datasets = [max_abs_error_MEANS, max_abs_error_EXCESS,
+                max_abs_error_EMD, max_abs_error_KDE]
+
+    for label, colour, data in zip(LABELS, COLOURS, datasets):
+        CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
+        CS.collections[0].set_label(label)
+    plt.legend()
+
+    # Plot shaded regions for each method on individual subplots
+    #SHADING_LEVELS = np.array([0, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.8, 1])
+    SHADING_LEVELS = np.arange(0, 1, 0.025)
+
+    fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
+    plt.suptitle('Maximum absolute average proportion error\nContours at {}'.format(LEVELS))
+    for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
+        ax.set_title(label)
+        CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
+                         cmap='viridis_r', extend='max')
+        ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
+        fig.colorbar(CS, ax=ax)
+
+
+if PLOT_STANDARD_DEVIATION:
+
+    LEVELS = np.array([0.01])
+
     plt.figure()
+    plt.title('Maximum standard deviation\nContours at {}'.format(LEVELS))
     plt.xlabel('Proportion T1D')
     plt.ylabel('Sample size')
-    #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-    #plt.colorbar()
-
-    levels = np.array([3.0]) #np.array([0.1, 1.0])  # # Percentage relative error
-
-    #if run_EMD:
-    adjusted_EMD = 100*(1-norm_mat_EMD_31)
-    dev_EMD_t1 = np.std(adjusted_EMD, axis=2)
-    dev_EMD_t2 = np.std(100-adjusted_EMD, axis=2)
-    max_dev_EMD = np.abs(np.maximum(dev_EMD_t1, dev_EMD_t2))
-    CS = plt.contour(proportions, sample_sizes, max_dev_EMD, levels, colors='r')
 
     #if run_means:
-    dev_means_t1 = np.std(means_T1D, axis=2)
-    dev_means_t2 = np.std(100-means_T1D, axis=2)
-    max_dev_means = np.abs(np.maximum(dev_means_t1, dev_means_t2))
-    CS = plt.contour(proportions, sample_sizes, max_dev_means, levels, colors='k')
+    dev_means_T1 = deviation(MEANS_T1D, axis=2)
+    dev_means_T2 = deviation(MEANS_T2D, axis=2)
+    max_dev_MEANS = np.maximum(dev_means_T1, dev_means_T2)
 
     #if run_excess:
-    dev_excess_t1 = np.std(excess_T1D, axis=2)
-    dev_excess_t2 = np.std(100-excess_T1D, axis=2)
-    max_dev_excess = np.abs(np.maximum(dev_excess_t1, dev_excess_t2))
-    CS = plt.contour(proportions, sample_sizes, max_dev_excess, levels, colors='g')
+    dev_excess_T1 = deviation(EXCESS_T1D, axis=2)
+    dev_excess_T2 = deviation(EXCESS_T2D, axis=2)
+    max_dev_EXCESS = np.maximum(dev_excess_T1, dev_excess_T2)
 
-    dev_kde_t1 = np.std(kde_T1D, axis=2)
-    dev_kde_t2 = np.std(100-kde_T1D, axis=2)
-    max_dev_kde = np.abs(np.maximum(dev_kde_t1, dev_kde_t2))
-    CS = plt.contour(proportions, sample_sizes, max_dev_kde, levels, colors='b')
+    #if run_EMD:
+    dev_EMD_T1 = deviation(EMD_31, axis=2)
+    dev_EMD_T2 = deviation(EMD_32, axis=2)
+    max_dev_EMD = np.maximum(dev_EMD_T1, dev_EMD_T2)
 
-    plt.contourf(proportions, sample_sizes, max_dev_kde, cmap='viridis_r')
-    plt.colorbar()
+    dev_kde_T1 = deviation(KDE_T1D, axis=2)
+    dev_kde_T2 = deviation(KDE_T2D, axis=2)
+    max_dev_KDE = np.maximum(dev_kde_T1, dev_kde_T2)
+
+
+    datasets = [max_dev_MEANS, max_dev_EXCESS, max_dev_EMD, max_dev_KDE]
+
+    for label, colour, data in zip(LABELS, COLOURS, datasets):
+        CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
+        CS.collections[0].set_label(label)
+    plt.legend(loc='upper left')
+
+
+    # Plot shaded regions for each method on individual subplots
+    #SHADING_LEVELS = np.array([0.005, 0.0075, 0.01, 0.025, 0.05, 0.075, 0.1])#, 0.25, 0.5])
+    SHADING_LEVELS = np.arange(0.005, 0.1, 0.005)
+
+    fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
+    plt.suptitle('Maximum standard deviation\nContours at {}'.format(LEVELS))
+    for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
+        ax.set_title(label)
+        CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
+                         cmap='viridis_r', extend='both')
+        ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
+        fig.colorbar(CS, ax=ax)
