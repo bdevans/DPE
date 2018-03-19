@@ -94,7 +94,7 @@ if PLOT_RELATIVE_ERROR:
 if PLOT_ABSOLUTE_ERROR:
     # Absolute error
 
-    LEVELS = np.array([0.05])  # Percentage relative error
+    LEVELS = np.array([0.02])  # Percentage relative error
 
     plt.figure()
     plt.title('Maximum absolute average proportion error\nContours at {}'.format(LEVELS))
@@ -102,22 +102,22 @@ if PLOT_ABSOLUTE_ERROR:
     plt.ylabel('Sample size')
 
     #if run_EMD:
-    abs_error_EMD_T1 = np.abs((average(1-EMD_31, axis=2)/PROPORTIONS_T1D)-1)
-    abs_error_EMD_T2 = np.abs((average(1-EMD_32, axis=2)/PROPORTIONS_T2D)-1)
+    abs_error_EMD_T1 = np.abs(average(1-EMD_31, axis=2)-PROPORTIONS_T1D)
+    abs_error_EMD_T2 = np.abs(average(1-EMD_32, axis=2)-PROPORTIONS_T2D)
     max_abs_error_EMD = np.maximum(abs_error_EMD_T1, abs_error_EMD_T2)
 
     #if run_means:
-    abs_error_MEANS_T1 = np.abs((average(MEANS_T1D, axis=2)/PROPORTIONS_T1D)-1)
-    abs_error_MEANS_T2 = np.abs((average(MEANS_T2D, axis=2)/PROPORTIONS_T2D)-1)
+    abs_error_MEANS_T1 = np.abs(average(MEANS_T1D, axis=2)-PROPORTIONS_T1D)
+    abs_error_MEANS_T2 = np.abs(average(MEANS_T2D, axis=2)-PROPORTIONS_T2D)
     max_abs_error_MEANS = np.maximum(abs_error_MEANS_T1, abs_error_MEANS_T2)
 
     #if run_excess:
-    abs_error_EXCESS_T1 = np.abs((average(EXCESS_T1D, axis=2)/PROPORTIONS_T1D)-1)
-    abs_error_EXCESS_T2 = np.abs((average(EXCESS_T2D, axis=2)/PROPORTIONS_T2D)-1)
+    abs_error_EXCESS_T1 = np.abs(average(EXCESS_T1D, axis=2)-PROPORTIONS_T1D)
+    abs_error_EXCESS_T2 = np.abs(average(EXCESS_T2D, axis=2)-PROPORTIONS_T2D)
     max_abs_error_EXCESS = np.maximum(abs_error_EXCESS_T1, abs_error_EXCESS_T2)
 
-    abs_error_KDE_T1 = np.abs((average(KDE_T1D, axis=2)/PROPORTIONS_T1D)-1)
-    abs_error_KDE_T2 = np.abs((average(KDE_T2D, axis=2)/PROPORTIONS_T2D)-1)
+    abs_error_KDE_T1 = np.abs(average(KDE_T1D, axis=2)-PROPORTIONS_T1D)
+    abs_error_KDE_T2 = np.abs(average(KDE_T2D, axis=2)-PROPORTIONS_T2D)
     max_abs_error_KDE = np.maximum(abs_error_KDE_T1, abs_error_KDE_T2)
 
 
@@ -131,7 +131,7 @@ if PLOT_ABSOLUTE_ERROR:
 
     # Plot shaded regions for each method on individual subplots
     #SHADING_LEVELS = np.array([0, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.8, 1])
-    SHADING_LEVELS = np.arange(0, 1, 0.025)
+    SHADING_LEVELS = np.arange(0, 0.1, 0.005)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
     plt.suptitle('Maximum absolute average proportion error\nContours at {}'.format(LEVELS))
