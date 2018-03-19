@@ -86,7 +86,7 @@ if PLOT_RELATIVE_ERROR:
     plt.legend()
 
     # Plot shaded regions for each method on individual subplots
-    SHADING_LEVELS = np.arange(0, 100, 2.5)
+    SHADING_LEVELS = np.arange(0, 100, 5)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
     plt.suptitle('Maximum relative average error (%)\nContours at {}'.format(LEVELS))
