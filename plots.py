@@ -153,26 +153,30 @@ if PLOT_STANDARD_DEVIATION:
     plt.ylabel('Sample size')
 
     #if run_means:
-    dev_means_T1 = deviation(MEANS_T1D, axis=2)
-    dev_means_T2 = deviation(MEANS_T2D, axis=2)
-    max_dev_MEANS = np.maximum(dev_means_T1, dev_means_T2)
+#    dev_means_T1 = deviation(MEANS_T1D, axis=2)
+#    dev_means_T2 = deviation(MEANS_T2D, axis=2)
+#    max_dev_MEANS = np.maximum(dev_means_T1, dev_means_T2)
+    dev_MEANS = deviation(MEANS_T1D, axis=2)
 
     #if run_excess:
-    dev_excess_T1 = deviation(EXCESS_T1D, axis=2)
-    dev_excess_T2 = deviation(EXCESS_T2D, axis=2)
-    max_dev_EXCESS = np.maximum(dev_excess_T1, dev_excess_T2)
+#    dev_excess_T1 = deviation(EXCESS_T1D, axis=2)
+#    dev_excess_T2 = deviation(EXCESS_T2D, axis=2)
+#    max_dev_EXCESS = np.maximum(dev_excess_T1, dev_excess_T2)
+    dev_EXCESS = deviation(EXCESS_T1D, axis=2)
 
     #if run_EMD:
     dev_EMD_T1 = deviation(EMD_31, axis=2)
     dev_EMD_T2 = deviation(EMD_32, axis=2)
     max_dev_EMD = np.maximum(dev_EMD_T1, dev_EMD_T2)
+    #dev_EMD = deviation(EMD_31, axis=2)
 
-    dev_kde_T1 = deviation(KDE_T1D, axis=2)
-    dev_kde_T2 = deviation(KDE_T2D, axis=2)
-    max_dev_KDE = np.maximum(dev_kde_T1, dev_kde_T2)
+#    dev_kde_T1 = deviation(KDE_T1D, axis=2)
+#    dev_kde_T2 = deviation(KDE_T2D, axis=2)
+#    max_dev_KDE = np.maximum(dev_kde_T1, dev_kde_T2)
+    dev_KDE = deviation(KDE_T1D, axis=2)
 
 
-    datasets = [max_dev_MEANS, max_dev_EXCESS, max_dev_EMD, max_dev_KDE]
+    datasets = [dev_MEANS, dev_EXCESS, max_dev_EMD, dev_KDE]
 
     for label, colour, data in zip(LABELS, COLOURS, datasets):
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
