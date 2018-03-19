@@ -143,24 +143,14 @@ if PLOT_STANDARD_DEVIATION:
 
     LEVELS = np.array([0.02])
 
-#    dev_means_T1 = deviation(MEANS_T1D, axis=2)
-#    dev_means_T2 = deviation(MEANS_T2D, axis=2)
-#    max_dev_MEANS = np.maximum(dev_means_T1, dev_means_T2)
     dev_MEANS = deviation(MEANS_T1D, axis=2)
 
-#    dev_excess_T1 = deviation(EXCESS_T1D, axis=2)
-#    dev_excess_T2 = deviation(EXCESS_T2D, axis=2)
-#    max_dev_EXCESS = np.maximum(dev_excess_T1, dev_excess_T2)
     dev_EXCESS = deviation(EXCESS_T1D, axis=2)
 
     dev_EMD_T1 = deviation(EMD_31, axis=2)
     dev_EMD_T2 = deviation(EMD_32, axis=2)
     max_dev_EMD = np.maximum(dev_EMD_T1, dev_EMD_T2)
-#    dev_EMD = deviation(EMD_31, axis=2)
 
-#    dev_kde_T1 = deviation(KDE_T1D, axis=2)
-#    dev_kde_T2 = deviation(KDE_T2D, axis=2)
-#    max_dev_KDE = np.maximum(dev_kde_T1, dev_kde_T2)
     dev_KDE = deviation(KDE_T1D, axis=2)
 
     datasets = [dev_MEANS, dev_EXCESS, max_dev_EMD, dev_KDE]
@@ -176,9 +166,7 @@ if PLOT_STANDARD_DEVIATION:
         CS.collections[0].set_label(label)
     plt.legend(loc='upper left')
 
-
     # Plot shaded regions for each method on individual subplots
-    #SHADING_LEVELS = np.array([0.005, 0.0075, 0.01, 0.025, 0.05, 0.075, 0.1])#, 0.25, 0.5])
     SHADING_LEVELS = np.arange(0.005, 0.1, 0.005)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
