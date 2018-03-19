@@ -89,7 +89,7 @@ if PLOT_RELATIVE_ERROR:
     SHADING_LEVELS = np.arange(0, 100, 5)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
-    plt.suptitle('Maximum relative average error (%)\nContours at {}'.format(LEVELS))
+    plt.suptitle('Maximum relative error (%)\nContours at {}'.format(LEVELS))
     for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
         ax.set_title(label)
         CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
@@ -130,7 +130,7 @@ if PLOT_ABSOLUTE_ERROR:
     SHADING_LEVELS = np.arange(0, 0.1, 0.005)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
-    plt.suptitle('Maximum absolute average error\nContours at {}'.format(LEVELS))
+    plt.suptitle('Maximum absolute error\nContours at {}'.format(LEVELS))
     for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
         ax.set_title(label)
         CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
