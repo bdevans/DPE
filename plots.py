@@ -84,6 +84,7 @@ if PLOT_RELATIVE_ERROR:
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         CS.collections[0].set_label(label)
     plt.legend()
+    plt.savefig('figs/relative.png')
 
     # Plot shaded regions for each method on individual subplots
     SHADING_LEVELS = np.arange(0, 100, 5)
@@ -96,6 +97,7 @@ if PLOT_RELATIVE_ERROR:
                          cmap='viridis_r', extend='max')
         ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         fig.colorbar(CS, ax=ax)
+    plt.savefig('figs/relative_sub.png')
 
 
 if PLOT_ABSOLUTE_ERROR:
@@ -125,6 +127,7 @@ if PLOT_ABSOLUTE_ERROR:
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         CS.collections[0].set_label(label)
     plt.legend()
+    plt.savefig('figs/absolute.png')
 
     # Plot shaded regions for each method on individual subplots
     SHADING_LEVELS = np.arange(0, 0.1, 0.005)
@@ -137,6 +140,7 @@ if PLOT_ABSOLUTE_ERROR:
                          cmap='viridis_r', extend='max')
         ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         fig.colorbar(CS, ax=ax)
+    plt.savefig('figs/absolute_sub.png')
 
 
 if PLOT_STANDARD_DEVIATION:
@@ -165,6 +169,7 @@ if PLOT_STANDARD_DEVIATION:
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         CS.collections[0].set_label(label)
     plt.legend(loc='upper left')
+    plt.savefig('figs/deviation.png')
 
     # Plot shaded regions for each method on individual subplots
     SHADING_LEVELS = np.arange(0.005, 0.1, 0.005)
@@ -177,3 +182,4 @@ if PLOT_STANDARD_DEVIATION:
                          cmap='viridis_r', extend='both')
         ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         fig.colorbar(CS, ax=ax)
+    plt.savefig('figs/deviation_sub.png')
