@@ -84,19 +84,21 @@ if PLOT_RELATIVE_ERROR:
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         CS.collections[0].set_label(label)
     plt.legend()
+    plt.tight_layout()
     plt.savefig('figs/relative.png')
 
     # Plot shaded regions for each method on individual subplots
     SHADING_LEVELS = np.arange(0, 100, 5)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
-    plt.suptitle('Maximum relative error (%)\nContours at {}'.format(LEVELS))
+    plt.suptitle('Maximum relative error (%) [Contours at {}]'.format(LEVELS))
     for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
         ax.set_title(label)
         CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
                          cmap='viridis_r', extend='max')
         ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         fig.colorbar(CS, ax=ax)
+    plt.tight_layout()
     plt.savefig('figs/relative_sub.png')
 
 
@@ -127,19 +129,21 @@ if PLOT_ABSOLUTE_ERROR:
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         CS.collections[0].set_label(label)
     plt.legend()
+    plt.tight_layout()
     plt.savefig('figs/absolute.png')
 
     # Plot shaded regions for each method on individual subplots
     SHADING_LEVELS = np.arange(0, 0.1, 0.005)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
-    plt.suptitle('Maximum absolute error\nContours at {}'.format(LEVELS))
+    plt.suptitle('Maximum absolute error [Contours at {}]'.format(LEVELS))
     for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
         ax.set_title(label)
         CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
                          cmap='viridis_r', extend='max')
         ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         fig.colorbar(CS, ax=ax)
+    plt.tight_layout()
     plt.savefig('figs/absolute_sub.png')
 
 
@@ -168,18 +172,20 @@ if PLOT_STANDARD_DEVIATION:
     for label, colour, data in zip(LABELS, COLOURS, datasets):
         CS = plt.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         CS.collections[0].set_label(label)
-    plt.legend(loc='upper left')
+    plt.legend(loc='best')
+    plt.tight_layout()
     plt.savefig('figs/deviation.png')
 
     # Plot shaded regions for each method on individual subplots
     SHADING_LEVELS = np.arange(0.005, 0.1, 0.005)
 
     fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
-    plt.suptitle('Maximum standard deviation\nContours at {}'.format(LEVELS))
+    plt.suptitle('Maximum standard deviation [Contours at {}]'.format(LEVELS))
     for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
         ax.set_title(label)
         CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data, SHADING_LEVELS,
                          cmap='viridis_r', extend='both')
         ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
         fig.colorbar(CS, ax=ax)
+    plt.tight_layout()
     plt.savefig('figs/deviation_sub.png')
