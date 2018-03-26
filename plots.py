@@ -5,6 +5,8 @@ Created on Wed Mar 14 11:07:52 2018
 
 @author: ben
 """
+import os.path
+
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -26,17 +28,25 @@ PROPORTIONS_T1D = np.load('data/proportions.npy')
 SAMPLE_SIZES = np.load('data/sample_sizes.npy')
 PROPORTIONS_T2D = PROPORTIONS_T1D[::-1]
 
-MEANS_T1D = np.load('data/means.npy')
-MEANS_T2D = 1 - MEANS_T1D
-EXCESS_T1D = np.load('data/excess.npy')
-EXCESS_T2D = 1 - EXCESS_T1D
-EMD_31 = np.load('data/emd_31.npy')
-EMD_32 = np.load('data/emd_32.npy')
-KDE_T1D = np.load('data/kde.npy')
-KDE_T2D = 1 - KDE_T1D
+if os.path.isfile('data/means.npy'):
+    MEANS_T1D = np.load('data/means.npy')
+    MEANS_T2D = 1 - MEANS_T1D
+    PLOT_MEANS = True
+if os.path.isfile('data/excess.npy'):
+    EXCESS_T1D = np.load('data/excess.npy')
+    EXCESS_T2D = 1 - EXCESS_T1D
+    if ADJUST_EXCESS:
+        EXCESS_T1D /= 0.92  # adjusted for fact underestimates by 8%
+    PLOT_EXCESS = True
+if os.path.isfile('data/emd_31.npy') and os.path.isfile('data/emd_32.npy'):
+    EMD_31 = np.load('data/emd_31.npy')
+    EMD_32 = np.load('data/emd_32.npy')
+    PLOT_EMD = True
+if os.path.isfile('data/kde.npy'):
+    KDE_T1D = np.load('data/kde.npy')
+    KDE_T2D = 1 - KDE_T1D
+    PLOT_KDE = True
 
-if ADJUST_EXCESS:
-    EXCESS_T1D /= 0.92  # adjusted for fact underestimates by 8%
 
 error_MEANS_T1 = average(MEANS_T1D, axis=2) - PROPORTIONS_T1D
 error_MEANS_T2 = average(MEANS_T2D, axis=2) - PROPORTIONS_T2D
