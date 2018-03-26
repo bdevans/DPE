@@ -46,7 +46,7 @@ data.describe()
 # Run bootstrap and plot results for:
 # T1GRS scores
 # T2GRS scores
-# Calculate estimates (not bootstrap) on data_bioban_t2_c_pep.csv
+# Calculate estimates (not bootstrap) on data_bioban_t2_c_pep.csv [Done]
 
 # Arrays of T1GRS scores for each group
 T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
@@ -77,7 +77,7 @@ run_EMD = True
 check_EMD = False
 
 bootstraps = 100
-sample_sizes = np.array(range(100, 3100, 100))
+sample_sizes = np.arange(100, 1501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)
 
 if plot_results:
