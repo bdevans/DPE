@@ -33,10 +33,20 @@ np.seterr(divide='ignore', invalid='ignore')
 # xls = pd.ExcelFile("data.xls")
 # data = xls.parse()
 # data = pd.read_csv('t1d_t2d_bootstrap_data.csv', usecols=[1, 2]) #t2 included data
-data = pd.read_csv('data.csv', usecols=[1, 2])
-data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
+#data = pd.read_csv('data.csv', usecols=[1, 2])  #
+#data = pd.read_csv('data_biobank_all.csv', usecols=[0, 1, 2])
+data = pd.read_csv('data_biobank_mix_WTCC_ref.csv')
+#data = pd.read_csv('c_pep_defined2.csv')
+#data = pd.read_csv('data_bioban_t2_c_pep.csv')
+#data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
 #data.rename(columns={'diabetes_type': 'type', 't2GRS': 'T1GRS'}, inplace=True) # looking at T2GRS
+data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS', 't2GRS': 'T1GRS'}, inplace=True)
 data.describe()
+
+# Run bootstrap and plot results for:
+# T1GRS scores
+# T2GRS scores
+# Calculate estimates (not bootstrap) on data_bioban_t2_c_pep.csv
 
 # Arrays of T1GRS scores for each group
 T1 = data.loc[data['type'] == 1, 'T1GRS'].as_matrix()
@@ -68,7 +78,7 @@ check_EMD = False
 
 bootstraps = 100
 sample_sizes = np.array(range(100, 3100, 100))
-proportions = np.arange(0.01, 1.01, 0.01)
+proportions = np.arange(0.0, 1.01, 0.01)
 
 if plot_results:
     import matplotlib as mpl
@@ -79,6 +89,7 @@ if plot_results:
 if run_excess:
     # Excess method median of T1GRS from the whole population in Biobank
     population_median = 0.23137931525707245
+    # T2GRS for data_biobank_mix_WTCC_ref
     #population_median = 6.78826 #t2dgrs
     high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
     low = 2*len(Mix[Mix <= population_median])
@@ -239,6 +250,7 @@ if run_means:
 
 if run_excess:
     print('Proportions based on excess')
+    # TODO: Flip these around for when using the T2GRS
     print('% of Type 1:', (high/(low+high)))
     print('% of Type 2:', (1-(high/(low+high))))
 
