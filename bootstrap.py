@@ -6,6 +6,7 @@ Created on Fri Jan 19 14:39:28 2018
 @author: ben
 """
 
+import os
 import time
 import math
 import sys
