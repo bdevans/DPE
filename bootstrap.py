@@ -24,6 +24,7 @@ from joblib import Parallel, delayed, cpu_count
 
 verbose = False
 plot_results = False
+out_dir = "results"
 run_means = True
 run_excess = True
 adjust_excess = True
@@ -56,6 +57,8 @@ kernel = 'gaussian'
 
 # ----------------------------------------------------------------------------
 
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
 
 if run_KDE:
 
@@ -557,16 +560,16 @@ if __name__ == '__main__':
                 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
         if run_means:
-            np.save('results/means_{}'.format(tag), means_T1D)
+            np.save('{}/means_{}'.format(out_dir, tag), means_T1D)
         if run_excess:
-            np.save('results/excess_{}'.format(tag), excess_T1D)
+            np.save('{}/excess_{}'.format(out_dir, tag), excess_T1D)
         if run_KDE:
-            np.save('results/kde_{}'.format(tag), KDE_fits)
+            np.save('{}/kde_{}'.format(out_dir, tag), KDE_fits)
         if run_EMD:
-            np.save('results/emd_31_{}'.format(tag), norm_mat_EMD_31)
-            np.save('results/emd_32_{}'.format(tag), norm_mat_EMD_32)
-        np.save('results/sample_sizes_{}'.format(tag), sample_sizes)
-        np.save('results/proportions_{}'.format(tag), proportions)
+            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
+            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
+        np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
+        np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
     # run_bootstrap('T1GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
     # run_bootstrap('T2GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
