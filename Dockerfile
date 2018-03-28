@@ -40,8 +40,8 @@ RUN mkdir -p /root/.config/matplotlib
 RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
 COPY bootstrap.py /usr/dpe/
-COPY data.csv /usr/dpe/
-VOLUME /usr/dpe/data
+COPY data/data_biobank_mix_WTCC_ref.csv /usr/dpe/data/
+VOLUME /usr/dpe/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
