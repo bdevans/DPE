@@ -38,7 +38,7 @@ bootstraps = 1000
 sample_sizes = np.arange(100, 1501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)  # T1 propoertions
 
-dataset = 'data/data_biobank_mix_WTCC_ref.csv'
+dataset = 'data/biobank_mix_WTCC_ref.csv'
 metrics = ['T1GRS', 'T2GRS']
 headers = {'diabetes_type': 'type', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
 
