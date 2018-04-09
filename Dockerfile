@@ -23,6 +23,7 @@ ENTRYPOINT [ "/bin/bash", "-c" ]
 #&& rm -rf /var/lib/apt/lists/*
 
 # Use the environment.yml to create the conda environment.
+# https://fmgdata.kinja.com/using-docker-with-conda-environments-1790901398
 RUN [ "conda", "update", "conda", "-y" ]
 RUN [ "conda", "update", "--all", "-y" ]
 COPY environment.yml /tmp/environment.yml
