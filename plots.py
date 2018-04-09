@@ -150,7 +150,7 @@ def plot_bootstrap_results(metric):
 
     if PLOT_STANDARD_DEVIATION:
 
-        LEVELS = np.array([0.02])
+        LEVELS = np.array([0.05])
 
         dev_MEANS = deviation(MEANS_T1D, axis=2)
 
