@@ -89,16 +89,18 @@ def plot_bootstrap_results(metric):
         plt.savefig('figs/relative_{}.png'.format(metric))
 
         # Plot shaded regions for each method on individual subplots
-        SHADING_LEVELS = np.arange(0, 100, 5)
+        #SHADING_LEVELS = np.arange(0, 100, 5)
+        SHADING_LEVELS = np.logspace(-2, 2, num=25)
 
         fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
         plt.suptitle('{} : Maximum relative error (%) [Contours at {}]'.format(metric, LEVELS))
         for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
             ax.set_title(label)
             CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data,
-                             SHADING_LEVELS, cmap='viridis_r', extend='max')
+                             SHADING_LEVELS, cmap='viridis_r',
+                             locator=mpl.ticker.LogLocator())  # , extend='max'
             ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
-            fig.colorbar(CS, ax=ax)
+            fig.colorbar(CS, ax=ax)  # , norm=mpl.colors.LogNorm())
         plt.tight_layout()
         plt.savefig('figs/relative_sub_{}.png'.format(metric))
 
@@ -134,16 +136,18 @@ def plot_bootstrap_results(metric):
         plt.savefig('figs/absolute_{}.png'.format(metric))
 
         # Plot shaded regions for each method on individual subplots
-        SHADING_LEVELS = np.arange(0, 0.1, 0.005)
+        #SHADING_LEVELS = np.arange(0, 0.1, 0.005)
+        SHADING_LEVELS = np.logspace(-4, -1, num=19)
 
         fig, axes = plt.subplots(2, 2, sharex=True, sharey=True)
         plt.suptitle('{} : Maximum absolute error [Contours at {}]'.format(metric, LEVELS))
         for ax, label, colour, data in zip(axes.ravel(), LABELS, COLOURS, datasets):
             ax.set_title(label)
             CS = ax.contourf(PROPORTIONS_T1D, SAMPLE_SIZES, data,
-                             SHADING_LEVELS, cmap='viridis_r', extend='max')
+                             SHADING_LEVELS, cmap='viridis_r',
+                             locator=mpl.ticker.LogLocator())  # , extend='max'
             ax.contour(PROPORTIONS_T1D, SAMPLE_SIZES, data, LEVELS, colors=colour)
-            fig.colorbar(CS, ax=ax)
+            fig.colorbar(CS, ax=ax)  #, norm=mpl.colors.LogNorm())
         plt.tight_layout()
         plt.savefig('figs/absolute_sub_{}.png'.format(metric))
 
