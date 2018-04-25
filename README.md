@@ -28,12 +28,10 @@ Methods
     difference = number_high - number_low
     proportion_T1 = difference/(2*number_low+difference)
     ```
-    Should this be abs? With the assumptions from the Lancet it is not necessary... but I guess the definition would always be case specific (it'd depend on the relation between the two reference distributions and general population)...
+    Should this be abs? With the assumptions from the Lancet it is not necessary to use abs... but I guess the definition would always be case specific (it'd depend on the relation between the two reference distributions and general population)...
     
-    ```
-    2*number_low+difference = len(RM) / total number of samples
-    ```
-
+    `2*number_low+difference = len(RM)` (total number of samples)
+    
     a. The excess/subtraction method counts points above and below threshold `population_median`
     
     b. The threshold is based on statistical properties of reference GRS (Wellcome Trust Case Control Consortium cohort) and statistical properties of the general population (distribution of GRS in the general population);
