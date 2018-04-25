@@ -23,6 +23,9 @@ Methods
 Should this be abs?
 
 3. [EMD](https://en.wikipedia.org/wiki/Earth_mover%27s_distance)
+    ```math
+    EMD(P,Q)={\frac {\sum _{i=1}^{m}\sum _{j=1}^{n}f_{i,j}d_{i,j}}{\sum _{i=1}^{m}\sum _{j=1}^{n}f_{i,j}}}
+    ```
 
     ```python
     max_emd = bin_edges[-1] - bin_edges[0]
