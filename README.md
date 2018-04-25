@@ -3,6 +3,14 @@ Diabetes Proportion Estimation
 
 Evaluation of algorithms for estimating the proportions of Type I (and Type II) diabetics in a mixture population based on genetic risk scores.
 
+Execution
+---------
+
+1. Run `bootstrap.py` on a multicore server. This is best done in a Docker container as follows:
+    1. `docker build -t dpe https://git.exeter.ac.uk/bdevans/DPE.git`
+    2. `docker run -it -v dpe:/usr/dpe/data --name dpe dpe`
+2. Collect results and run `plots.py`. 
+
 Methods
 -------
 
