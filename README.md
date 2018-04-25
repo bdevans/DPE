@@ -9,7 +9,7 @@ Methods
 1. Means
 
     ```python
-    proportion_of_T1 = abs(RM.mean()-T2_mean)/(T1_mean-T2_mean)
+    proportion_of_T1 = abs((RM.mean()-T2_mean)/(T1_mean-T2_mean))
     ```
 
 2. [Excess](https://www.thelancet.com/journals/landia/article/PIIS2213-8587(17)30362-5/fulltext)
