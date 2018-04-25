@@ -28,17 +28,19 @@ Methods
     difference = number_high - number_low
     proportion_T1 = difference/(2*number_low+difference)
     ```
-Should this be abs? With the assumptions from the lancet it is not necessery... but I guess the definition would always be case specific (it'd depend on the relation between the two reference distributions and general population)...
+    Should this be abs? With the assumptions from the Lancet it is not necessary... but I guess the definition would always be case specific (it'd depend on the relation between the two reference distributions and general population)...
+    
+    ```
+    2*number_low+difference = len(RM) / total number of samples
+    ```
 
-```2*number_low+difference=len(RM)```/ total number of samples
-
-a.) the excess/ subtraction method counts points above and below threshold ```population_median```
-
-b.) threshold is based on statistical properties of reference grs (Wellcome Trust Case Control Consortium cohort) and statistical properties of the general population (distribution of grs in the general population);
-
-c.) the lancet analysis was posible because: "The type 1 genetic risk score in the general population has the same distribution [statistically ?] and median as [the type 1 genetic risk score in] the type 2 diabetes population." and "Almost all (96%) individuals with type 1 diabetes in the Wellcome Trust Case Control Consortium cohort have [the type 1] genetic risk score above the 50th centile of [the type 1 genetic risk score in] the type 2 diabetes cohort";
-
-d.) ...
+    a. The excess/subtraction method counts points above and below threshold `population_median`
+    
+    b. The threshold is based on statistical properties of reference GRS (Wellcome Trust Case Control Consortium cohort) and statistical properties of the general population (distribution of GRS in the general population);
+    
+    c. The Lancet analysis was posible because: "The type 1 genetic risk score in the general population has the same distribution [statistically ?] and median as [the type 1 genetic risk score in] the type 2 diabetes population." and "Almost all (96%) individuals with type 1 diabetes in the Wellcome Trust Case Control Consortium cohort have [the type 1] genetic risk score above the 50th centile of [the type 1 genetic risk score in] the type 2 diabetes cohort";
+    
+    d. ...
 
 
 3. [EMD](https://en.wikipedia.org/wiki/Earth_mover%27s_distance)
