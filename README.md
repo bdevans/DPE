@@ -72,7 +72,7 @@ Should this be abs?
     2. Create a new model which is the weighted sum of these two distributions (initialise to equal amplitudes: `amp_T1 = amp_T2 = 1`).
     3. Convolve the same kernel with the unknown mixture data.
     4. Fit the combined model to the smoothed mixture allowing the amplitude of each reference distribution to vary. Optimise with the least squares algorithm.
-    5. proportion_T1 = amp_T1/(amp_T1+amp_T2).
+    5. `proportion_T1 = amp_T1/(amp_T1+amp_T2)`.
 
 
 TODO
