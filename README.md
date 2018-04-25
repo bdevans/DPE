@@ -73,6 +73,23 @@ Should this be abs?
     3. Convolve the same kernel with the unknown mixture data.
     4. Fit the combined model to the smoothed mixture allowing the amplitude of each reference distribution to vary. Optimise with the least squares algorithm.
     5. `proportion_T1 = amp_T1/(amp_T1+amp_T2)`.
+    
+    ```python
+    # Fit reference populations
+    for data, label in zip([T1, T2], labels):
+        kdes[label] = {}
+        X = data[:, np.newaxis]
+        kde = KernelDensity(kernel=kernel, bandwidth=bin_width).fit(X)
+        kdes[label] = kde
+                
+    def fit_KDE(RM, model, params_mix, kernel, bins):
+        x_KDE = np.linspace(bins[tag]['min'], bins[tag]['max'], len(RM)+2)
+        mix_kde = KernelDensity(kernel=kernel, bandwidth=bins[tag]['width']).fit(RM[:, np.newaxis])
+        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+        amp_T1 = res_mix.params['amp_T1'].value
+        amp_T2 = res_mix.params['amp_T2'].value
+        return amp_T1/(amp_T1+amp_T2)
+    ```
 
 
 TODO
