@@ -28,8 +28,9 @@ Methods
     difference = number_high - number_low
     proportion_T1 = difference/(2*number_low+difference)
     ```
-Should this be abs?
-```2*number_low+difference=len(RM)```  total number of samples
+Should this be abs? With the assumptions from the lancet it is not necessery... but I guess the definition would always be case specific (it'd depend on the relation between the two reference distributions and general population)...
+
+```2*number_low+difference=len(RM)```/ total number of samples
 
 a.) the excess/ subtraction method counts points above and below threshold ```population_median```
 
