@@ -23,6 +23,8 @@ Methods
 2. [Excess](https://www.thelancet.com/journals/landia/article/PIIS2213-8587(17)30362-5/fulltext)
 
     ```python
+    medians = {'T1GRS': 0.23137931525707245, 'T2GRS': 6.78826}
+
     number_low = len(RM[RM <= population_median])
     number_high = len(RM[RM > population_median])
     difference = number_high - number_low
