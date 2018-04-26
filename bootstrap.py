@@ -300,6 +300,8 @@ def estimate_T1D(sample_size, prop_T1, b, **kwargs):
     RM = np.concatenate((R1, R2))
     # xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
 
+    # assert sample_size == len(RM)
+
     # x = np.array([0.095, *np.sort(RM), 0.35])
     results = {}
 
@@ -312,9 +314,7 @@ def estimate_T1D(sample_size, prop_T1, b, **kwargs):
     if run_excess:
         number_low = len(RM[RM <= population_median])
         number_high = len(RM[RM > population_median])
-        high = number_high - number_low
-        low = 2*number_low
-        proportion_T1 = (high/(low+high))
+        proportion_T1 = (number_high - number_low)/sample_size
         results['excess'] = proportion_T1
 
     # ------------------------------ KDE method ------------------------------
