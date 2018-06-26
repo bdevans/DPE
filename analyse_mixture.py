@@ -435,8 +435,8 @@ if __name__ == '__main__':
     # TODO: Reimplement this
     adjust_excess = True
 
-    seed = 42
-    bootstraps = 1000
+    seed = 180
+    bootstraps = 8
 
     dataset = 'data/biobank_mix_WTCC_ref.csv'
     metrics = ['T1GRS', 'T2GRS']
@@ -527,7 +527,8 @@ if __name__ == '__main__':
     print("Running mixture analysis with T1GRS scores...")
     t = time.time()  # Start timer
 
-    (res, df_bs) = analyse_mixture(scores['T1GRS'], means['T1GRS'], medians['T1GRS'], bins['T1GRS'], run_method, bootstrap=8)
+    (res, df_bs) = analyse_mixture(scores['T1GRS'], means['T1GRS'], medians['T1GRS'],
+                                   bins['T1GRS'], run_method, bootstrap=bootstraps)
     #    analyse_mixture('T2GRS', scores, means, medians, bins)
 
     elapsed = time.time() - t
