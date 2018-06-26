@@ -117,3 +117,7 @@ TODO
 ----
 
 * [Remove sensitive data](https://help.github.com/articles/removing-sensitive-data-from-a-repository/) from the repository before publishing e.g. `biobank_mix_WTCC_ref.csv`.
+
+* [x] Summary table of pros and cons for each method
+* [ ] Apply excess and kde to mixture plots for mean and CI
+* [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
