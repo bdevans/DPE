@@ -19,6 +19,8 @@ from sklearn.neighbors import KernelDensity
 # TODO: replace with a scipy/numpy function to reduce dependencies
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
 import lmfit
+# TODO: Try replacing with scipy.optimize.curve_fit to solve jopblib problem and reduce dependencies:
+# https://lmfit.github.io/lmfit-py/model.html
 from joblib import Parallel, delayed, cpu_count
 import seaborn as sns
 
@@ -56,6 +58,7 @@ def fit_KDE(Mix, bins, model, params_mix, kernel):
 
 
 def interpolate_CDF(scores, x_i, min_edge, max_edge):
+    # TODO: x = [x_i[0], *sorted(scores), x_i[-1]]
     x = [min_edge, *sorted(scores), max_edge]
     y = np.linspace(0, 1, num=len(x), endpoint=True)
     (iv, ii) = np.unique(x, return_index=True)
@@ -216,6 +219,7 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
         extra_args['Ref2_mean'] = Ref2.mean()
 
     if run_method["Excess"]:
+        # TODO: Check and rename to Ref1_median?
         extra_args['population_median'] = median #population_median
 
     sample_size = len(Mix)
@@ -243,6 +247,7 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
 
         # -------------------------- Subtraction method --------------------------
         if run_method["Excess"]:
+            # TODO: Flip these around for when using the T2GRS
             number_low = len(RM[RM <= kwargs['population_median']])
             number_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
