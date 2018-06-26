@@ -10,7 +10,7 @@ import os
 import time
 import math
 import sys
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 import numpy as np
 import scipy as sp
@@ -301,7 +301,7 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
 
     if bootstrap:
 
-        results = {}
+        results = OrderedDict()
 
         methods = [method for method in ["Means", "Excess", "EMD", "KDE"] if run_method[method]]
 
