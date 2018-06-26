@@ -121,3 +121,17 @@ TODO
 * [x] Summary table of pros and cons for each method
 * [ ] Apply excess and kde to mixture plots for mean and CI
 * [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
+Display Items
+-------------
+
+1. Bootstrap figure
+2. Methods illustration (including excess) consistent layout with results
+3. Type I Diabetes: Results (error & s.d. for each method) [2x2]
+4. Violin plot or swarm in box plot (estimate with confidence intervals)
+    - Compute estimates for each method for each real data set [3x3] then fix each estimate to bootstrap around (drawing from reference populations) in order to compute CIs for each method on each data set.
+5. Table of pros and cons
+
+### Supplementary Figures
+
+1. Bootstraps (as for Fig. 3) for e.g. Depression, Menieres, Renal.
+2. Mixture histograms with estimates and confidence intervals for each method
