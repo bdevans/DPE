@@ -20,6 +20,7 @@ from sklearn.neighbors import KernelDensity
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
 import lmfit
 from joblib import Parallel, delayed, cpu_count
+import seaborn as sns
 
 
 def fit_kernels(scores, bw):
@@ -531,3 +532,11 @@ if __name__ == '__main__':
 
     elapsed = time.time() - t
     print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
+
+
+
+    # Plot swarm box
+    ax = sns.boxplot(data=df_bs)
+    ax = sns.swarmplot(data=df_bs, color=".25")
+
+
