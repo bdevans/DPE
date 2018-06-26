@@ -65,12 +65,12 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
+def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median=None):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
-    population_median = median
+    # population_median = median
     bin_width = bins['width']
     bin_centers = bins['centers']
     bin_edges = bins['edges']
@@ -215,12 +215,20 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
         extra_args['i_EMD_21'] = i_EMD_21
 
     if run_method["Means"]:
-        extra_args['Ref1_mean'] = Ref1.mean()
-        extra_args['Ref2_mean'] = Ref2.mean()
+        if means is None:
+            extra_args['Ref1_mean'] = Ref1.mean()
+            extra_args['Ref2_mean'] = Ref2.mean()
+        else:
+            extra_args['Ref1_mean'] = means['Ref1_mean']
+            extra_args['Ref2_mean'] = means['Ref2_mean']
 
     if run_method["Excess"]:
         # TODO: Check and rename to Ref1_median?
-        extra_args['population_median'] = median #population_median
+        # NOTE: This is close to but not equal to the Ref1_median
+        if median is None:
+            extra_args['population_median'] = Ref1.median()
+        else:
+            extra_args['population_median'] = median #population_median
 
     sample_size = len(Mix)
 #    extra_args['sample_size'] = sample_size
@@ -512,14 +520,13 @@ if __name__ == '__main__':
     print("Running mixture analysis with T1GRS scores...")
     t = time.time()  # Start timer
 
-    (res, df_bs) = analyse_mixture(scores['T1GRS'], means['T1GRS'], medians['T1GRS'],
-                                   bins['T1GRS'], run_method, bootstrap=bootstraps)
+    (res, df_bs) = analyse_mixture(scores['T1GRS'], bins['T1GRS'],
+                                   run_method, bootstrap=bootstraps,
+                                   means=None, median=medians['T1GRS'])
     #    analyse_mixture('T2GRS', scores, means, medians, bins)
 
     elapsed = time.time() - t
     print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
-
-
 
     # Plot swarm box
     ax = sns.boxplot(data=df_bs)
