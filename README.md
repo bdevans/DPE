@@ -14,6 +14,8 @@ Execution
 Methods
 -------
 
+We bootstrap (i.e. sample with replacement) from the available data, systematically varying sample size and mixture proportion. We then apply the following methods to yield estimates of the true proportion and from those, calculate the errors throughout the bootstrap parameter space. 
+
 1. Means
 
     ```python
