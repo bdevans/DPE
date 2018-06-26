@@ -304,7 +304,7 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
 
         results = OrderedDict()
 
-        methods = [method for method in ["Means", "Excess", "EMD", "KDE"] if run_method[method]]
+#        methods = [method for method in ["Means", "Excess", "EMD", "KDE"] if run_method[method]]
 
         # Spawn threads
 #        with Parallel(n_jobs=nprocs) as parallel:
@@ -317,7 +317,7 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
 #                results[method] = parallel(delayed(bootstrap_mixture)(sample_size, prop_Ref1, Ref1, Ref2, method, **extra_args)
 #                                           for b in range(bootstrap))
 
-        for method in methods:
+        for method in run_method:
             prop_Ref1 = initial_results[method]
             results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, method, **extra_args)
                                                  for b in range(bootstrap)]
@@ -519,10 +519,10 @@ if __name__ == '__main__':
     del T2GRS_bin_width, T2GRS_bin_min, T2GRS_bin_max, T2GRS_bin_edges, T2GRS_bin_centers
 
 
-    run_method = {"Means": True,
-                  "Excess": True,
-                  "EMD": True,
-                  "KDE": True}
+    run_method = OrderedDict([("Means", True),
+                              ("Excess", True),
+                              ("EMD", True),
+                              ("KDE", True)])
 
     print("Running mixture analysis with T1GRS scores...")
     t = time.time()  # Start timer
