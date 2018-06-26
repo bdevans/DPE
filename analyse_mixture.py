@@ -331,10 +331,10 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
         print('Proportions based on {}'.format(method))
         print('Reference 1: {:.5}'.format(initial_results[method]))
         if bootstrap:
-            print('Reference 1 mean: {:.5} +/- {:.5}'.format(np.mean(df_bs[method]), np.std(df_bs[method])))
+            print('Reference 1: {:.5} +/- {:.5}'.format(np.mean(df_bs[method]), np.std(df_bs[method])))
         print('Reference 2: {:.5}'.format(1-initial_results[method]))
         if bootstrap:
-            print('Reference 2 mean: {:.5} +/- {:.5}'.format(1-np.mean(df_bs[method]), np.std(1-df_bs[method])))
+            print('Reference 2: {:.5} +/- {:.5}'.format(1-np.mean(df_bs[method]), np.std(1-df_bs[method])))
 
 
 
