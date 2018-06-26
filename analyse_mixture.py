@@ -272,6 +272,17 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
 #            print('max_EMD', max_EMD)
             # TODO: Consider averaging the two measures
             results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
+            # print('Proportions based on counts')
+            # print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
+            # print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
+
+            # print("Proportions based on Earth Mover's Distance (histogram values):")
+            # print('% of Type 1:', 1-EMD_31/EMD_21)
+            # print('% of Type 2:', 1-EMD_32/EMD_21)
+            #
+            # print("Proportions based on Earth Mover's Distance (interpolated values):")
+            # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
+            # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
 
         return results
 
@@ -335,37 +346,6 @@ def analyse_mixture(scores, means, median, bins, run_method, bootstrap=1000):
         print('Reference 2: {:.5}'.format(1-initial_results[method]))
         if bootstrap:
             print('Reference 2: {:.5} +/- {:.5}'.format(1-np.mean(df_bs[method]), np.std(1-df_bs[method])))
-
-
-
-#    if run_method["Means"]:
-#        print('Proportions based on means')
-#        print('% of Type 1:', (Mix.mean()-means[tag]['T2'])/(means[tag]['T1']-means[tag]['T2']))
-#        print('% of Type 2:', (1-(Mix.mean()-means[tag]['T2'])/(means[tag]['T1']-means[tag]['T2'])))
-#
-#    if run_method["Excess"]:
-#        print('Proportions based on excess')
-#        # TODO: Flip these around for when using the T2GRS
-#        print('% of Type 1:', (high/(low+high)))
-#        print('% of Type 2:', (1-(high/(low+high))))
-#
-#    print('Proportions based on counts')
-#    print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
-#    print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
-#
-#    if run_method["EMD"]:
-#        print("Proportions based on Earth Mover's Distance (histogram values):")
-#        print('% of Type 1:', 1-EMD_31/EMD_21)
-#        print('% of Type 2:', 1-EMD_32/EMD_21)
-#
-#        print("Proportions based on Earth Mover's Distance (interpolated values):")
-#        print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
-#        print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
-#
-#    if run_method["KDE"]:
-#        print('Proportions based on KDEs')
-#        print('% of Type 1:', amp_T1/(amp_T1+amp_T2))
-#        print('% of Type 2:', amp_T2/(amp_T1+amp_T2))
 
     print('--------------------------------------------------------------------------------\n\n')
 
@@ -539,5 +519,3 @@ if __name__ == '__main__':
     # Plot swarm box
     ax = sns.boxplot(data=df_bs)
     ax = sns.swarmplot(data=df_bs, color=".25")
-
-
