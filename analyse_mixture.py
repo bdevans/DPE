@@ -25,6 +25,8 @@ import lmfit
 # https://lmfit.github.io/lmfit-py/model.html
 from joblib import Parallel, delayed, cpu_count
 import seaborn as sns
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 
 def fit_kernels(scores, bw):
@@ -40,6 +42,46 @@ def fit_kernels(scores, bw):
     return kernels
 
 
+def plot_kernels_(scores, bins):
+    kernels = ['gaussian', 'tophat', 'epanechnikov',
+               'exponential', 'linear', 'cosine']
+    fig, axes = plt.subplots(len(scores), 1, sharex=True) #, squeeze=False)
+#    X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
+    X_plot = bins['centers'][:, np.newaxis]
+
+    kdes = {}
+#        for data, label, ax in zip([Ref1, Ref2, Mix], labels, axes):
+    for (label, data), ax in zip(scores.items(), axes):
+
+        kdes[label] = {}
+        X = data[:, np.newaxis]
+
+        for kernel in kernels:
+            kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(X)
+            log_dens = kde.score_samples(X_plot)
+            ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
+                    label="kernel = '{0}'; bandwidth = {1}".format(kernel, bins['width']))
+            kdes[label][kernel] = kde  # np.exp(log_dens)
+
+        # ax.text(6, 0.38, "N={0} points".format(N))
+        ax.legend(loc='upper left')
+        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
+        ax.set_ylabel(label)
+
+
+def plot_kernels(scores, bins):
+
+    kernels = fit_kernels(scores, bins['width'])
+    fig, axes = plt.subplots(len(scores), 1, sharex=True)
+    X_plot = bins['centers'][:, np.newaxis]
+    for (label, data), ax in zip(scores.items(), axes):
+        X = data[:, np.newaxis]
+        for name, kernel in kernels[label].items():
+            ax.plot(X_plot[:, 0], np.exp(kernel.score_samples(X_plot)), '-',
+                    label="kernel = '{0}'; bandwidth = {1}".format(name, bins['width']))
+        ax.legend(loc='upper left')
+        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
+        ax.set_ylabel(label)
 
 
 
