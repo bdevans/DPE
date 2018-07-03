@@ -125,6 +125,15 @@ Methods Summary
 | Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | ... | Computationally expensive. |
 
 
+Discussion points to be agreed
+------------------------------
+
+- [x] Use adjusted excess method i.e. pr_Excess /= 0.92
+- [ ] Mirror the Excess heatmap?
+- [ ] How to calculate "pseudo ground truth" for Diabetes data
+- [ ] How to generate a single proportion from EMD method
+
+
 TODO
 ----
 
