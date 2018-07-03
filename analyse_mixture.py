@@ -34,7 +34,6 @@ def fit_kernels(scores, bw):
     for label, data in scores.items():
         kernels[label] = {}
         X = data[:, np.newaxis]
-#        for kernel in ['gaussian', 'tophat', 'epanechnikov']:
         for kernel in ['gaussian', 'tophat', 'epanechnikov',
                        'exponential', 'linear', 'cosine']:
             kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
@@ -46,24 +45,18 @@ def plot_kernels_(scores, bins):
     kernels = ['gaussian', 'tophat', 'epanechnikov',
                'exponential', 'linear', 'cosine']
     fig, axes = plt.subplots(len(scores), 1, sharex=True) #, squeeze=False)
-#    X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
     X_plot = bins['centers'][:, np.newaxis]
 
     kdes = {}
-#        for data, label, ax in zip([Ref1, Ref2, Mix], labels, axes):
     for (label, data), ax in zip(scores.items(), axes):
-
         kdes[label] = {}
         X = data[:, np.newaxis]
-
         for kernel in kernels:
             kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(X)
             log_dens = kde.score_samples(X_plot)
             ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
                     label="kernel = '{0}'; bandwidth = {1}".format(kernel, bins['width']))
             kdes[label][kernel] = kde  # np.exp(log_dens)
-
-        # ax.text(6, 0.38, "N={0} points".format(N))
         ax.legend(loc='upper left')
         ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
         ax.set_ylabel(label)
@@ -109,14 +102,12 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=None, means=None, median=None, KDE_kernel='gaussian'):
+def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
-    # population_median = median
     bin_width = bins['width']
-    bin_centers = bins['centers']
     bin_edges = bins['edges']
 
 #    print('Running {} mixture analysis...'.format(tag))
@@ -129,9 +120,8 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
 
     # -------------------------------- EMD method --------------------------------
 
-    if run_method["EMD"]:
-
-
+#    if run_method["EMD"]:
+    if "EMD" in methods:
 
         max_EMD = bin_edges[-1] - bin_edges[0]
 
@@ -146,25 +136,24 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
 #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 
 
-    if run_method["KDE"]:
+    if "KDE" in methods:
         # ------------------------------ KDE method ------------------------------
 
         bw = bin_width  # Bandwidth
-
         kdes = fit_kernels(scores, bw)
-#        kdes = {}
-#        labels = ['Reference 1', 'Reference 2', 'Mixture']
 
-        # sp.interpolate.interp1d(X, y, X_new, y_new)
-
-#        for label, data in scores.items():
-#            kdes[label] = {}
-#            X = data[:, np.newaxis]
-#            for kernel in ['gaussian', 'tophat', 'epanechnikov']:
-#                kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
-#                kdes[label][kernel] = kde
-
-#        kernel = 'gaussian'  #'epanechnikov'
+        try:
+            KDE_kernel = methods["KDE"]["kernel"]
+        except (KeyError, TypeError):
+            print("No kernel specified!")
+            KDE_kernel = "gaussian"  # Default kernel
+        else:
+            try:
+                bw = methods["KDE"]["bandwidth"]
+            except (KeyError, TypeError):
+                bw = bins["width"]
+        finally:
+            print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
 
         # Define the KDE models
         # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
@@ -241,7 +230,7 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
 
     extra_args = {}
 
-    if run_method["KDE"]:
+    if "KDE" in methods:
         extra_args['model'] = model  # This breaks joblib
         extra_args['params_mix'] = params_mix
         extra_args['KDE_kernel'] = KDE_kernel
@@ -249,37 +238,43 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
         extra_args['kdes'] = kdes
 #        extra_args["fit_KDE"] = fit_KDE
 
-    if run_method["EMD"]:
+    if "EMD" in methods:
         extra_args['max_EMD'] = max_EMD
         extra_args['i_CDF_Ref1'] = i_CDF_Ref1
         extra_args['i_CDF_Ref2'] = i_CDF_Ref2
         extra_args['i_EMD_21'] = i_EMD_21
 
-    if run_method["Means"]:
-        if means is None:
-            extra_args['Ref1_mean'] = Ref1.mean()
-            extra_args['Ref2_mean'] = Ref2.mean()
-        else:
-            extra_args['Ref1_mean'] = means['Ref1_mean']
-            extra_args['Ref2_mean'] = means['Ref2_mean']
+    if "Means" in methods:
+        try:
+            Mean_Ref1 = methods["Means"]["Ref1"]
+        except (KeyError, TypeError):
+            print("No Mean_Ref1 specified!")
+            Mean_Ref1 = Ref1.mean()
+        finally:
+            extra_args["Ref1_mean"] = Mean_Ref1
+        try:
+            Mean_Ref2 = methods["Means"]["Ref2"]
+        except (KeyError, TypeError):
+            print("No Mean_Ref2 specified!")
+            Mean_Ref2 = Ref2.mean()
+        finally:
+            extra_args["Ref2_mean"] = Mean_Ref2
 
-    if run_method["Excess"]:
+    if "Excess" in methods:
         # TODO: Check and rename to Ref1_median?
         # NOTE: This is close to but not equal to the Ref1_median
-        if median is None:
-            extra_args['population_median'] = np.median(Ref1)
-        else:
+        if isinstance(methods["Excess"], float):
+            # Median passed
+            median = methods["Excess"]
             print("Passed median: {}".format(median))
-            extra_args['population_median'] = median #population_median
-        print("Ref1 median: {}".format(np.median(Ref1)))
+        else:
+            median = np.median(scores["Ref1"])
+        extra_args['population_median'] = median
+        print("Ref1 median: {}".format(median))  # np.median(Ref1)))
 
     sample_size = len(Mix)
-#    extra_args['sample_size'] = sample_size
     extra_args['bins'] = bins
-#    extra_args['bin_centers'] = bins['centers']
-
 #    print(extra_args)
-
 
 
     def estimate_Ref1(RM, Ref1, Ref2, run_method, **kwargs):
@@ -288,7 +283,6 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
 
 
         bins = kwargs['bins']
-    #    kdes = kwargs['kdes']
         results = {}
 
         # ---------------------- Difference of Means method ----------------------
@@ -365,7 +359,7 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
 
 
     # Get initial estimate of proportions
-    initial_results = estimate_Ref1(Mix, Ref1, Ref2, run_method, **extra_args)
+    initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **extra_args)
     pprint(initial_results)
 
 
