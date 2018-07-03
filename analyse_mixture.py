@@ -267,9 +267,11 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
         # TODO: Check and rename to Ref1_median?
         # NOTE: This is close to but not equal to the Ref1_median
         if median is None:
-            extra_args['population_median'] = Ref1.median()
+            extra_args['population_median'] = np.median(Ref1)
         else:
+            print("Passed median: {}".format(median))
             extra_args['population_median'] = median #population_median
+        print("Ref1 median: {}".format(np.median(Ref1)))
 
     sample_size = len(Mix)
 #    extra_args['sample_size'] = sample_size
