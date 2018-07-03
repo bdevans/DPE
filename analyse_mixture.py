@@ -8,12 +8,12 @@ Created on Thu Jun 21 11:47:27 2018
 
 import os
 import time
-import math
-import sys
+#import math
+#import sys
 from collections import defaultdict, OrderedDict
 
 import numpy as np
-import scipy as sp
+#import scipy as sp
 import pandas as pd
 from sklearn.neighbors import KernelDensity
 # TODO: replace with a scipy/numpy function to reduce dependencies
