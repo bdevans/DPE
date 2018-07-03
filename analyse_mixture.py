@@ -67,7 +67,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median=None):
+def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=None, means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -122,20 +122,17 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median
 #                kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
 #                kdes[label][kernel] = kde
 
-        kernel = 'gaussian'  #'epanechnikov'
+#        kernel = 'gaussian'  #'epanechnikov'
 
         # Define the KDE models
         # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
         def kde_Ref1(x, amp_Ref1):
-            return amp_Ref1 * np.exp(kdes['Ref1'][kernel].score_samples(x[:, np.newaxis]))
-
+            return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
         def kde_Ref2(x, amp_Ref2):
-            return amp_Ref2 * np.exp(kdes['Ref2'][kernel].score_samples(x[:, np.newaxis]))
-
+            return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
         model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
-
 
         params_mix = model.make_params()
         params_mix['amp_Ref1'].value = 1
@@ -205,7 +202,7 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median
     if run_method["KDE"]:
         extra_args['model'] = model  # This breaks joblib
         extra_args['params_mix'] = params_mix
-        extra_args['kernel'] = kernel
+        extra_args['KDE_kernel'] = KDE_kernel
         extra_args['bin_width'] = bin_width
         extra_args['kdes'] = kdes
 #        extra_args["fit_KDE"] = fit_KDE
