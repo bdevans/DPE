@@ -328,6 +328,10 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median
 
     if bootstrap:
 
+        #    nprocs = multiprocessing.cpu_count()
+        nprocs = cpu_count()
+        print('Running {} bootstraps with {} processors...'.format(bootstrap, nprocs))
+
         results = OrderedDict()
 
 #        methods = [method for method in ["Means", "Excess", "EMD", "KDE"] if run_method[method]]
