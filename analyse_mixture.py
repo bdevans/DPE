@@ -266,7 +266,7 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median
 
         # ------------------------------ KDE method ------------------------------
         if run_method["KDE"]:
-            results['KDE'] = fit_KDE(RM, bins, model, kwargs['params_mix'], kwargs['kernel'])
+            results['KDE'] = fit_KDE(RM, bins, model, kwargs['params_mix'], kwargs['KDE_kernel'])
 
         # ------------------------------ EMD method ------------------------------
         if run_method["EMD"]:
