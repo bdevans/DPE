@@ -14,7 +14,7 @@ Execution
 Methods
 -------
 
-We bootstrap (i.e. sample with replacement) from the available data, systematically varying sample size and mixture proportion. We then apply the following methods to yield estimates of the true proportion and from those, calculate the errors throughout the bootstrap parameter space. 
+We bootstrap (i.e. sample with replacement) from the available data, systematically varying sample size and mixture proportion. We then apply the following methods to yield estimates of the true proportion and from those, calculate the errors throughout the bootstrap parameter space.
 
 1. Means
 
@@ -138,11 +138,11 @@ Discussion points to be agreed
 TODO
 ----
 
-* [Remove sensitive data](https://help.github.com/articles/removing-sensitive-data-from-a-repository/) from the repository before publishing e.g. `biobank_mix_WTCC_ref.csv`.
-
-* [x] Summary table of pros and cons for each method
-* [ ] Apply excess and kde to mixture plots for mean and CI
-* [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
+- [ ] [Remove sensitive data](https://help.github.com/articles/removing-sensitive-data-from-a-repository/) from the repository before publishing e.g. `biobank_mix_WTCC_ref.csv`.
+- [ ] Why is the population_median close to but not equal to the Ref1_median?
+- [x] Summary table of pros and cons for each method
+- [ ] Apply excess and kde to mixture plots for mean and CI
+- [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
 
 Continuous characteristics (eg, BMI) were derived by use of the mean value of the low susceptibility group (type 2 diabetes) and the mean of the high susceptibility group (combined type 1 and type 2 diabetes) to calculate a mean for the group with type 1 diabetes. For example, for BMI:
 
