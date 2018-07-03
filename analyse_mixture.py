@@ -304,6 +304,8 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
             sample_size = len(RM)
     #        proportion_Ref1 = (number_high - number_low)/sample_size
             results['Excess'] = (number_high - number_low)/sample_size #kwargs['sample_size']
+            results['Excess'] /= 0.92  # adjusted for fact underestimates by 8%
+
 
         # ------------------------------ KDE method ------------------------------
         if run_method["KDE"]:
