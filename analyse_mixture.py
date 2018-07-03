@@ -12,6 +12,8 @@ import time
 #import sys
 from collections import defaultdict, OrderedDict
 
+from pprint import pprint
+
 import numpy as np
 #import scipy as sp
 import pandas as pd
@@ -321,7 +323,7 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, means=None, median
 
     # Get initial estimate of proportions
     initial_results = estimate_Ref1(Mix, Ref1, Ref2, run_method, **extra_args)
-
+    pprint(initial_results)
 
 
     if bootstrap:
