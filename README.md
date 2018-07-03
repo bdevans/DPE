@@ -121,6 +121,7 @@ Methods Summary
 | ------------- | --------------------- | --------------------- | --------------------- | --------------------- |
 | Advantages    | Trivial to calculate. | Trivial to calculate. | Computationally cheap. | Accurate |
 |               | Relies only on summary statistics. | Relies only on summary statistics. | ... | ... |
+|               | Works for even highly overlapping distributions. |    |   |
 | ------------- | --------------------- | --------------------- | ----------------- | ----------------- |
 | Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | ... | Computationally expensive. |
 
