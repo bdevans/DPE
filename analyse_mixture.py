@@ -391,9 +391,12 @@ def analyse_mixture(scores, bins, run_method, bootstrap=1000, true_prop_Ref1=Non
 #                                           for b in range(bootstrap))
 
         for method in run_method:
-            prop_Ref1 = initial_results[method]
+            if true_prop_Ref1:
+                prop_Ref1 = true_prop_Ref1
+            else:
+                prop_Ref1 = initial_results[method]
             results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, method, **extra_args)
-                                                 for b in range(bootstrap)]
+                               for b in range(bootstrap)]
         # Put into dataframe
         df_bs = pd.DataFrame(results)
         #bootstraps[]
