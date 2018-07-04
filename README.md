@@ -123,7 +123,8 @@ Methods Summary
 |               | Relies only on summary statistics. | Relies only on summary statistics. | ... | ... |
 |               | Works for even highly overlapping distributions. |    |   |
 | ------------- | --------------------- | --------------------- | ----------------- | ----------------- |
-| Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | ... | Computationally expensive. |
+| Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
+|               |                       |                       | Computationally expensive. |
 
 
 Discussion points to be agreed
