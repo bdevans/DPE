@@ -144,6 +144,7 @@ TODO
 - [x] Summary table of pros and cons for each method
 - [ ] Apply excess and kde to mixture plots for mean and CI
 - [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
+- [ ] Plot residuals for KDE to help identify "third" groups
 
 Continuous characteristics (eg, BMI) were derived by use of the mean value of the low susceptibility group (type 2 diabetes) and the mean of the high susceptibility group (combined type 1 and type 2 diabetes) to calculate a mean for the group with type 1 diabetes. For example, for BMI:
 
