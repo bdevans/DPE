@@ -172,11 +172,11 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
     if "KDE" in methods:
         extra_args['model'] = model  # This breaks joblib
-        extra_args['params_mix'] = params_mix
+        extra_args['initial_params'] = params_mix
         extra_args['KDE_kernel'] = KDE_kernel
         extra_args['bin_width'] = bin_width
         extra_args['kdes'] = kdes
-#        extra_args["fit_KDE"] = fit_KDE
+#        extra_args["fit_KDE_model"] = fit_KDE_model
 
     if "EMD" in methods:
         extra_args['max_EMD'] = max_EMD
@@ -192,14 +192,14 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
             print("No Mean_Ref1 specified!")
             Mean_Ref1 = Ref1.mean()
         finally:
-            extra_args["Ref1_mean"] = Mean_Ref1
+            extra_args["Mean_Ref1"] = Mean_Ref1
         try:
             Mean_Ref2 = methods["Means"]["Ref2"]
         except (KeyError, TypeError):
             print("No Mean_Ref2 specified!")
             Mean_Ref2 = Ref2.mean()
         finally:
-            extra_args["Ref2_mean"] = Mean_Ref2
+            extra_args["Mean_Ref2"] = Mean_Ref2
 
     if "Excess" in methods:
         # TODO: Check and rename to Ref1_median?
@@ -227,8 +227,8 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         results = {}
 
         # ---------------------- Difference of Means method ----------------------
-            proportion_of_Ref1 = (RM.mean()-kwargs['Ref2_mean'])/(kwargs['Ref1_mean']-kwargs['Ref2_mean'])
         if "Means" in methods:
+            proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
             results['Means'] = abs(proportion_of_Ref1)
 
         # -------------------------- Subtraction method --------------------------
