@@ -209,9 +209,13 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
             median = methods["Excess"]
             print("Passed median: {}".format(median))
         else:
-            median = np.median(scores["Ref1"])
+            # The Excess method assumes that...
+            median = np.median(scores["Ref2"])
         extra_args['population_median'] = median
-        print("Ref1 median: {}".format(median))  # np.median(Ref1)))
+        print("Ref1 median:", np.median(Ref1))
+        print("Ref2 median:", np.median(Ref2))
+        print("Population median: {}".format(median))
+        print("Mixture size:", sample_size)
 
     sample_size = len(Mix)
     extra_args['bins'] = bins
