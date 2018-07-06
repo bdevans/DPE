@@ -397,16 +397,18 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
 
     # ------------ Summarise proportions for the whole distribution --------------
-    for method in run_method:
-        print('Proportions based on {}'.format(method))
-        print('Reference 1: {:.5}'.format(initial_results[method]))
+    print()
+    print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
+    print("="*61)
+    for method in methods:
+        print("{:20} | {:<17.5f} | {:<17.5f}".format(method, initial_results[method], 1-initial_results[method]))
         if bootstrap:
-            print('Reference 1: {:.5} +/- {:.5}'.format(np.mean(df_bs[method]), np.std(df_bs[method])))
-        print('Reference 2: {:.5}'.format(1-initial_results[method]))
-        if bootstrap:
-            print('Reference 2: {:.5} +/- {:.5}'.format(1-np.mean(df_bs[method]), np.std(1-df_bs[method])))
-
-    print('--------------------------------------------------------------------------------\n\n')
+            print("{:20} | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f}".format("Bootstraps (µ±σ)", np.mean(df_bs[method]), np.std(df_bs[method]), 1-np.mean(df_bs[method]), np.std(1-df_bs[method])))  #  (+/- SD)
+        print("-"*61)
+    if true_prop_Ref1:
+        print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
+        print("="*61)
+    print()
 
     if bootstrap:
         return (initial_results, df_bs)
