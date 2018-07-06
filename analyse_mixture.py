@@ -226,7 +226,6 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         '''Estimate the proportion of two reference populations in an unknown mixture.
         The returned proportions are with respect to Ref 1. The proportion of Ref 2 is assumed to be 1 pr(Ref1). '''
 
-
         bins = kwargs['bins']
         results = {}
 
@@ -321,7 +320,6 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
 
     if bootstrap:
-
         #    nprocs = multiprocessing.cpu_count()
         nprocs = cpu_count()
         print('Running {} bootstraps with {} processors...'.format(bootstrap, nprocs))
@@ -331,17 +329,11 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 #        methods = [method for method in ["Means", "Excess", "EMD", "KDE"] if run_method[method]]
 
         # Spawn threads
-#        with Parallel(n_jobs=nprocs) as parallel:
-#        with Parallel(n_jobs=1) as parallel:
-#            # Parallelise over bootstraps
-#
-#            # Fix estimated proportions for each method
-#            for method in methods:
-#                prop_Ref1 = initial_results[method]
-#                results[method] = parallel(delayed(bootstrap_mixture)(sample_size, prop_Ref1, Ref1, Ref2, method, **extra_args)
-#                                           for b in range(bootstrap))
+        # with Parallel(n_jobs=nprocs) as parallel:
+            # Parallelise over bootstraps
 
         for method in methods:
+            # Fix estimated proportions for each method
             if true_prop_Ref1:
                 prop_Ref1 = true_prop_Ref1
             else:
