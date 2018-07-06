@@ -36,7 +36,7 @@ def fit_kernels(scores, bw):
         X = data[:, np.newaxis]
         for kernel in ['gaussian', 'tophat', 'epanechnikov',
                        'exponential', 'linear', 'cosine']:
-            kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
+            kde = KernelDensity(kernel=kernel, bandwidth=bw, atol=0, rtol=1e-4).fit(X)  #
             kernels[label][kernel] = kde
     return kernels
 
