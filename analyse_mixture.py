@@ -78,9 +78,10 @@ def plot_kernels(scores, bins):
 
 
 # @mem.cache
-    x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
-    #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
 def fit_KDE_model(Mix, bins, model, params_mix, kernel):
+# TODO: Think carefully about this!
+    # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
+    x_KDE = bins["centers"]
     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
     amp_Ref1 = res_mix.params['amp_Ref1'].value
