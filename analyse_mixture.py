@@ -169,6 +169,8 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
 
     extra_args = {}
+    sample_size = len(Mix)
+    extra_args['bins'] = bins
 
     if "KDE" in methods:
         extra_args['model'] = model  # This breaks joblib
@@ -217,8 +219,6 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         print("Population median: {}".format(median))
         print("Mixture size:", sample_size)
 
-    sample_size = len(Mix)
-    extra_args['bins'] = bins
 #    print(extra_args)
 
 
