@@ -238,13 +238,10 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         # -------------------------- Subtraction method --------------------------
         if "Excess" in methods:
             # TODO: Flip these around for when using the T2GRS
-            number_low = len(RM[RM <= kwargs['population_median']])
-            number_high = len(RM[RM > kwargs['population_median']])
+            number_Ref2_low = len(RM[RM <= kwargs['population_median']])
+            number_Ref2_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
     #        proportion_Ref1 = (number_high - number_low)/sample_size
-            results['Excess'] = (number_high - number_low)/sample_size #kwargs['sample_size']
-            results['Excess'] /= 0.92  # adjusted for fact underestimates by 8%
-
 
         # ------------------------------ KDE method ------------------------------
         if "KDE" in methods:
