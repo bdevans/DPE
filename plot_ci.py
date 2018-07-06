@@ -64,6 +64,7 @@ def load_diabetes_data(metric):
         bin_min = 0.095
         bin_max = 0.350
 
+        # NOTE: This is close to but not equal to the Ref1_median
         median = 0.23137931525707245  # Type 2 population
 
     elif metric == 'T2GRS':

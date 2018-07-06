@@ -132,7 +132,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
     if "Excess" in methods:
     # ----------------------------- Excess method -----------------------------
         # TODO: Check and rename to Ref1_median?
-        # NOTE: This is close to but not equal to the Ref1_median
+
         if isinstance(methods["Excess"], dict):
             if "Median_Ref1" not in methods["Excess"]:
                 methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
