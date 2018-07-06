@@ -266,7 +266,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
             i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1))
             i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2))
-            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+#            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
             results["EMD"] = 0.5 * (1 + (i_EMD_M_2 - i_EMD_M_1)/i_EMD_1_2)
             # print('Proportions based on counts')
             # print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
