@@ -126,7 +126,8 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 #        i_CDF_Mix = interpolate_CDF(Mix, bin_centers, bins['min'], bins['max'])
 
         # EMDs computed with interpolated CDFs
-        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
+        i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+#        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
 #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
 #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 
@@ -181,7 +182,8 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         extra_args['max_EMD'] = max_EMD
         extra_args['i_CDF_Ref1'] = i_CDF_Ref1
         extra_args['i_CDF_Ref2'] = i_CDF_Ref2
-        extra_args['i_EMD_21'] = i_EMD_21
+#        extra_args['i_EMD_21'] = i_EMD_21
+        extra_args['i_EMD_1_2'] = i_EMD_1_2
 
     if "Means" in methods:
         try:
@@ -254,15 +256,14 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
     #            si_CDF_Mix = np.interp(bin_centers, iv, y[ii])
 
             # Compute EMDs
-            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
-            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD #kwargs['max_EMD']
+#            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
+#            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD #kwargs['max_EMD']
+#            results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
 
-#            print('M_1', i_EMD_M_1)
-#            print('M_2', i_EMD_M_2)
-#            print('i_CDF_Mix', i_CDF_Mix)
-#            print('max_EMD', max_EMD)
-            # TODO: Consider averaging the two measures
-            results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
+            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1))
+            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2))
+            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+            results["EMD"] = 0.5 * (1 + (i_EMD_M_2 - i_EMD_M_1)/i_EMD_1_2)
             # print('Proportions based on counts')
             # print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
             # print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
