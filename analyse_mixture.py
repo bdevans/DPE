@@ -80,9 +80,9 @@ def plot_kernels(scores, bins):
 
 
 # @mem.cache
-def fit_KDE(Mix, bins, model, params_mix, kernel):
     x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
     #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+def fit_KDE_model(Mix, bins, model, params_mix, kernel):
     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
     amp_Ref1 = res_mix.params['amp_Ref1'].value
@@ -303,7 +303,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
         # ------------------------------ KDE method ------------------------------
         if run_method["KDE"]:
-            results['KDE'] = fit_KDE(RM, bins, model, kwargs['params_mix'], kwargs['KDE_kernel'])
+            results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
 
         # ------------------------------ EMD method ------------------------------
         if run_method["EMD"]:
