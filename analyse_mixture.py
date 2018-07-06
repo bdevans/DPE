@@ -207,13 +207,22 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
     if "Excess" in methods:
         # TODO: Check and rename to Ref1_median?
         # NOTE: This is close to but not equal to the Ref1_median
-        if isinstance(methods["Excess"], float):
-            # Median passed
-            median = methods["Excess"]
-            print("Passed median: {}".format(median))
-        else:
-            # The Excess method assumes that...
-            median = np.median(scores["Ref2"])
+        if isinstance(methods["Excess"], dict):
+            if "Median_Ref1" not in methods["Excess"]:
+                methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
+            if "Median_Ref2" not in methods["Excess"]:
+                methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
+            median = methods["Excess"]["Median_Ref2"]
+            if "adjustment_factor" not in methods["Excess"]:
+                methods["Excess"]["adjustment_factor"] = 1
+            extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
+#        if isinstance(methods["Excess"], float):
+#            # Median passed
+#            median = methods["Excess"]
+#            print("Passed median: {}".format(median))
+#        else:
+#            # The Excess method assumes that...
+#            median = np.median(scores["Ref2"])
         extra_args['population_median'] = median
         print("Ref1 median:", np.median(Ref1))
         print("Ref2 median:", np.median(Ref2))
@@ -238,6 +247,11 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         # -------------------------- Subtraction method --------------------------
         if "Excess" in methods:
             # TODO: Flip these around for when using the T2GRS
+            Median_Mix = np.median(Mix)
+            if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
+                population_median = methods["Excess"]["Median_Ref2"]
+            else:  # Ref1 is closets to the mixture
+                population_median = methods["Excess"]["Median_Ref1"]
             number_Ref2_low = len(RM[RM <= kwargs['population_median']])
             number_Ref2_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
@@ -257,7 +271,9 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 #                print("M_Ref1 < M_Ref2")
 #                print("High", number_Ref2_high)
 #                print("Low", number_Ref2_low)
-            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
+
+#            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
+            results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
         # ------------------------------ KDE method ------------------------------
         if "KDE" in methods:

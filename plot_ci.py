@@ -91,6 +91,9 @@ def load_diabetes_data(metric):
     means = {'Ref1': scores['Ref1'].mean(),
              'Ref2': scores['Ref2'].mean()}
 
+    medians = {"Ref1": np.median(scores["Ref1"]),
+               "Ref2": median}
+
     # --------------------------- Bin the data -------------------------------
 #    N = data.count()[0]
     bins = {}
@@ -113,7 +116,7 @@ def load_diabetes_data(metric):
 #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
 
     prop_Ref1 = None
-    return scores, bins, means, median, prop_Ref1
+    return scores, bins, means, medians, prop_Ref1
 
 
 def load_renal_data():
@@ -149,6 +152,9 @@ def load_renal_data():
     means = {'Ref1': scores['Ref1'].mean(),
              'Ref2': scores['Ref2'].mean()}
 
+    medians = {"Ref1": np.median(scores['Ref1']),
+               "Ref2": np.median(scores['Ref2'])}
+
     # --------------------------- Bin the data -------------------------------
 #    N = data.count()[0]
     bins = {}
@@ -162,8 +168,7 @@ def load_renal_data():
             'edges': bin_edges,
             'centers': bin_centers}
 
-    median = np.median(scores['Ref2'])
-    return scores, bins, means, median, prop_Ref1
+    return scores, bins, means, medians, prop_Ref1
 
 
 
@@ -227,10 +232,16 @@ plot_distributions(scores, bins, data_label)  #KDE_kernel, bins['width'])
 #for (scores, bins, means, median) in ...
 am.plot_kernels(scores, bins)
 
+if adjust_excess:
+    adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
+else:
+    adjustment_factor = 1.0
 
 methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
                                   'Ref2': means['Ref2']}),
-                       ("Excess", median),
+                       ("Excess", {"Median_Ref1": medians["Ref1"],
+                                   "Median_Ref2": medians["Ref2"],
+                                   "adjustment_factor": adjustment_factor}),
                        ("EMD", True),
                        ("KDE", {'kernel': KDE_kernel,
                                 'bandwidth': bins['width']})])
