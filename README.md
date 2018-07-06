@@ -131,9 +131,11 @@ Discussion points to be agreed
 ------------------------------
 
 - [x] Use adjusted excess method i.e. pr_Excess /= 0.92
-- [ ] Mirror the Excess heatmap?
+- [ ] Should the Excess take as Ref2, the closest to the mixture?
+- [ ] Should the Excess flip the references for the heatmap?
 - [ ] How to calculate "pseudo ground truth" for Diabetes data
 - [ ] How to generate a single proportion from EMD method
+- [ ] Supplementary figure showing the Excess breakdown for different degrees of overlap?
 
 
 TODO
