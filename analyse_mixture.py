@@ -290,12 +290,10 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         Mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
                               np.random.choice(Ref2, n_Ref2, replace=True)))
 
-        run_method = defaultdict(bool)
-        run_method[method] = True
+#        run_method = defaultdict(bool)
+#        run_method[method] = True
 
-        results = estimate_Ref1(Mix, Ref1, Ref2, run_method, **extra_args)
-
-        return results[method]
+        results = estimate_Ref1(Mix, Ref1, Ref2, method, **extra_args)
 
 
 
