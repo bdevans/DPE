@@ -218,7 +218,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 #    print(extra_args)
 
 
-    def estimate_Ref1(RM, Ref1, Ref2, run_method, **kwargs):
+    def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         '''Estimate the proportion of two reference populations in an unknown mixture.
         The returned proportions are with respect to Ref 1. The proportion of Ref 2 is assumed to be 1 pr(Ref1). '''
 
