@@ -41,25 +41,25 @@ def fit_kernels(scores, bw):
     return kernels
 
 
-def plot_kernels_(scores, bins):
-    kernels = ['gaussian', 'tophat', 'epanechnikov',
-               'exponential', 'linear', 'cosine']
-    fig, axes = plt.subplots(len(scores), 1, sharex=True) #, squeeze=False)
-    X_plot = bins['centers'][:, np.newaxis]
-
-    kdes = {}
-    for (label, data), ax in zip(scores.items(), axes):
-        kdes[label] = {}
-        X = data[:, np.newaxis]
-        for kernel in kernels:
-            kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(X)
-            log_dens = kde.score_samples(X_plot)
-            ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
-                    label="kernel = '{0}'; bandwidth = {1}".format(kernel, bins['width']))
-            kdes[label][kernel] = kde  # np.exp(log_dens)
-        ax.legend(loc='upper left')
-        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
-        ax.set_ylabel(label)
+#def plot_kernels_(scores, bins):
+#    kernels = ['gaussian', 'tophat', 'epanechnikov',
+#               'exponential', 'linear', 'cosine']
+#    fig, axes = plt.subplots(len(scores), 1, sharex=True) #, squeeze=False)
+#    X_plot = bins['centers'][:, np.newaxis]
+#
+#    kdes = {}
+#    for (label, data), ax in zip(scores.items(), axes):
+#        kdes[label] = {}
+#        X = data[:, np.newaxis]
+#        for kernel in kernels:
+#            kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(X)
+#            log_dens = kde.score_samples(X_plot)
+#            ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
+#                    label="kernel = '{0}'; bandwidth = {1}".format(kernel, bins['width']))
+#            kdes[label][kernel] = kde  # np.exp(log_dens)
+#        ax.legend(loc='upper left')
+#        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
+#        ax.set_ylabel(label)
 
 
 def plot_kernels(scores, bins):
@@ -77,8 +77,6 @@ def plot_kernels(scores, bins):
         ax.set_ylabel(label)
 
 
-
-
 # @mem.cache
     x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
     #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
@@ -88,10 +86,6 @@ def fit_KDE_model(Mix, bins, model, params_mix, kernel):
     amp_Ref1 = res_mix.params['amp_Ref1'].value
     amp_Ref2 = res_mix.params['amp_Ref2'].value
     return amp_Ref1/(amp_Ref1+amp_Ref2)
-
-
-
-
 
 
 def interpolate_CDF(scores, x_i, min_edge, max_edge):
@@ -170,62 +164,6 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         params_mix['amp_Ref1'].min = 0
         params_mix['amp_Ref2'].value = 1
         params_mix['amp_Ref2'].min = 0
-
-#        if plot_results and False:
-#            plot_kernels()
-#
-#        (freqs_Mix, _) = np.histogram(Mix, bins=bins['edges'])
-#        x = bins['centers']
-
-    #    res_mix = model.fit(freqs_Mix, x=x, params=params_mix)
-    #
-    #    dely = res_mix.eval_uncertainty(sigma=3)
-    #
-    #    amp_T1 = res_mix.params['amp_Ref1'].value
-    #    amp_T2 = res_mix.params['amp_Ref2'].value
-    #
-    #    kde1 = kde_T1(x, amp_T1)
-    #    kde2 = kde_T2(x, amp_T2)
-
-#        res_mix = model.fit(freqs_Mix, x=x, params=params_mix)
-#
-#        dely = res_mix.eval_uncertainty(sigma=3)
-#
-#        amp_Ref1 = res_mix.params['amp_Ref1'].value
-#        amp_Ref2 = res_mix.params['amp_Ref2'].value
-#
-#        kde1 = kde_Ref1(x, amp_Ref1)
-#        kde2 = kde_Ref2(x, amp_Ref2)
-#
-#        if plot_results:
-#            plt.figure()
-#            fig, (axP, axM, axR, axI) = plt.subplots(4, 1, sharex=True, sharey=False)
-#
-#            axP.stackplot(x, np.vstack((kde1/(kde1+kde2), kde2/(kde1+kde2))), labels=labels[:-1])
-#            legend = axP.legend(facecolor='grey')
-#            #legend.get_frame().set_facecolor('grey')
-#            axP.set_title('Proportions of Type 1 and Type 2 vs {}'.format(tag))
-#
-#            plt.sca(axM)
-#            res_mix.plot_fit()
-#
-#            axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
-#
-#            plt.sca(axR)
-#            res_mix.plot_residuals()
-#
-#            #plt.sca(axI)
-#            axI.plot(x, kde1, label='Reference 1')
-#            axI.plot(x, kde2, label='Reference 2')
-#
-#        if verbose:
-#            print(res_mix.fit_report())
-#            print('Ref2/Ref1 =', amp_Ref2/amp_Ref1)
-#            print('')
-#            print('\nParameter confidence intervals:')
-#            print(res_mix.ci_report())  # --> res_mix.ci_out # See also res_mix.conf_interval()
-#
-
 
 
     extra_args = {}
@@ -393,7 +331,6 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
                                for b in range(bootstrap)]
         # Put into dataframe
         df_bs = pd.DataFrame(results)
-        #bootstraps[]
 
 
     # ------------ Summarise proportions for the whole distribution --------------
@@ -414,168 +351,3 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         return (initial_results, df_bs)
     else:
         return (initial_results, None)
-
-
-
-
-if __name__ == '__main__':
-
-#    # Define the KDE models
-#    # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-#    def kde_Ref1(x, amp_Ref1):
-#        return amp_Ref1 * np.exp(kdes['Ref 1'][kernel].score_samples(x[:, np.newaxis]))
-#
-#
-#    def kde_Ref2(x, amp_Ref2):
-#        return amp_Ref2 * np.exp(kdes['Ref 2'][kernel].score_samples(x[:, np.newaxis]))
-
-
-#    # @mem.cache
-#    def fit_KDE(Mix, bins, model, params_mix, kernel):
-#        x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
-#        #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
-#        mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
-#        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-#        amp_Ref1 = res_mix.params['amp_Ref1'].value
-#        amp_Ref2 = res_mix.params['amp_Ref2'].value
-#        return amp_Ref1/(amp_Ref1+amp_Ref2)
-#
-
-    def plot_kernels(scores, bw):
-        kernels = ['gaussian', 'tophat', 'epanechnikov',
-                   'exponential', 'linear', 'cosine']
-        fig, axes = plt.subplots(len(kernels), 1, sharex=True) #, squeeze=False)
-        X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
-
-#        for data, label, ax in zip([Ref1, Ref2, Mix], labels, axes):
-        for data, label, ax in zip(scores.items(), axes):
-
-            kdes[label] = {}
-            X = data[:, np.newaxis]
-
-            for kernel in kernels:
-                kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
-                log_dens = kde.score_samples(X_plot)
-                ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
-                        label="kernel = '{0}'; bandwidth = {1}".format(kernel, bw))
-                kdes[label][kernel] = kde  # np.exp(log_dens)
-
-            # ax.text(6, 0.38, "N={0} points".format(N))
-            ax.legend(loc='upper left')
-            ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
-            ax.set_ylabel(label)
-
-#    model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
-
-# ---------------------------- Define constants ------------------------------
-
-    verbose = False
-    plot_results = False
-    out_dir = "results_test"
-
-    # TODO: Reimplement this
-    adjust_excess = True
-
-    seed = 180
-    bootstraps = 8
-
-    dataset = 'data/biobank_mix_WTCC_ref.csv'
-    metrics = ['T1GRS', 'T2GRS']
-    headers = {'diabetes_type': 'type', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
-
-    T1GRS_bin_width = 0.005
-    T1GRS_bin_min = 0.095
-    T1GRS_bin_max = 0.350
-
-    T2GRS_bin_width = 0.1
-    T2GRS_bin_min = 4.7
-    T2GRS_bin_max = 8.9
-
-    medians = {'T1GRS': 0.23137931525707245, 'T2GRS': 6.78826}
-
-    kernel = 'gaussian'
-    # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
-
-# ----------------------------------------------------------------------------
-
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-#    nprocs = multiprocessing.cpu_count()
-    nprocs = cpu_count()
-    print('Running with {} processors...'.format(nprocs))
-
-    # Set random seed
-    np.random.seed(seed)
-    # rng = np.random.RandomState(42)
-
-    np.seterr(divide='ignore', invalid='ignore')
-
-    data = pd.read_csv(dataset)
-    data.rename(columns=headers, inplace=True)
-    data.describe()
-
-    scores = {}
-    means = {}
-
-    # Arrays of T1GRS scores for each group
-    scores['T1GRS'] = {'Ref1': data.loc[data['type'] == 1, 'T1GRS'].values,
-                       'Ref2': data.loc[data['type'] == 2, 'T1GRS'].values,
-                       'Mix': data.loc[data['type'] == 3, 'T1GRS'].values}
-
-    means['T1GRS'] = {'Ref1': scores['T1GRS']['Ref1'].mean(),
-                      'Ref2': scores['T1GRS']['Ref2'].mean()}
-
-    # Arrays of T2GRS scores for each group
-    scores['T2GRS'] = {'Ref1': data.loc[data['type'] == 1, 'T2GRS'].values,
-                       'Ref2': data.loc[data['type'] == 2, 'T2GRS'].values,
-                       'Mix': data.loc[data['type'] == 3, 'T2GRS'].values}
-
-    means['T2GRS'] = {'Ref1': scores['T2GRS']['Ref1'].mean(),
-                      'Ref2': scores['T2GRS']['Ref2'].mean()}
-
-    # ----------------------------- Bin the data ---------------------------------
-    N = data.count()[0]
-    bins = {}
-
-    T1GRS_bin_edges = np.arange(T1GRS_bin_min, T1GRS_bin_max+T1GRS_bin_width, T1GRS_bin_width)
-    T1GRS_bin_centers = (T1GRS_bin_edges[:-1] + T1GRS_bin_edges[1:]) / 2
-
-    bins['T1GRS'] = {'width': T1GRS_bin_width,
-                     'min': T1GRS_bin_min,
-                     'max': T1GRS_bin_max,
-                     'edges': T1GRS_bin_edges,
-                     'centers': T1GRS_bin_centers}
-    del T1GRS_bin_width, T1GRS_bin_min, T1GRS_bin_max, T1GRS_bin_edges, T1GRS_bin_centers
-
-    # bin_centers = np.arange(0.095+bin_width/2, 0.35+bin_width/2, bin_width)
-    T2GRS_bin_edges = np.arange(T2GRS_bin_min, T2GRS_bin_max+T2GRS_bin_width, T2GRS_bin_width)
-    T2GRS_bin_centers = (T2GRS_bin_edges[:-1] + T2GRS_bin_edges[1:]) / 2
-
-    bins['T2GRS'] = {'width': T2GRS_bin_width,
-                     'min': T2GRS_bin_min,
-                     'max': T2GRS_bin_max,
-                     'edges': T2GRS_bin_edges,
-                     'centers': T2GRS_bin_centers}
-    del T2GRS_bin_width, T2GRS_bin_min, T2GRS_bin_max, T2GRS_bin_edges, T2GRS_bin_centers
-
-
-    run_method = OrderedDict([("Means", True),
-                              ("Excess", True),
-                              ("EMD", True),
-                              ("KDE", True)])
-
-    print("Running mixture analysis with T1GRS scores...")
-    t = time.time()  # Start timer
-
-    (res, df_bs) = analyse_mixture(scores['T1GRS'], bins['T1GRS'],
-                                   run_method, bootstrap=bootstraps,
-                                   means=None, median=medians['T1GRS'])
-    #    analyse_mixture('T2GRS', scores, means, medians, bins)
-
-    elapsed = time.time() - t
-    print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
-
-    # Plot swarm box
-    ax = sns.boxplot(data=df_bs)
-    ax = sns.swarmplot(data=df_bs, color=".25")
