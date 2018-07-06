@@ -42,27 +42,6 @@ def fit_kernels(scores, bw):
     return kernels
 
 
-#def plot_kernels_(scores, bins):
-#    kernels = ['gaussian', 'tophat', 'epanechnikov',
-#               'exponential', 'linear', 'cosine']
-#    fig, axes = plt.subplots(len(scores), 1, sharex=True) #, squeeze=False)
-#    X_plot = bins['centers'][:, np.newaxis]
-#
-#    kdes = {}
-#    for (label, data), ax in zip(scores.items(), axes):
-#        kdes[label] = {}
-#        X = data[:, np.newaxis]
-#        for kernel in kernels:
-#            kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(X)
-#            log_dens = kde.score_samples(X_plot)
-#            ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
-#                    label="kernel = '{0}'; bandwidth = {1}".format(kernel, bins['width']))
-#            kdes[label][kernel] = kde  # np.exp(log_dens)
-#        ax.legend(loc='upper left')
-#        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
-#        ax.set_ylabel(label)
-
-
 def plot_kernels(scores, bins):
 
     kernels = fit_kernels(scores, bins['width'])
