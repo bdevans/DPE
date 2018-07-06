@@ -227,12 +227,12 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         results = {}
 
         # ---------------------- Difference of Means method ----------------------
-        if run_method["Means"]:
             proportion_of_Ref1 = (RM.mean()-kwargs['Ref2_mean'])/(kwargs['Ref1_mean']-kwargs['Ref2_mean'])
+        if "Means" in methods:
             results['Means'] = abs(proportion_of_Ref1)
 
         # -------------------------- Subtraction method --------------------------
-        if run_method["Excess"]:
+        if "Excess" in methods:
             # TODO: Flip these around for when using the T2GRS
             number_low = len(RM[RM <= kwargs['population_median']])
             number_high = len(RM[RM > kwargs['population_median']])
@@ -243,11 +243,12 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 
 
         # ------------------------------ KDE method ------------------------------
-        if run_method["KDE"]:
+        if "KDE" in methods:
+            # TODO: Print out warnings if goodness of fit is poor?
             results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
 
         # ------------------------------ EMD method ------------------------------
-        if run_method["EMD"]:
+        if "EMD" in methods:
             # Interpolated cdf (to compute EMD)
             i_CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
     #            x = [bins['min'], *np.sort(RM), bins['max']]
@@ -324,7 +325,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 #                results[method] = parallel(delayed(bootstrap_mixture)(sample_size, prop_Ref1, Ref1, Ref2, method, **extra_args)
 #                                           for b in range(bootstrap))
 
-        for method in run_method:
+        for method in methods:
             if true_prop_Ref1:
                 prop_Ref1 = true_prop_Ref1
             else:
