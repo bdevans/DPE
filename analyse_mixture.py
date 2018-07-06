@@ -106,18 +106,58 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
     bin_width = bins['width']
     bin_edges = bins['edges']
 
+    extra_args = {}
+    sample_size = len(Mix)
+    extra_args['bins'] = bins
 #    print('Running {} mixture analysis...'.format(tag))
 #    print('--------------------------------------------------------------------------------')
 
-#    if run_method["Excess"]:
-#        # Excess method median of GRS from the whole population in Biobank
-#        high = len(Mix[Mix > population_median]) - len(Mix[Mix <= population_median])
-#        low = 2*len(Mix[Mix <= population_median])
+    if "Means" in methods:
+        try:
+            Mean_Ref1 = methods["Means"]["Ref1"]
+        except (KeyError, TypeError):
+            print("No Mean_Ref1 specified!")
+            Mean_Ref1 = Ref1.mean()
+        finally:
+            extra_args["Mean_Ref1"] = Mean_Ref1
+        try:
+            Mean_Ref2 = methods["Means"]["Ref2"]
+        except (KeyError, TypeError):
+            print("No Mean_Ref2 specified!")
+            Mean_Ref2 = Ref2.mean()
+        finally:
+            extra_args["Mean_Ref2"] = Mean_Ref2
 
-    # -------------------------------- EMD method --------------------------------
 
-#    if run_method["EMD"]:
+    if "Excess" in methods:
+    # ----------------------------- Excess method -----------------------------
+        # TODO: Check and rename to Ref1_median?
+        # NOTE: This is close to but not equal to the Ref1_median
+        if isinstance(methods["Excess"], dict):
+            if "Median_Ref1" not in methods["Excess"]:
+                methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
+            if "Median_Ref2" not in methods["Excess"]:
+                methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
+            median = methods["Excess"]["Median_Ref2"]
+            if "adjustment_factor" not in methods["Excess"]:
+                methods["Excess"]["adjustment_factor"] = 1
+            extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
+#        if isinstance(methods["Excess"], float):
+#            # Median passed
+#            median = methods["Excess"]
+#            print("Passed median: {}".format(median))
+#        else:
+#            # The Excess method assumes that...
+#            median = np.median(scores["Ref2"])
+        extra_args['population_median'] = median
+        print("Ref1 median:", np.median(Ref1))
+        print("Ref2 median:", np.median(Ref2))
+        print("Population median: {}".format(median))
+        print("Mixture size:", sample_size)
+
+
     if "EMD" in methods:
+    # -------------------------------- EMD method --------------------------------
 
         max_EMD = bin_edges[-1] - bin_edges[0]
 
@@ -132,6 +172,11 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
 #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
 #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 
+        extra_args['max_EMD'] = max_EMD
+        extra_args['i_CDF_Ref1'] = i_CDF_Ref1
+        extra_args['i_CDF_Ref2'] = i_CDF_Ref2
+#        extra_args['i_EMD_21'] = i_EMD_21
+        extra_args['i_EMD_1_2'] = i_EMD_1_2
 
     if "KDE" in methods:
         # ------------------------------ KDE method ------------------------------
@@ -168,66 +213,12 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         params_mix['amp_Ref2'].value = 1
         params_mix['amp_Ref2'].min = 0
 
-
-    extra_args = {}
-    sample_size = len(Mix)
-    extra_args['bins'] = bins
-
-    if "KDE" in methods:
         extra_args['model'] = model  # This breaks joblib
         extra_args['initial_params'] = params_mix
         extra_args['KDE_kernel'] = KDE_kernel
         extra_args['bin_width'] = bin_width
         extra_args['kdes'] = kdes
 #        extra_args["fit_KDE_model"] = fit_KDE_model
-
-    if "EMD" in methods:
-        extra_args['max_EMD'] = max_EMD
-        extra_args['i_CDF_Ref1'] = i_CDF_Ref1
-        extra_args['i_CDF_Ref2'] = i_CDF_Ref2
-#        extra_args['i_EMD_21'] = i_EMD_21
-        extra_args['i_EMD_1_2'] = i_EMD_1_2
-
-    if "Means" in methods:
-        try:
-            Mean_Ref1 = methods["Means"]["Ref1"]
-        except (KeyError, TypeError):
-            print("No Mean_Ref1 specified!")
-            Mean_Ref1 = Ref1.mean()
-        finally:
-            extra_args["Mean_Ref1"] = Mean_Ref1
-        try:
-            Mean_Ref2 = methods["Means"]["Ref2"]
-        except (KeyError, TypeError):
-            print("No Mean_Ref2 specified!")
-            Mean_Ref2 = Ref2.mean()
-        finally:
-            extra_args["Mean_Ref2"] = Mean_Ref2
-
-    if "Excess" in methods:
-        # TODO: Check and rename to Ref1_median?
-        # NOTE: This is close to but not equal to the Ref1_median
-        if isinstance(methods["Excess"], dict):
-            if "Median_Ref1" not in methods["Excess"]:
-                methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
-            if "Median_Ref2" not in methods["Excess"]:
-                methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
-            median = methods["Excess"]["Median_Ref2"]
-            if "adjustment_factor" not in methods["Excess"]:
-                methods["Excess"]["adjustment_factor"] = 1
-            extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
-#        if isinstance(methods["Excess"], float):
-#            # Median passed
-#            median = methods["Excess"]
-#            print("Passed median: {}".format(median))
-#        else:
-#            # The Excess method assumes that...
-#            median = np.median(scores["Ref2"])
-        extra_args['population_median'] = median
-        print("Ref1 median:", np.median(Ref1))
-        print("Ref2 median:", np.median(Ref2))
-        print("Population median: {}".format(median))
-        print("Mixture size:", sample_size)
 
 #    print(extra_args)
 
