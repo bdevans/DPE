@@ -242,6 +242,22 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
             number_Ref2_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
     #        proportion_Ref1 = (number_high - number_low)/sample_size
+#            print("Passed median:", kwargs['population_median'])
+#            print("Ref1 median:", np.median(Ref1))
+#            print("Ref2 median:", np.median(Ref2))
+#            print("Mixture size:", sample_size)
+#            if kwargs['population_median'] < np.median(Ref1):
+            results['Excess'] = abs(number_Ref2_high - number_Ref2_low)/sample_size #kwargs['sample_size']
+#                print("M_Ref2 < M_Ref1")
+#                print("High", number_Ref2_high)
+#                print("Low", number_Ref2_low)
+#            else:
+                # NOTE: This is an extension of the original method (above)
+#                results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
+#                print("M_Ref1 < M_Ref2")
+#                print("High", number_Ref2_high)
+#                print("Low", number_Ref2_low)
+            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
 
         # ------------------------------ KDE method ------------------------------
         if "KDE" in methods:
