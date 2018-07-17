@@ -222,13 +222,13 @@ np.random.seed(seed)
 
 np.seterr(divide='ignore', invalid='ignore')
 
-if False:
+if True:
     #metric = 'T1GRS'
     data_label ='Diabetes'
-    (scores, bins, means, median, prop_Ref1) = load_diabetes_data('T1GRS')
+    (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T1GRS')
 else:
     data_label ='Renal'
-    (scores, bins, means, median, prop_Ref1) = load_renal_data()
+    (scores, bins, means, medians, prop_Ref1) = load_renal_data()
 plot_distributions(scores, bins, data_label)  #KDE_kernel, bins['width'])
 
 #for (scores, bins, means, median) in ...
