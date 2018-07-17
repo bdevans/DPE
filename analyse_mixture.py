@@ -29,6 +29,8 @@ import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+#from tqdm import tqdm
+import tqdm
 
 def fit_kernels(scores, bw):
     kernels = {}
@@ -330,6 +332,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
             results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
                                for b in range(bootstrap)]
         results = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+                   for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
+
         # Put into dataframe
         df_bs = pd.DataFrame(results)
 
