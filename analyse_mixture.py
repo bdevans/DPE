@@ -222,14 +222,16 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
 
         # -------------------------- Subtraction method --------------------------
         if "Excess" in methods:
+            # Calculate the proportion of another population w.r.t. the excess
+            # number of cases from the mixture's assumed majority population.
             # TODO: Flip these around for when using the T2GRS
             Median_Mix = np.median(Mix)
             if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
                 population_median = methods["Excess"]["Median_Ref2"]
             else:  # Ref1 is closets to the mixture
                 population_median = methods["Excess"]["Median_Ref1"]
-            number_Ref2_low = len(RM[RM <= kwargs['population_median']])
-            number_Ref2_high = len(RM[RM > kwargs['population_median']])
+            number_low = len(RM[RM <= kwargs['population_median']])
+            number_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
     #        proportion_Ref1 = (number_high - number_low)/sample_size
 #            print("Passed median:", kwargs['population_median'])
@@ -237,7 +239,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
 #            print("Ref2 median:", np.median(Ref2))
 #            print("Mixture size:", sample_size)
 #            if kwargs['population_median'] < np.median(Ref1):
-            results['Excess'] = abs(number_Ref2_high - number_Ref2_low)/sample_size #kwargs['sample_size']
+            results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
 #                print("M_Ref2 < M_Ref1")
 #                print("High", number_Ref2_high)
 #                print("Low", number_Ref2_low)
@@ -289,20 +291,24 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
         return results
 
 
-    def bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, method, **extra_args):
+    def bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
 
-        assert(0.0 <= prop_Ref1 <= 1.0)
-        n_Ref1 = int(round(sample_size * prop_Ref1))
-        n_Ref2 = sample_size - n_Ref1
+        results = {}
+        for method in methods:
+            assert(0.0 <= prop_Ref1[method] <= 1.0)
+            n_Ref1 = int(round(sample_size * prop_Ref1[method]))
+            n_Ref2 = sample_size - n_Ref1
 
-        # Bootstrap mixture
-        Mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                              np.random.choice(Ref2, n_Ref2, replace=True)))
+            # Bootstrap mixture
+            Mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+                                  np.random.choice(Ref2, n_Ref2, replace=True)))
 
-#        run_method = defaultdict(bool)
-#        run_method[method] = True
+#            run_method = defaultdict(bool)
+#            run_method[method] = True
+            indiv_method = {}
+            indiv_method[method] = methods[method]
 
-        results = estimate_Ref1(Mix, Ref1, Ref2, method, **extra_args)
+            results[method] = estimate_Ref1(Mix, Ref1, Ref2, indiv_method, **extra_args)[method]
 
         return results#[method]
 
@@ -329,13 +335,15 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
         for method in methods:
             # Fix estimated proportions for each method
             if true_prop_Ref1:
-                prop_Ref1 = true_prop_Ref1
+                prop_Ref1 = defaultdict(lambda: true_prop_Ref1)
+#                prop_Ref1[method] = true_prop_Ref1
             else:
-                prop_Ref1 = initial_results[method]
-            individual_method = {}
-            individual_method[method] = methods[method]
-            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
-                               for b in range(bootstrap)]
+                prop_Ref1 = initial_results
+#            individual_method = {}
+#            individual_method[method] = methods[method]
+#            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
+#                               for b in range(bootstraps)]
+
         results = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
                    for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
 
