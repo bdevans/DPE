@@ -319,18 +319,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
 
 
     if bootstraps:
-        #    nprocs = multiprocessing.cpu_count()
-#        nprocs = cpu_count()
-#        print('Running {} bootstraps with {} processors...'.format(bootstraps, nprocs))
+
         print('Running {} bootstraps...'.format(bootstraps), flush=True)
 
         results = OrderedDict()
-
-#        methods = [method for method in ["Means", "Excess", "EMD", "KDE"] if run_method[method]]
-
-        # Spawn threads
-        # with Parallel(n_jobs=nprocs) as parallel:
-            # Parallelise over bootstraps
 
         for method in methods:
             # Fix estimated proportions for each method
