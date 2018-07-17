@@ -31,6 +31,8 @@ import matplotlib.pyplot as plt
 
 #from tqdm import tqdm
 import tqdm
+from statsmodels.stats.proportion import proportion_confint
+
 METHODS_ORDER = ["Means", "Excess", "EMD", "KDE"]
 
 
@@ -312,8 +314,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
 
     if bootstraps:
         #    nprocs = multiprocessing.cpu_count()
-        nprocs = cpu_count()
-        print('Running {} bootstraps with {} processors...'.format(bootstrap, nprocs))
+#        nprocs = cpu_count()
+#        print('Running {} bootstraps with {} processors...'.format(bootstraps, nprocs))
+        print('Running {} bootstraps...'.format(bootstraps), flush=True)
 
         results = OrderedDict()
 
@@ -347,9 +350,15 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
     print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
     print("="*61)
     for method in methods:
-        print("{:20} | {:<17.5f} | {:<17.5f}".format(method, initial_results[method], 1-initial_results[method]))
-        if bootstrap:
-            print("{:20} | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f}".format("Bootstraps (µ±σ)", np.mean(df_bs[method]), np.std(df_bs[method]), 1-np.mean(df_bs[method]), np.std(1-df_bs[method])))  #  (+/- SD)
+        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
+        if bootstraps:
+            print("{:20} | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} ".format("Bootstraps (µ±σ)", np.mean(df_bs[method]), np.std(df_bs[method]), 1-np.mean(df_bs[method]), np.std(1-df_bs[method])))  #  (+/- SD)
+            nobs = len(df_bs[method])
+            count = int(np.mean(df_bs[method])*nobs)
+            ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
+            ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
+            print("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} ".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
+#            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_bs[method]), ci_upp1, ci_low2, 1-np.mean(df_bs[method]), ci_upp2))
         print("-"*61)
     if true_prop_Ref1:
         print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
