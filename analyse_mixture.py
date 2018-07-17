@@ -77,7 +77,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, means=None, median=None, KDE_kernel='gaussian'):
+def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_prop_Ref1=None, means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -306,7 +306,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
     pprint(initial_results)
 
 
-    if bootstrap:
+    if bootstraps:
         #    nprocs = multiprocessing.cpu_count()
         nprocs = cpu_count()
         print('Running {} bootstraps with {} processors...'.format(bootstrap, nprocs))
@@ -329,6 +329,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
             individual_method[method] = methods[method]
             results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
                                for b in range(bootstrap)]
+        results = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
         # Put into dataframe
         df_bs = pd.DataFrame(results)
 
@@ -347,7 +348,7 @@ def analyse_mixture(scores, bins, methods, bootstrap=1000, true_prop_Ref1=None, 
         print("="*61)
     print()
 
-    if bootstrap:
+    if bootstraps:
         return (initial_results, df_bs)
     else:
         return (initial_results, None)
