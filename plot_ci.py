@@ -289,3 +289,12 @@ sns.violinplot(data=df_bs) #, inner="points")
 sns.despine(top=True, bottom=True, trim=True)
 #plt.hlines()
 plt.savefig('figs/violins_{}.png'.format(data_label))
+
+# Use pointplot to show mean and confidence intervals
+# TODO: Replace with a manual plot and draw CIs computed with proportion_confint
+f, ax = plt.subplots()
+ax = sns.pointplot(data=df_bs, join=False, ci=100*(1-alpha), capsize=.2)
+sns.despine(top=True, bottom=True, trim=True)
+plt.savefig('figs/conf_int_{}.png'.format(data_label))
+
+from statsmodels.stats.proportion import proportion_confint
