@@ -31,6 +31,7 @@ def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):
     # Note that scipy weights its bandwidth by the covariance of the
     # input data.  To make the results comparable to the other methods,
     # we divide the bandwidth by the sample standard deviation here.
+    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
     kde = gaussian_kde(x, bw_method=bandwidth / x.std(ddof=1), **kwargs)
     return kde.evaluate(x_grid)
 
@@ -184,4 +185,3 @@ plt.legend()
 #    plt.plot(support, kernel, color="r")
 #
 #sns.rugplot(x, color=".2", linewidth=3);
-

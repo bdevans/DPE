@@ -14,6 +14,7 @@ from lmfit import minimize
 
 import corner
 
+
 class Timer:
     """
     Class for timing blocks of code.
@@ -57,6 +58,8 @@ KDE_kernel = "gaussian"
 bw = bins["width"]
 print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
 
+# TODO: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.leastsq.html
+
 # Set up
 def fit_kernels(scores, bw):
     kernels = {}
@@ -77,6 +80,7 @@ y = np.exp(kdes["Mix"][KDE_kernel].score_samples(x[:, np.newaxis]))
 
 
 # SciPy
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
 print("="*40)
 print("SciPy curve_fit")
 print("="*40)
@@ -197,6 +201,7 @@ print("="*40)
 print("LMFIT: minimize")
 print("="*40)
 
+
 # TODO: Switch to using Minimizer to avoid issues with lmfit models
 def KDE_model(pars, x, kdes, data=None):
     kde_Ref1 = np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
@@ -206,6 +211,7 @@ def KDE_model(pars, x, kdes, data=None):
         return model
     else:
         return model - data
+
 
 with Timer() as t:
     res_min = minimize(KDE_model, params_mix, args=(x, kdes, y), method=method)
