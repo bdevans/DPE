@@ -18,3 +18,4 @@ dependencies:
   - joblib
   - h5py
   - numexpr
+  - tqdm
