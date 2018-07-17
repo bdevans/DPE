@@ -31,6 +31,8 @@ import matplotlib.pyplot as plt
 
 #from tqdm import tqdm
 import tqdm
+METHODS_ORDER = ["Means", "Excess", "EMD", "KDE"]
+
 
 def fit_kernels(scores, bw):
     kernels = {}
@@ -335,7 +337,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
                    for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
 
         # Put into dataframe
-        df_bs = pd.DataFrame(results)
+#        df_bs = pd.DataFrame(results)
+        columns = [method for method in METHODS_ORDER if method in methods]
+        df_bs = pd.DataFrame.from_records(results, columns=columns)
 
 
     # ------------ Summarise proportions for the whole distribution --------------
