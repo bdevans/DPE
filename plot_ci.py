@@ -34,7 +34,7 @@ import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-import analyse_mixture as am
+import analyse_mixture as pe
 
 import warnings
 
@@ -206,6 +206,7 @@ adjust_excess = True
 
 seed = 4242
 bootstraps = 1000#1000
+alpha = 0.05
 
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
@@ -231,7 +232,7 @@ else:
 plot_distributions(scores, bins, data_label)  #KDE_kernel, bins['width'])
 
 #for (scores, bins, means, median) in ...
-am.plot_kernels(scores, bins)
+pe.plot_kernels(scores, bins)
 
 if adjust_excess:
     adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
@@ -263,9 +264,10 @@ print("Running mixture analysis with {} scores...".format(data_label))
 t = time.time()  # Start timer
 
 
-(res, df_bs) = am.analyse_mixture(scores, bins, methods, bootstrap=bootstraps,
-                                  true_prop_Ref1=prop_Ref1,
-                                  means=None, median=median, KDE_kernel=KDE_kernel)
+(res, df_bs) = pe.analyse_mixture(scores, bins, methods,
+                                  bootstraps=bootstraps, alpha=alpha,
+                                  true_prop_Ref1=prop_Ref1) #,
+#                                  means=None, median=median, KDE_kernel=KDE_kernel)
 
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
