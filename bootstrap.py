@@ -32,7 +32,7 @@ from datasets import (load_diabetes_data, load_renal_data)
 # ---------------------------- Define constants ------------------------------
 
 verbose = False
-out_dir = "sweep_results"
+out_dir = "results"
 run_means = True
 run_excess = True
 adjust_excess = True
