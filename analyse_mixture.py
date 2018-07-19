@@ -6,30 +6,30 @@ Created on Thu Jun 21 11:47:27 2018
 @author: ben
 """
 
-import os
-import time
-#import math
-#import sys
+# import os
+# import time
+# import math
+# import sys
 from collections import defaultdict, OrderedDict
 
 from pprint import pprint
 
 import numpy as np
-#import scipy as sp
+# import scipy as sp
 import pandas as pd
 from sklearn.neighbors import KernelDensity
-#from statsmodels.nonparametric.kde import KDEUnivariate
+# from statsmodels.nonparametric.kde import KDEUnivariate
 # TODO: replace with a scipy/numpy function to reduce dependencies
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
 import lmfit
 # TODO: Try replacing with scipy.optimize.curve_fit to solve jopblib problem and reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
-from joblib import Parallel, delayed, cpu_count
-import seaborn as sns
-import matplotlib as mpl
+# from joblib import Parallel, delayed, cpu_count
+# import seaborn as sns
+# import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-#from tqdm import tqdm
+# from tqdm import tqdm
 import tqdm
 from statsmodels.stats.proportion import proportion_confint
 
