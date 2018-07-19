@@ -25,6 +25,7 @@ from joblib import Parallel, delayed, cpu_count
 # mem = Memory(cachedir='/tmp')
 
 import analyse_mixture as pe
+from datasets import *
 
 # ---------------------------- Define constants ------------------------------
 
@@ -42,20 +43,6 @@ seed = 42
 bootstraps = 1000
 sample_sizes = np.arange(100, 1501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)  # T1 propoertions
-
-dataset = 'data/biobank_mix_WTCC_ref.csv'
-metrics = ['T1GRS', 'T2GRS']
-headers = {'diabetes_type': 'type', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
-
-T1GRS_bin_width = 0.005
-T1GRS_bin_min = 0.095
-T1GRS_bin_max = 0.350
-
-T2GRS_bin_width = 0.1
-T2GRS_bin_min = 4.7
-T2GRS_bin_max = 8.9
-
-medians = {'T1GRS': 0.23137931525707245, 'T2GRS': 6.78826}
 
 kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
@@ -167,62 +154,9 @@ if __name__ == '__main__':
 
     np.seterr(divide='ignore', invalid='ignore')
 
-    # xls = pd.ExcelFile("data.xls")
-    # data = xls.parse()
-    # data = pd.read_csv('t1d_t2d_bootstrap_data.csv', usecols=[1, 2]) #t2 included data
-    # data = pd.read_csv('data.csv', usecols=[1, 2])  #
-    # data = pd.read_csv('data_biobank_all.csv', usecols=[0, 1, 2])
-    data = pd.read_csv(dataset)
-    # data = pd.read_csv('c_pep_defined2.csv')
-    # data = pd.read_csv('data_bioban_t2_c_pep.csv')
-    # data.rename(columns={'diabetes_type': 'type', 't1GRS': 'T1GRS'}, inplace=True)
-    # data.rename(columns={'diabetes_type': 'type', 't2GRS': 'T1GRS'}, inplace=True) # looking at T2GRS
-    data.rename(columns=headers, inplace=True)
-    data.describe()
-
-    scores = {}
-    means = {}
-
-    # Arrays of T1GRS scores for each group
-    scores['T1GRS'] = {'T1': data.loc[data['type'] == 1, 'T1GRS'].as_matrix(),
-                       'T2': data.loc[data['type'] == 2, 'T1GRS'].as_matrix(),
-                       'Mix': data.loc[data['type'] == 3, 'T1GRS'].as_matrix()}
-
-    means['T1GRS'] = {'T1': scores['T1GRS']['T1'].mean(),
-                      'T2': scores['T1GRS']['T2'].mean()}
-
-    # Arrays of T2GRS scores for each group
-    scores['T2GRS'] = {'T1': data.loc[data['type'] == 1, 'T2GRS'].as_matrix(),
-                       'T2': data.loc[data['type'] == 2, 'T2GRS'].as_matrix(),
-                       'Mix': data.loc[data['type'] == 3, 'T2GRS'].as_matrix()}
-
-    means['T2GRS'] = {'T1': scores['T2GRS']['T1'].mean(),
-                      'T2': scores['T2GRS']['T2'].mean()}
-
-    # ----------------------------- Bin the data ---------------------------------
-    N = data.count()[0]
-    bins = {}
-
-    T1GRS_bin_edges = np.arange(T1GRS_bin_min, T1GRS_bin_max+T1GRS_bin_width, T1GRS_bin_width)
-    T1GRS_bin_centers = (T1GRS_bin_edges[:-1] + T1GRS_bin_edges[1:]) / 2
-
-    bins['T1GRS'] = {'width': T1GRS_bin_width,
-                     'min': T1GRS_bin_min,
-                     'max': T1GRS_bin_max,
-                     'edges': T1GRS_bin_edges,
-                     'centers': T1GRS_bin_centers}
-    del T1GRS_bin_width, T1GRS_bin_min, T1GRS_bin_max, T1GRS_bin_edges, T1GRS_bin_centers
-
-    # bin_centers = np.arange(0.095+bin_width/2, 0.35+bin_width/2, bin_width)
-    T2GRS_bin_edges = np.arange(T2GRS_bin_min, T2GRS_bin_max+T2GRS_bin_width, T2GRS_bin_width)
-    T2GRS_bin_centers = (T2GRS_bin_edges[:-1] + T2GRS_bin_edges[1:]) / 2
-
-    bins['T2GRS'] = {'width': T2GRS_bin_width,
-                     'min': T2GRS_bin_min,
-                     'max': T2GRS_bin_max,
-                     'edges': T2GRS_bin_edges,
-                     'centers': T2GRS_bin_centers}
-    del T2GRS_bin_width, T2GRS_bin_min, T2GRS_bin_max, T2GRS_bin_edges, T2GRS_bin_centers
+    metric = "T1GRS"
+    scores, bins, means, medians, prop_Ref1 = load_diabetes_data(metric)
+    scores, bins, means, medians, prop_Ref1 = load_renal_data()
 
     for tag in metrics:
 
