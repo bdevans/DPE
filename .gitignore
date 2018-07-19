@@ -2,8 +2,9 @@
 # TODO: Remove sensitive data from the repository
 data
 data/previous*
-results*/
+*results*/
 figs/
+tmp*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
