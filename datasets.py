@@ -66,13 +66,13 @@ def load_diabetes_data(metric):
             'edges': bin_edges,
             'centers': bin_centers}
 
-
-    sns.jointplot(x='T1GRS', y='T2GRS', data=data)
-#    f, ax = plt.subplots(1, 3)
-    sns.jointplot(x='T1GRS', y='T2GRS', color='r', data=data.loc[data["group"]==1])
-    sns.jointplot(x='T1GRS', y='T2GRS', color='b', data=data.loc[data["group"]==2])
-    sns.jointplot(x='T1GRS', y='T2GRS', color='g', data=data.loc[data["group"]==3])
-#    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
+    if False:
+        sns.jointplot(x='T1GRS', y='T2GRS', data=data)
+    #    f, ax = plt.subplots(1, 3)
+        sns.jointplot(x='T1GRS', y='T2GRS', color='r', data=data.loc[data["group"]==1])
+        sns.jointplot(x='T1GRS', y='T2GRS', color='b', data=data.loc[data["group"]==2])
+        sns.jointplot(x='T1GRS', y='T2GRS', color='g', data=data.loc[data["group"]==3])
+    #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
 
     prop_Ref1 = None
     return scores, bins, means, medians, prop_Ref1
