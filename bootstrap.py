@@ -42,7 +42,7 @@ seed = 42
 
 bootstraps = 1000
 sample_sizes = np.arange(100, 1501, 100)  # 3100
-proportions = np.arange(0.0, 1.01, 0.01)  # T1 propoertions
+proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
 
 kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
@@ -63,13 +63,13 @@ if run_KDE:
 
     # Define the KDE models
     # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-    def kde_T1(x, amp_T1):
-        return amp_T1 * np.exp(kdes['Type 1'].score_samples(x[:, np.newaxis]))
+    def kde_Ref1(x, amp_Ref1):
+        return amp_Ref1 * np.exp(kdes['Ref1'].score_samples(x[:, np.newaxis]))
 
-    def kde_T2(x, amp_T2):
-        return amp_T2 * np.exp(kdes['Type 2'].score_samples(x[:, np.newaxis]))
+    def kde_Ref2(x, amp_Ref2):
+        return amp_Ref2 * np.exp(kdes['Ref2'].score_samples(x[:, np.newaxis]))
 
-    model = lmfit.Model(kde_T1) + lmfit.Model(kde_T2)
+    model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
 
     # @mem.cache
     # def fit_KDE(RM, model, params_mix, kernel, bins):
@@ -77,21 +77,21 @@ if run_KDE:
     #     #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
     #     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins[tag]['width']).fit(RM[:, np.newaxis])
     #     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-    #     amp_T1 = res_mix.params['amp_T1'].value
-    #     amp_T2 = res_mix.params['amp_T2'].value
-    #     return amp_T1/(amp_T1+amp_T2)
+    #     amp_Ref1 = res_mix.params['amp_Ref1'].value
+    #     amp_Ref2 = res_mix.params['amp_Ref2'].value
+    #     return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
-def estimate_T1D(sample_size, prop_T1, b, **kwargs):
+def estimate_Ref1(sample_size, prop_Ref1, b, **kwargs):
 
-    nT1 = int(round(sample_size * prop_T1))
-    nT2 = sample_size - nT1
+    nRef1 = int(round(sample_size * prop_Ref1))
+    nRef2 = sample_size - nRef1
 
-    # Random sample from T1
-    R1 = np.random.choice(T1, nT1, replace=True)
+    # Random sample from Ref1
+    R1 = np.random.choice(Ref1, nRef1, replace=True)
 
-    # Random sample from T2
-    R2 = np.random.choice(T2, nT2, replace=True)
+    # Random sample from Ref2
+    R2 = np.random.choice(Ref2, nRef2, replace=True)
 
     # Bootstrap mixture
     RM = np.concatenate((R1, R2))
@@ -104,15 +104,15 @@ def estimate_T1D(sample_size, prop_T1, b, **kwargs):
 
     # ---------------------- Difference of Means method ----------------------
     if run_means:
-        proportion_of_T1 = (RM.mean()-T2_mean)/(T1_mean-T2_mean)
-        results['means'] = abs(proportion_of_T1)
+        proportion_of_Ref1 = (RM.mean()-Ref2_mean)/(Ref1_mean-Ref2_mean)
+        results['means'] = abs(proportion_of_Ref1)
 
     # -------------------------- Subtraction method --------------------------
     if run_excess:
         number_low = len(RM[RM <= population_median])
         number_high = len(RM[RM > population_median])
-        proportion_T1 = (number_high - number_low)/sample_size
-        results['excess'] = proportion_T1
+        proportion_Ref1 = (number_high - number_low)/sample_size
+        results['excess'] = proportion_Ref1
 
     # ------------------------------ KDE method ------------------------------
     if run_KDE:
@@ -178,13 +178,13 @@ if __name__ == '__main__':
         it = 0
         bar_element = 0
 
-        T1 = scores[tag]['T1']
-        T2 = scores[tag]['T2']
+        Ref1 = scores[tag]['Ref1']
+        Ref2 = scores[tag]['Ref2']
 
         kwargs = {}
         kwargs[tag] = tag
-        kwargs['T1'] = T1
-        kwargs['T2'] = T2
+        kwargs['Ref1'] = Ref1
+        kwargs['Ref2'] = Ref2
 
         bin_width = bins[tag]['width']
         bin_centers = bins[tag]['centers']
@@ -193,10 +193,10 @@ if __name__ == '__main__':
         if run_KDE:
             bw = bin_width  # Bandwidth
             kdes = {}
-            labels = ['Type 1', 'Type 2']  # Reference populations
+            labels = ['Ref1', 'Ref2']  # Reference populations
 
             # Fit reference populations
-            for data, label in zip([T1, T2], labels):
+            for data, label in zip([Ref1, Ref2], labels):
                 kdes[label] = {}
                 X = data[:, np.newaxis]
                 # for kernel in ['gaussian', 'tophat', 'epanechnikov']:
@@ -207,8 +207,8 @@ if __name__ == '__main__':
             # kernel = 'gaussian'  #' epanechnikov'
 
             params_mix = model.make_params()
-            params_mix['amp_T1'].value = 1
-            params_mix['amp_T2'].value = 1
+            params_mix['amp_Ref1'].value = 1
+            params_mix['amp_Ref2'].value = 1
 
         #    if run_KDE:
             KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
@@ -229,15 +229,15 @@ if __name__ == '__main__':
                 rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
             # Interpolate the cdfs at the same points for comparison
-            x_T1 = [bins[tag]['min'], *sorted(T1), bins[tag]['max']]
-            y_T1 = np.linspace(0, 1, len(x_T1))
-            (iv, ii) = np.unique(x_T1, return_index=True)
-            i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
+            x_Ref1 = [bins[tag]['min'], *sorted(Ref1), bins[tag]['max']]
+            y_Ref1 = np.linspace(0, 1, len(x_Ref1))
+            (iv, ii) = np.unique(x_Ref1, return_index=True)
+            i_CDF_1 = np.interp(bin_centers, iv, y_Ref1[ii])
 
-            x_T2 = [bins[tag]['min'], *sorted(T2), bins[tag]['max']]
-            y_T2 = np.linspace(0, 1, len(x_T2))
-            (iv, ii) = np.unique(x_T2, return_index=True)
-            i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
+            x_Ref2 = [bins[tag]['min'], *sorted(Ref2), bins[tag]['max']]
+            y_Ref2 = np.linspace(0, 1, len(x_Ref2))
+            (iv, ii) = np.unique(x_Ref2, return_index=True)
+            i_CDF_2 = np.interp(bin_centers, iv, y_Ref2[ii])
 
             # EMDs computed with interpolated CDFs
             i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bins[tag]['width'] / max_emd
@@ -248,31 +248,31 @@ if __name__ == '__main__':
             kwargs['i_EMD_21'] = i_EMD_21
 
         if run_means:
-            means_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-            T1_mean = T1.mean()
-            T2_mean = T2.mean()
-            kwargs['T1_mean'] = T1_mean
-            kwargs['T2_mean'] = T2_mean
+            means_Ref1 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            Ref1_mean = Ref1.mean()
+            Ref2_mean = Ref2.mean()
+            kwargs['Ref1_mean'] = Ref1_mean
+            kwargs['Ref2_mean'] = Ref2_mean
 
         if run_excess:
-            excess_T1D = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            excess_Ref1 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
             population_median = medians[tag]
             kwargs['population_median'] = population_median
 
         # Spawn threads
         with Parallel(n_jobs=nprocs) as parallel:
             for s, sample_size in enumerate(sample_sizes):
-                for p, prop_T1 in enumerate(proportions):
+                for p, prop_Ref1 in enumerate(proportions):
 
                     # Parallelise over bootstraps
-                    results = parallel(delayed(estimate_T1D)(sample_size, prop_T1, b, **kwargs)
+                    results = parallel(delayed(estimate_Ref1)(sample_size, prop_Ref1, b, **kwargs)
                                        for b in range(bootstraps))
 
                     for b in range(bootstraps):
                         if run_means:
-                            means_T1D[s, p, b] = results[b]['means']
+                            means_Ref1[s, p, b] = results[b]['means']
                         if run_excess:
-                            excess_T1D[s, p, b] = results[b]['excess']
+                            excess_Ref1[s, p, b] = results[b]['excess']
                         if run_KDE:
                             KDE_fits[s, p, b] = results[b]['KDE']
                         if run_EMD:
@@ -300,9 +300,9 @@ if __name__ == '__main__':
                 median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
         if run_means:
-            np.save('{}/means_{}'.format(out_dir, tag), means_T1D)
+            np.save('{}/means_{}'.format(out_dir, tag), means_Ref1)
         if run_excess:
-            np.save('{}/excess_{}'.format(out_dir, tag), excess_T1D)
+            np.save('{}/excess_{}'.format(out_dir, tag), excess_Ref1)
         if run_KDE:
             np.save('{}/kde_{}'.format(out_dir, tag), KDE_fits)
         if run_EMD:
