@@ -12,7 +12,7 @@ https://git.exeter.ac.uk/bdevans/DPE/commit/01a9705b6fa1bf0d1df4fd3a4beaa1a413f6
 import os
 import time
 # import math
-import sys
+# import sys
 # import multiprocessing
 from collections import OrderedDict
 
@@ -216,8 +216,7 @@ if __name__ == '__main__':
         if iterations < max_bars:
             max_bars = iterations   # if less than 20 points, shorten bar
         print("|" + max_bars*"-" + "|")
-        sys.stdout.write('|')
-        sys.stdout.flush()  # print start of progress bar
+        print('|', end='', flush=True)  # print start of progress bar
 
         t = time.time()  # Start timer
         it = 0
@@ -389,12 +388,10 @@ if __name__ == '__main__':
 #                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
 
                     if (it >= bar_element*iterations/max_bars):
-                        sys.stdout.write('*')
-                        sys.stdout.flush()
+                        print('*', end='', flush=True)
                         bar_element += 1
                     if (it >= iterations-1):
-                        sys.stdout.write('|\n')
-                        sys.stdout.flush()
+                        print('|', flush=True)
                     it += 1
 
         elapsed = time.time() - t
