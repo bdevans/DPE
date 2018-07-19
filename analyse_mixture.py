@@ -317,15 +317,18 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
     def bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **extra_args):
 
-        results = {}
-        for method in methods:
-            # Bootstrap mixture
-            bs = np.random.choice(Mix, sample_size, replace=True)
+#        results = {}
+#        for method in methods:
+#            # Bootstrap mixture
+#            bs = np.random.choice(Mix, sample_size, replace=True)
+#
+#            indiv_method = {}
+#            indiv_method[method] = methods[method]
+#
+#            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **extra_args)[method]
 
-            indiv_method = {}
-            indiv_method[method] = methods[method]
-
-            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **extra_args)[method]
+        bs = np.random.choice(Mix, sample_size, replace=True)
+        results = estimate_Ref1(bs, Ref1, Ref2, methods, **extra_args)
 
         return results
 
@@ -336,20 +339,21 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     if true_prop_Ref1:
         print("Ground truth: {:.5f}".format(true_prop_Ref1))
 
+    columns = [method for method in METHODS_ORDER if method in methods]
 
-    if bootstraps:
+    if bootstraps > 1:
 
         print('Running {} bootstraps...'.format(bootstraps), flush=True)
 
         results = OrderedDict()
 
-        for method in methods:
+#        for method in methods:
             # Fix estimated proportions for each method
-            if true_prop_Ref1:
-                prop_Ref1 = defaultdict(lambda: true_prop_Ref1)
-#                prop_Ref1[method] = true_prop_Ref1
-            else:
-                prop_Ref1 = initial_results
+#            if true_prop_Ref1:
+#                prop_Ref1 = defaultdict(lambda: true_prop_Ref1)
+##                prop_Ref1[method] = true_prop_Ref1
+#            else:
+#                prop_Ref1 = initial_results
 #            individual_method = {}
 #            individual_method[method] = methods[method]
 #            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
@@ -359,9 +363,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
                    for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
 
         # Put into dataframe
-#        df_bs = pd.DataFrame(results)
-        columns = [method for method in METHODS_ORDER if method in methods]
-        df_bs = pd.DataFrame.from_records(results, columns=columns)
+        df_pe = pd.DataFrame.from_records(results, columns=columns)
+
+    else:
+        df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
 
 
     # ------------ Summarise proportions for the whole distribution --------------
@@ -369,22 +374,19 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
     print("="*61)
     for method in methods:
-        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        if bootstraps:
-            print("{:20} | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} ".format("Bootstraps (µ±σ)", np.mean(df_bs[method]), np.std(df_bs[method]), 1-np.mean(df_bs[method]), np.std(1-df_bs[method])))  #  (+/- SD)
-            nobs = len(df_bs[method])
-            count = int(np.mean(df_bs[method])*nobs)
+#        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
+        print("{:14} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} ".format(method, np.mean(df_pe[method]), np.std(df_pe[method]), 1-np.mean(df_pe[method]), np.std(1-df_pe[method])))  #  (+/- SD)
+        if bootstraps > 1:
+            nobs = len(df_pe[method])
+            count = int(np.mean(df_pe[method])*nobs)
             ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
             ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
             print("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} ".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-#            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_bs[method]), ci_upp1, ci_low2, 1-np.mean(df_bs[method]), ci_upp2))
+#            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_pe[method]), ci_upp1, ci_low2, 1-np.mean(df_pe[method]), ci_upp2))
         print("-"*61)
     if true_prop_Ref1:
         print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
         print("="*61)
     print()
 
-    if bootstraps:
-        return (initial_results, df_bs)
-    else:
-        return (initial_results, None)
+    return df_pe
