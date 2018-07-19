@@ -83,7 +83,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_prop_Ref1=None):  #, means=None, median=None, KDE_kernel='gaussian'):
+def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None):  #, means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -92,7 +92,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
     bin_edges = bins['edges']
 
     extra_args = {}
-    sample_size = len(Mix)
+    if sample_size == -1:
+        sample_size = len(Mix)
     extra_args['bins'] = bins
 #    print('Running {} mixture analysis...'.format(tag))
 #    print('--------------------------------------------------------------------------------')
@@ -291,26 +292,41 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
         return results
 
 
-    def bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+#    def construct_bootstraps(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+#
+#        results = {}
+#        for method in methods:
+#            assert(0.0 <= prop_Ref1[method] <= 1.0)
+#            n_Ref1 = int(round(sample_size * prop_Ref1[method]))
+#            n_Ref2 = sample_size - n_Ref1
+#
+#            # Bootstrap mixture
+#            Mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+#                                  np.random.choice(Ref2, n_Ref2, replace=True)))
+#
+##            run_method = defaultdict(bool)
+##            run_method[method] = True
+#            indiv_method = {}
+#            indiv_method[method] = methods[method]
+#
+#            results[method] = estimate_Ref1(Mix, Ref1, Ref2, indiv_method, **extra_args)[method]
+#
+#        return results#[method]
+
+
+    def bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **extra_args):
 
         results = {}
         for method in methods:
-            assert(0.0 <= prop_Ref1[method] <= 1.0)
-            n_Ref1 = int(round(sample_size * prop_Ref1[method]))
-            n_Ref2 = sample_size - n_Ref1
-
             # Bootstrap mixture
-            Mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                                  np.random.choice(Ref2, n_Ref2, replace=True)))
+            bs = np.random.choice(Mix, sample_size, replace=True)
 
-#            run_method = defaultdict(bool)
-#            run_method[method] = True
             indiv_method = {}
             indiv_method[method] = methods[method]
 
-            results[method] = estimate_Ref1(Mix, Ref1, Ref2, indiv_method, **extra_args)[method]
+            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **extra_args)[method]
 
-        return results#[method]
+        return results
 
 
     # Get initial estimate of proportions
@@ -336,7 +352,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, alpha=0.05, true_pro
 #            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
 #                               for b in range(bootstraps)]
 
-        results = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+        results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **extra_args)
                    for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
 
         # Put into dataframe
