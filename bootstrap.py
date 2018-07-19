@@ -154,13 +154,16 @@ if __name__ == '__main__':
 
     np.seterr(divide='ignore', invalid='ignore')
 
+    datasets = {}
     metric = "T1GRS"
-    scores, bins, means, medians, prop_Ref1 = load_diabetes_data(metric)
-    scores, bins, means, medians, prop_Ref1 = load_renal_data()
+    datasets["Diabetes"] = load_diabetes_data(metric)
+    datasets["Renal"] = load_renal_data()
 
-    for tag in metrics:
+    for tag, data in datasets.items():
 
         print("Running bootstrap with {} scores...".format(tag))
+
+        scores, bins, means, medians, prop_Ref1 = data
 
         # Setup progress bar
         iterations = len(sample_sizes) * len(proportions) # * len(metrics) * bootstraps  #KDE_fits.size
