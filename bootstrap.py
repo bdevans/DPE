@@ -61,6 +61,11 @@ kernel = 'gaussian'
 
 # ----------------------------------------------------------------------------
 
+def SecToStr(sec):
+    m, s = divmod(sec, 60)
+    h, m = divmod(m,   60)
+    return u'%d:%02d:%02d'%(h,m,s)
+
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
