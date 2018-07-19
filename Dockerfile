@@ -40,8 +40,8 @@ WORKDIR /usr/dpe
 RUN mkdir -p /root/.config/matplotlib
 RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
-COPY data/biobank_mix_WTCC_ref.csv /usr/dpe/data/
 COPY *.py /usr/dpe/
+COPY data /usr/dpe/data/
 VOLUME /usr/dpe/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
