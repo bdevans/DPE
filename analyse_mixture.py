@@ -65,7 +65,7 @@ def plot_kernels(scores, bins):
 
 # @mem.cache
 def fit_KDE_model(Mix, bins, model, params_mix, kernel):
-# TODO: Think carefully about this!
+    # TODO: Think carefully about this!
     # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
     x_KDE = bins["centers"]
     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
