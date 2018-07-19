@@ -228,10 +228,16 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             # number of cases from the mixture's assumed majority population.
             # TODO: Flip these around for when using the T2GRS
             Median_Mix = np.median(Mix)
+
+
+            # TODO!!!
             if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
                 population_median = methods["Excess"]["Median_Ref2"]
             else:  # Ref1 is closets to the mixture
                 population_median = methods["Excess"]["Median_Ref1"]
+
+
+
             number_low = len(RM[RM <= kwargs['population_median']])
             number_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
