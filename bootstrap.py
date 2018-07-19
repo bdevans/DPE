@@ -202,9 +202,9 @@ if __name__ == '__main__':
     np.seterr(divide='ignore', invalid='ignore')
 
     datasets = {}
-    metric = "T1GRS"
-    #datasets["Diabetes"] = load_diabetes_data(metric)
     datasets["Renal"] = load_renal_data()
+    metric = "T1GRS"
+    datasets["Diabetes"] = load_diabetes_data(metric)
 
     for tag, data in datasets.items():
 
