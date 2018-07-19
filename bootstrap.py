@@ -290,7 +290,7 @@ if __name__ == '__main__':
                     it += 1
 
         elapsed = time.time() - t
-        print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
+        print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
 
         # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
         if run_EMD:
