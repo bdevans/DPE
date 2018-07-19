@@ -185,10 +185,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
         # Define the KDE models
         # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-        def kde_Ref1(x, amp_Ref1):
+        # Assigning a default value to amp initialises them
+        def kde_Ref1(x, amp_Ref1=1):
             return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
-        def kde_Ref2(x, amp_Ref2):
+        def kde_Ref2(x, amp_Ref2=1):
             return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
         model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
