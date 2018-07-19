@@ -29,7 +29,6 @@ import analyse_mixture as pe
 # ---------------------------- Define constants ------------------------------
 
 verbose = False
-plot_results = False
 out_dir = "results"
 run_means = True
 run_excess = True
@@ -95,33 +94,6 @@ if run_KDE:
     #     amp_T2 = res_mix.params['amp_T2'].value
     #     return amp_T1/(amp_T1+amp_T2)
 
-    def plot_kernels():
-        kernels = ['gaussian', 'tophat', 'epanechnikov',
-                   'exponential', 'linear', 'cosine']
-        fig, axes = plt.subplots(len(kernels), 1, sharex=True) #, squeeze=False)
-        X_plot = np.linspace(0.1, 0.35, 1000)[:, np.newaxis]
-
-        for data, label, ax in zip([T1, T2, Mix], labels, axes):
-
-            kdes[label] = {}
-            X = data[:, np.newaxis]
-
-            for kernel in kernels:
-                kde = KernelDensity(kernel=kernel, bandwidth=bw).fit(X)
-                log_dens = kde.score_samples(X_plot)
-                ax.plot(X_plot[:, 0], np.exp(log_dens), '-',
-                        label="kernel = '{0}'; bandwidth = {1}".format(kernel, bw))
-                kdes[label][kernel] = kde  # np.exp(log_dens)
-
-            # ax.text(6, 0.38, "N={0} points".format(N))
-
-            ax.legend(loc='upper left')
-            ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
-            ax.set_ylabel(label)
-            # ax.set_xlim(-4, 9)
-            # ax.set_ylim(-0.02, 0.4)
-            # plt.show()
-
 
 def analyse_mixture(tag, scores, means, medians, bins):
 
@@ -184,9 +156,6 @@ def analyse_mixture(tag, scores, means, medians, bins):
         kdes = {}
         labels = ['Type 1', 'Type 2', 'Mixture']
 
-        if plot_results and False:
-            plot_kernels()
-
 #        # TODO: Rethink
 #        n_bins = int(np.floor(np.sqrt(N)))
 #        (freqs_T1, bins) = np.histogram(T1, bins=n_bins)
@@ -235,27 +204,6 @@ def analyse_mixture(tag, scores, means, medians, bins):
 
         kde1 = kde_T1(x, amp_T1)
         kde2 = kde_T2(x, amp_T2)
-
-        if plot_results:
-            plt.figure()
-            fig, (axP, axM, axR, axI) = plt.subplots(4, 1, sharex=True, sharey=False)
-
-            axP.stackplot(x, np.vstack((kde1/(kde1+kde2), kde2/(kde1+kde2))), labels=labels[:-1])
-            legend = axP.legend(facecolor='grey')
-            #legend.get_frame().set_facecolor('grey')
-            axP.set_title('Proportions of Type 1 and Type 2 vs {}'.format(tag))
-
-            plt.sca(axM)
-            res_mix.plot_fit()
-
-            axM.fill_between(x, res_mix.best_fit-dely, res_mix.best_fit+dely, color="#ABABAB")
-
-            plt.sca(axR)
-            res_mix.plot_residuals()
-
-            #plt.sca(axI)
-            axI.plot(x, kde1, label='Type 1')
-            axI.plot(x, kde2, label='Type 2')
 
         if verbose:
             print(res_mix.fit_report())
@@ -426,12 +374,6 @@ if __name__ == '__main__':
                      'centers': T2GRS_bin_centers}
     del T2GRS_bin_width, T2GRS_bin_min, T2GRS_bin_max, T2GRS_bin_edges, T2GRS_bin_centers
 
-    if plot_results:
-        import matplotlib as mpl
-        from matplotlib import pyplot as plt
-        mpl.style.use('seaborn')
-        mpl.rc('figure', figsize=(12, 10))
-
     analyse_mixture('T1GRS', scores, means, medians, bins)
     analyse_mixture('T2GRS', scores, means, medians, bins)
 
@@ -587,183 +529,3 @@ if __name__ == '__main__':
 
     # run_bootstrap('T1GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
     # run_bootstrap('T2GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
-
-    # ------------------------------- Plot results -------------------------------
-
-    if plot_results:
-
-        execfile("plots.py")
-
-        proportions_rev = proportions[::-1]
-        plot_relative_error = False
-        plot_absolute_error = True
-        plot_standard_deviation = True
-        if run_excess and adjust_excess:
-            excess_T1D = excess_T1D/0.92  # adjusted for fact underestimates by 8%
-
-        if plot_relative_error:
-            # TODO: Plot SD around estimated proportion
-            plt.figure()
-            levels = np.array([5.0])  # np.array([0.1, 1.0])  # Percentage relative error
-
-            if run_EMD:
-                relative_error_EMD_T1 = 100*(np.median(1-norm_mat_EMD_31, axis=2)-proportions)/proportions
-                relative_error_EMD_T2 = 100*(np.median(1-norm_mat_EMD_32, axis=2)-proportions_rev)/proportions_rev
-                max_relative_error_EMD = np.maximum(relative_error_EMD_T1, relative_error_EMD_T2)
-                CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_EMD),
-                                 levels, colors='r')
-
-            if run_means:
-                #relative_error_means = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
-                relative_error_means_T1 = 100*(np.median(means_T1D/100, axis=2)-proportions)/proportions
-                relative_error_means_T2 = 100*(np.median(1-means_T1D/100, axis=2)-proportions_rev)/proportions_rev
-                max_relative_error_means = np.maximum(relative_error_means_T1, relative_error_means_T2)
-                CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_means),
-                                 levels, colors='k')
-
-            if run_excess:
-                relative_error_excess_T1 = 100*(np.median(excess_T1D/100, axis=2)-proportions)/proportions
-                relative_error_excess_T2 = 100*(np.median(1-excess_T1D/100, axis=2)-proportions_rev)/proportions_rev
-                max_relative_error_excess = np.maximum(relative_error_excess_T1, relative_error_excess_T2)
-                CS = plt.contour(proportions, sample_sizes, np.abs(max_relative_error_excess),
-                                 levels, colors='g')
-
-        if plot_absolute_error:
-            plt.figure()
-            #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-            #plt.colorbar()
-
-            levels = np.array([(0.05)]) #np.array([0.1, 1.0])  # # Percentage relative error
-
-            if run_EMD:
-                relative_error_EMD_T1D = np.abs(((np.mean(1-norm_mat_EMD_31, axis=2))/proportions)-1)
-                relative_error_EMD_T2D = np.abs(((1-(np.mean(1-norm_mat_EMD_31, axis=2)))/proportions_rev)-1)
-                max_relative_error_emd_abs = np.maximum(relative_error_EMD_T1D, relative_error_EMD_T2D)
-                CS = plt.contour(proportions, sample_sizes, (max_relative_error_emd_abs),
-                                 levels, colors='r')
-
-            if run_means:
-                relative_error_means_T1D = np.abs(((np.mean(means_T1D/100, axis=2))/proportions)-1)
-                relative_error_means_T2D = np.abs(((1-(np.mean(means_T1D/100, axis=2)))/proportions_rev)-1)
-                max_relative_error_means_abs = np.maximum(relative_error_means_T1D, relative_error_means_T2D)
-                CS = plt.contour(proportions, sample_sizes, (max_relative_error_means_abs),
-                                 levels, colors='k')
-
-            if run_excess:
-                relative_error_excess_T1D = np.abs(((np.mean(excess_T1D/100, axis=2))/proportions)-1)
-                relative_error_excess_T2D = np.abs(((1-(np.mean(excess_T1D/100, axis=2)))/proportions_rev)-1)
-                max_relative_error_excess_abs = np.maximum(relative_error_excess_T1D, relative_error_excess_T2D)
-                CS = plt.contour(proportions, sample_sizes, (max_relative_error_excess_abs),
-                                 levels, colors='g')
-
-        if plot_standard_deviation:
-            plt.figure()
-            #plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-            #plt.colorbar()
-
-            levels = np.array([3.0]) #np.array([0.1, 1.0])  # # Percentage relative error
-
-            if run_EMD:
-                adjusted_EMD = 100*(1-norm_mat_EMD_31)
-                dev_EMD_t1 = np.std(adjusted_EMD, axis=2)
-                dev_EMD_t2 = np.std(100-adjusted_EMD, axis=2)
-                max_dev_EMD = np.maximum(dev_EMD_t1, dev_EMD_t2)
-                CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_EMD),
-                                 levels, colors='r')
-
-            if run_means:
-                dev_means_t1 = np.std(means_T1D, axis=2)
-                dev_means_t2 = np.std(100-means_T1D, axis=2)
-                max_dev_means = np.maximum(dev_means_t1, dev_means_t2)
-                CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_means),
-                                 levels, colors='k')
-
-            if run_excess:
-                dev_excess_t1 = np.std(excess_T1D, axis=2)
-                dev_excess_t2 = np.std(100-excess_T1D, axis=2)
-                max_dev_excess = np.maximum(dev_excess_t1, dev_excess_t2)
-                CS = plt.contour(proportions, sample_sizes, np.abs(max_dev_excess),
-                                 levels, colors='g')
-
-        if verbose:
-            plt.figure()
-            fig, (axEMD, axMeans, axExcess) = plt.subplots(3, 1, sharex=True, sharey=False)
-            axEMD.contourf(proportions, sample_sizes, relative_error_EMD, cmap='bwr')
-            #plt.colorbar()
-            #lim = np.amax(abs(relative_error_EMD))
-            #plt.clim(-lim, lim)
-            axMeans.contourf(proportions, sample_sizes, relative_error_means, cmap='bwr')
-            #plt.colorbar()
-            #lim = np.amax(abs(relative_error_Means))
-            #plt.clim(-lim, lim)
-            axExcess.contourf(proportions, sample_sizes, relative_error_excess, cmap='bwr')
-            #fig.colorbar()
-            #lim = np.amax(abs(relative_error_Excess))
-            #plt.clim(-lim, lim)
-
-        if verbose:
-            # Deviation from fit
-            plt.figure()
-            plt.contourf(proportions, sample_sizes, median_error, cmap='viridis_r')
-            plt.colorbar()
-
-            #contour3(median(emd_dev_from_fit/0.0128,3),[0.01 0.001]*max(emd_dev_from_fit(:)/0.0128),'r','LineWidth',3)
-            levels = np.array([0.1, 1.0]) * np.amax(norm_EMD_dev)  # Percentage
-            CS = plt.contour(proportions, sample_sizes, np.amax(norm_EMD_dev, axis=2), levels)
-            plt.clabel(CS, inline=1, fontsize=10)
-
-            plt.xlabel('Proportion (Type 1)')
-            plt.ylabel('Sample size')
-            plt.title('Median propotion error from true proportion (as a % of maximum EMD error)\nContours represent maximum error')
-
-            # Error T1
-            plt.figure()
-            rel_err_31 = 100*(np.median((1-norm_mat_EMD_31), axis=2) - proportions)/proportions
-            plt.contourf(proportions, sample_sizes, rel_err_31, cmap='bwr')
-            plt.colorbar()
-            lim = np.amax(abs(rel_err_31))
-            plt.clim(-lim, lim)
-
-            # 1 & 5% relative error contour the other proportion
-            CS = plt.contour(proportions, sample_sizes, rel_err_31, [1, 5])
-            plt.clabel(CS, inline=1, fontsize=10)
-
-            plt.xlabel('Proportion (Type 1)')
-            plt.ylabel('Sample size')
-            plt.title('Relative % error from Type 1 population')
-
-            # Error T2
-            plt.figure()
-            proportions_rev = proportions[::-1]
-            rel_err_32 = 100*(np.median((1-norm_mat_EMD_32), axis=2) - proportions_rev)/proportions_rev
-            plt.contourf(proportions_rev, sample_sizes, rel_err_32, cmap='bwr')
-            plt.colorbar()
-            lim = np.amax(abs(rel_err_32))
-            plt.clim(-lim, lim)
-
-            # 1 & 5% relative error contour the other proportion
-            CS = plt.contour(proportions_rev, sample_sizes, rel_err_32, [1, 5])
-            plt.clabel(CS, inline=1, fontsize=10)
-
-            plt.xlim(0.99, 0.01)  # Reverse axis
-            plt.xlabel('Proportion (Type 2)')
-            plt.ylabel('Sample size')
-            plt.title('Relative % error from Type 2 population')
-
-            # Max Error
-            ers = np.zeros((len(sample_sizes), len(proportions), 2))
-            ers[:, :, 0] = 100*(np.median(1-mat_EMD_31/i_EMD_21, axis=2) - proportions_rev)/proportions_rev  # N.B. Swapped indicies
-            ers[:, :, 1] = 100*(np.median(1-mat_EMD_32/i_EMD_21, axis=2) - proportions)/proportions
-            max_ers = np.amax(abs(ers), axis=2)
-
-            plt.figure()
-            plt.contourf(proportions, sample_sizes, max_ers, cmap='viridis_r')
-            plt.colorbar()
-
-            # 1 & 5% relative error contour the max error proportion
-            CS = plt.contour(proportions, sample_sizes, max_ers, [1, 5])
-            plt.clabel(CS, inline=1, fontsize=10)
-
-            plt.xlabel('Proportion (Type 1)')
-            plt.ylabel('Sample size')
-            plt.title('Maximum % relative error from either population')
