@@ -333,6 +333,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     # Get initial estimate of proportions
     initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **extra_args)
     pprint(initial_results)
+    if true_prop_Ref1:
+        print("Ground truth: {:.5f}".format(true_prop_Ref1))
 
 
     if bootstraps:
