@@ -210,17 +210,7 @@ if __name__ == '__main__':
 
         print("Running parameter sweep with {} scores...".format(tag))
 
-        # Setup progress bar
-        iterations = len(sample_sizes) * len(proportions) # * len(metrics) * bootstraps  #KDE_fits.size
-        max_bars = 78    # number of dots in progress bar
-        if iterations < max_bars:
-            max_bars = iterations   # if less than 20 points, shorten bar
-        print("|" + max_bars*"-" + "|")
-        print('|', end='', flush=True)  # print start of progress bar
-
         t = time.time()  # Start timer
-        it = 0
-        bar_element = 0
 
         # Unpack data
         scores, bins, means, medians, prop_Ref1 = data
@@ -360,6 +350,16 @@ if __name__ == '__main__':
             extra_args['kdes'] = kdes
 
             results_KDE = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
+        # Setup progress bar
+        iterations = len(sample_sizes) * len(proportions) # * len(metrics) * bootstraps  #KDE_fits.size
+        max_bars = 78    # number of dots in progress bar
+        if iterations < max_bars:
+            max_bars = iterations   # if less than 20 points, shorten bar
+        print("|" + max_bars*"-" + "|")
+        print('|', end='', flush=True)  # print start of progress bar
+        it = 0
+        bar_element = 0
 
         # Spawn threads
 #        with Parallel(n_jobs=nprocs) as parallel:
