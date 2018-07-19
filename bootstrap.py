@@ -24,6 +24,8 @@ from joblib import Parallel, delayed, cpu_count
 # from joblib import Memory
 # mem = Memory(cachedir='/tmp')
 
+import analyse_mixture as pe
+
 # ---------------------------- Define constants ------------------------------
 
 verbose = False
@@ -84,14 +86,14 @@ if run_KDE:
     model = lmfit.Model(kde_T1) + lmfit.Model(kde_T2)
 
     # @mem.cache
-    def fit_KDE(RM, model, params_mix, kernel, bins):
-        x_KDE = np.linspace(bins[tag]['min'], bins[tag]['max'], len(RM)+2)
-        #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
-        mix_kde = KernelDensity(kernel=kernel, bandwidth=bins[tag]['width']).fit(RM[:, np.newaxis])
-        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-        amp_T1 = res_mix.params['amp_T1'].value
-        amp_T2 = res_mix.params['amp_T2'].value
-        return amp_T1/(amp_T1+amp_T2)
+    # def fit_KDE(RM, model, params_mix, kernel, bins):
+    #     x_KDE = np.linspace(bins[tag]['min'], bins[tag]['max'], len(RM)+2)
+    #     #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
+    #     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins[tag]['width']).fit(RM[:, np.newaxis])
+    #     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+    #     amp_T1 = res_mix.params['amp_T1'].value
+    #     amp_T2 = res_mix.params['amp_T2'].value
+    #     return amp_T1/(amp_T1+amp_T2)
 
     def plot_kernels():
         kernels = ['gaussian', 'tophat', 'epanechnikov',
@@ -329,7 +331,8 @@ def estimate_T1D(sample_size, prop_T1, b, **kwargs):
 
     # ------------------------------ KDE method ------------------------------
     if run_KDE:
-        results['KDE'] = fit_KDE(RM, model, params_mix, kernel, bins)
+        # results['KDE'] = fit_KDE(RM, model, params_mix, kernel, bins)
+        results['KDE'] = pe.fit_KDE_model(RM, bins, model, params_mix, kernel)
 
     # ------------------------------ EMD method ------------------------------
     if run_EMD:
