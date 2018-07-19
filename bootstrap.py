@@ -61,26 +61,26 @@ if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
 if run_KDE:
-
     # Define the KDE models
     # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
     def kde_Ref1(x, amp_Ref1):
-        return amp_Ref1 * np.exp(kdes['Ref1'].score_samples(x[:, np.newaxis]))
+        return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
     def kde_Ref2(x, amp_Ref2):
-        return amp_Ref2 * np.exp(kdes['Ref2'].score_samples(x[:, np.newaxis]))
+        return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
     model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
 
     # @mem.cache
-    # def fit_KDE(RM, model, params_mix, kernel, bins):
-    #     x_KDE = np.linspace(bins[tag]['min'], bins[tag]['max'], len(RM)+2)
-    #     #x_KDE = np.array([0.095, *np.sort(RM), 0.35])
-    #     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins[tag]['width']).fit(RM[:, np.newaxis])
-    #     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-    #     amp_Ref1 = res_mix.params['amp_Ref1'].value
-    #     amp_Ref2 = res_mix.params['amp_Ref2'].value
-    #     return amp_Ref1/(amp_Ref1+amp_Ref2)
+    def fit_KDE_model(Mix, bins, model, params_mix, kernel):
+        # TODO: Think carefully about this!
+        # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
+        x_KDE = bins["centers"]
+        mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
+        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+        amp_Ref1 = res_mix.params['amp_Ref1'].value
+        amp_Ref2 = res_mix.params['amp_Ref2'].value
+        return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
 def estimate_Ref1(sample_size, prop_Ref1, b, **kwargs):
