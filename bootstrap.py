@@ -186,6 +186,7 @@ if __name__ == '__main__':
         kwargs[tag] = tag
         kwargs['Ref1'] = Ref1
         kwargs['Ref2'] = Ref2
+            results_Excess = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
         bin_width = bins[tag]['width']
         bin_centers = bins[tag]['centers']
@@ -195,6 +196,7 @@ if __name__ == '__main__':
             bw = bin_width  # Bandwidth
             kdes = {}
             labels = ['Ref1', 'Ref2']  # Reference populations
+            results_Means = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
             # Fit reference populations
             for data, label in zip([Ref1, Ref2], labels):
@@ -206,13 +208,13 @@ if __name__ == '__main__':
                 kdes[label] = kde
 
             # kernel = 'gaussian'  #' epanechnikov'
+            results_Excess = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
             params_mix = model.make_params()
             params_mix['amp_Ref1'].value = 1
             params_mix['amp_Ref2'].value = 1
 
         #    if run_KDE:
-            KDE_fits = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
             # kwargs['model'] = model  # This breaks joblib
             kwargs['params_mix'] = params_mix
@@ -228,6 +230,7 @@ if __name__ == '__main__':
             if check_EMD:
                 emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
                 rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            results_EMD = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
             # Interpolate the cdfs at the same points for comparison
             x_Ref1 = [bins[tag]['min'], *sorted(Ref1), bins[tag]['max']]
@@ -249,16 +252,15 @@ if __name__ == '__main__':
             kwargs['i_EMD_21'] = i_EMD_21
 
         if run_means:
-            means_Ref1 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
             Ref1_mean = Ref1.mean()
             Ref2_mean = Ref2.mean()
             kwargs['Ref1_mean'] = Ref1_mean
             kwargs['Ref2_mean'] = Ref2_mean
 
         if run_excess:
-            excess_Ref1 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
             population_median = medians[tag]
             kwargs['population_median'] = population_median
+            results_KDE = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
         # Spawn threads
         with Parallel(n_jobs=nprocs) as parallel:
@@ -271,14 +273,15 @@ if __name__ == '__main__':
 
                     for b in range(bootstraps):
                         if run_means:
-                            means_Ref1[s, p, b] = results[b]['means']
+                            results_Means[s, p, b] = results[b]['Means']
                         if run_excess:
-                            excess_Ref1[s, p, b] = results[b]['excess']
+                            results_Excess[s, p, b] = results[b]['Excess']
                         if run_KDE:
-                            KDE_fits[s, p, b] = results[b]['KDE']
+                            results_KDE[s, p, b] = results[b]['KDE']
                         if run_EMD:
-                            mat_EMD_31[s, p, b] = results[b]['EMD_31']
-                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
+                            results_EMD[s, p, b] = results[b]['EMD']
+#                            mat_EMD_31[s, p, b] = results[b]['EMD_31']
+#                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
 
                     if (it >= bar_element*iterations/max_bars):
                         sys.stdout.write('*')
@@ -293,22 +296,23 @@ if __name__ == '__main__':
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
 
         # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
-        if run_EMD:
-            norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
-            norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-            if check_EMD:
-                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
-                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+#        if run_EMD:
+#            norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
+#            norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
+#            if check_EMD:
+#                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
+#                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
 
         if run_means:
-            np.save('{}/means_{}'.format(out_dir, tag), means_Ref1)
+            np.save('{}/means_{}'.format(out_dir, tag), results_Means)
         if run_excess:
-            np.save('{}/excess_{}'.format(out_dir, tag), excess_Ref1)
+            np.save('{}/excess_{}'.format(out_dir, tag), results_Excess)
         if run_KDE:
-            np.save('{}/kde_{}'.format(out_dir, tag), KDE_fits)
+            np.save('{}/kde_{}'.format(out_dir, tag), results_KDE)
         if run_EMD:
-            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
-            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
+            np.save('{}/emd_{}'.format(out_dir, tag), results_EMD)
+#            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
+#            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
