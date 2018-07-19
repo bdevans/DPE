@@ -11,27 +11,28 @@ https://git.exeter.ac.uk/bdevans/DPE/commit/01a9705b6fa1bf0d1df4fd3a4beaa1a413f6
 
 import os
 import time
-import math
+# import math
 import sys
-#import multiprocessing
+# import multiprocessing
 from collections import OrderedDict
 
-import pandas as pd
+# import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
 import lmfit
-#import dill
+# import dill
 from joblib import Parallel, delayed, cpu_count
 # from joblib import Memory
 # mem = Memory(cachedir='/tmp')
+# import tqdm
 
 import analyse_mixture as pe
-from datasets import *
+from datasets import (load_diabetes_data, load_renal_data)
 
 # ---------------------------- Define constants ------------------------------
 
 verbose = False
-out_dir = "results"
+out_dir = "sweep_results"
 run_means = True
 run_excess = True
 adjust_excess = True
@@ -45,7 +46,7 @@ bootstraps = 1000
 sample_sizes = np.arange(100, 1501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
 
-kernel = 'gaussian'
+KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
 # ----------------------------------------------------------------------------
@@ -63,10 +64,10 @@ if not os.path.exists(out_dir):
 if run_KDE:
     # Define the KDE models
     # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-    def kde_Ref1(x, amp_Ref1):
+    def kde_Ref1(x, amp_Ref1=1):
         return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
-    def kde_Ref2(x, amp_Ref2):
+    def kde_Ref2(x, amp_Ref2=1):
         return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
     model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
@@ -83,71 +84,116 @@ if run_KDE:
         return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
-def estimate_Ref1(sample_size, prop_Ref1, b, **kwargs):
+def construct_bootstrap(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
 
-    nRef1 = int(round(sample_size * prop_Ref1))
-    nRef2 = sample_size - nRef1
-
-    # Random sample from Ref1
-    R1 = np.random.choice(Ref1, nRef1, replace=True)
-
-    # Random sample from Ref2
-    R2 = np.random.choice(Ref2, nRef2, replace=True)
+    assert(0.0 <= prop_Ref1 <= 1.0)
+    n_Ref1 = int(round(sample_size * prop_Ref1))
+    n_Ref2 = sample_size - n_Ref1
 
     # Bootstrap mixture
-    RM = np.concatenate((R1, R2))
-    # xRM = np.linspace(0, 1, num=len(RM), endpoint=True)
+    bs = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+                         np.random.choice(Ref2, n_Ref2, replace=True)))
 
-    # assert sample_size == len(RM)
+    results = estimate_Ref1(bs, Ref1, Ref2, methods, **extra_args)
 
-    # x = np.array([0.095, *np.sort(RM), 0.35])
+    return results
+
+
+def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
+    '''Estimate the proportion of two reference populations in an unknown mixture.
+    The returned proportions are with respect to Ref 1. The proportion of Ref 2 is assumed to be 1 pr(Ref1). '''
+
+    # TODO: Import this from proportion_estimation
+
+    bins = kwargs['bins']
     results = {}
 
     # ---------------------- Difference of Means method ----------------------
-    if run_means:
-        proportion_of_Ref1 = (RM.mean()-Ref2_mean)/(Ref1_mean-Ref2_mean)
-        results['means'] = abs(proportion_of_Ref1)
+    if "Means" in methods:
+        proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+        results['Means'] = abs(proportion_of_Ref1)
 
-    # -------------------------- Subtraction method --------------------------
-    if run_excess:
-        number_low = len(RM[RM <= population_median])
-        number_high = len(RM[RM > population_median])
-        proportion_Ref1 = (number_high - number_low)/sample_size
-        results['excess'] = proportion_Ref1
+    # ----------------------------- Excess method ----------------------------
+    if "Excess" in methods:
+        # Calculate the proportion of another population w.r.t. the excess
+        # number of cases from the mixture's assumed majority population.
+        # TODO: Flip these around for when using the T2GRS
+#        Median_Mix = np.median(RM)
+#        if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
+#            population_median = methods["Excess"]["Median_Ref2"]
+#        else:  # Ref1 is closets to the mixture
+#            population_median = methods["Excess"]["Median_Ref1"]
+        number_low = len(RM[RM <= kwargs['population_median']])
+        number_high = len(RM[RM > kwargs['population_median']])
+        sample_size = len(RM)
+#        proportion_Ref1 = (number_high - number_low)/sample_size
+#            print("Passed median:", kwargs['population_median'])
+#            print("Ref1 median:", np.median(Ref1))
+#            print("Ref2 median:", np.median(Ref2))
+#            print("Mixture size:", sample_size)
+#            if kwargs['population_median'] < np.median(Ref1):
+        results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
+#                print("M_Ref2 < M_Ref1")
+#                print("High", number_Ref2_high)
+#                print("Low", number_Ref2_low)
+#            else:
+            # NOTE: This is an extension of the original method (above)
+#                results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
+#                print("M_Ref1 < M_Ref2")
+#                print("High", number_Ref2_high)
+#                print("Low", number_Ref2_low)
+
+#            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
+        results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
     # ------------------------------ KDE method ------------------------------
-    if run_KDE:
-        # results['KDE'] = fit_KDE(RM, model, params_mix, kernel, bins)
-        results['KDE'] = pe.fit_KDE_model(RM, bins, model, params_mix, kernel)
+    if "KDE" in methods:
+        # TODO: Print out warnings if goodness of fit is poor?
+#        model = kwargs["model"]
+        results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
 
     # ------------------------------ EMD method ------------------------------
-    if run_EMD:
+    if "EMD" in methods:
         # Interpolated cdf (to compute EMD)
-        x = [bins[tag]['min'], *np.sort(RM), bins[tag]['max']]
-        y = np.linspace(0, 1, num=len(x), endpoint=True)
-        (iv, ii) = np.unique(x, return_index=True)
-        si_CDF_3 = np.interp(bin_centers, iv, y[ii])
+        i_CDF_Mix = pe.interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
+#            x = [bins['min'], *np.sort(RM), bins['max']]
+#            y = np.linspace(0, 1, num=len(x), endpoint=True)
+#            (iv, ii) = np.unique(x, return_index=True)
+#            si_CDF_Mix = np.interp(bin_centers, iv, y[ii])
 
         # Compute EMDs
-        i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width / max_emd
-        i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width / max_emd
+#            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
+#            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD #kwargs['max_EMD']
+#            results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
 
-        if check_EMD:
-            # These were computed to check that the EMD computed proportions fit the mixture's CDF
-            EMD_diff = si_CDF_3 - ((1-i_EMD_31/i_EMD_21)*i_CDF_1 + (1-i_EMD_32/i_EMD_21)*i_CDF_2)
-            emd_dev_from_fit[s, p, b] = sum(EMD_diff)  # deviations from fit measured with emd
-            rms_dev_from_fit[s, p, b] = math.sqrt(sum(EMD_diff**2)) / len(si_CDF_3)  # deviations from fit measured with rms
+        i_CDF_Ref1 = kwargs["i_CDF_Ref1"]
+        i_CDF_Ref2 = kwargs["i_CDF_Ref2"]
+        i_EMD_1_2 = kwargs["i_EMD_1_2"]
+        i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1))
+        i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2))
+#            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+        results["EMD"] = 0.5 * (1 + (i_EMD_M_2 - i_EMD_M_1)/i_EMD_1_2)
+        # print('Proportions based on counts')
+        # print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
+        # print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
 
-        results['EMD_31'] = i_EMD_31
-        results['EMD_32'] = i_EMD_32
+        # print("Proportions based on Earth Mover's Distance (histogram values):")
+        # print('% of Type 1:', 1-EMD_31/EMD_21)
+        # print('% of Type 2:', 1-EMD_32/EMD_21)
+        #
+        # print("Proportions based on Earth Mover's Distance (interpolated values):")
+        # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
+        # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
 
     return results
 
 
 if __name__ == '__main__':
 
-    nprocs = multiprocessing.cpu_count()
-    print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
+    #nprocs = multiprocessing.cpu_count()
+    nprocs = cpu_count()
+    #print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
+    print('Running with {} processors...'.format(nprocs))
 
     # Set random seed
     np.random.seed(seed)
@@ -157,14 +203,12 @@ if __name__ == '__main__':
 
     datasets = {}
     metric = "T1GRS"
-    datasets["Diabetes"] = load_diabetes_data(metric)
+    #datasets["Diabetes"] = load_diabetes_data(metric)
     datasets["Renal"] = load_renal_data()
 
     for tag, data in datasets.items():
 
-        print("Running bootstrap with {} scores...".format(tag))
-
-        scores, bins, means, medians, prop_Ref1 = data
+        print("Running parameter sweep with {} scores...".format(tag))
 
         # Setup progress bar
         iterations = len(sample_sizes) * len(proportions) # * len(metrics) * bootstraps  #KDE_fits.size
@@ -179,97 +223,158 @@ if __name__ == '__main__':
         it = 0
         bar_element = 0
 
-        Ref1 = scores[tag]['Ref1']
-        Ref2 = scores[tag]['Ref2']
+        # Unpack data
+        scores, bins, means, medians, prop_Ref1 = data
 
-        kwargs = {}
-        kwargs[tag] = tag
-        kwargs['Ref1'] = Ref1
-        kwargs['Ref2'] = Ref2
-            results_Excess = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+        Ref1 = scores['Ref1']
+        Ref2 = scores['Ref2']
+        Mix = scores['Mix']
+        bin_width = bins['width']
+        bin_edges = bins['edges']
 
-        bin_width = bins[tag]['width']
-        bin_centers = bins[tag]['centers']
-        bin_edges = bins[tag]['edges']
+        if adjust_excess:
+            adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
+        else:
+            adjustment_factor = 1.0
 
-        if run_KDE:
-            bw = bin_width  # Bandwidth
-            kdes = {}
-            labels = ['Ref1', 'Ref2']  # Reference populations
+        methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
+                                          'Ref2': means['Ref2']}),
+                               ("Excess", {"Median_Ref1": medians["Ref1"],
+                                           "Median_Ref2": medians["Ref2"],
+                                           "adjustment_factor": adjustment_factor}),
+                               ("EMD", True),
+                               ("KDE", {'kernel': KDE_kernel,
+                                        'bandwidth': bins['width']})])
+
+        extra_args = {}
+#        if sample_size == -1:
+#            sample_size = len(Mix)
+        extra_args['bins'] = bins
+
+        if "Means" in methods:
+            try:
+                Mean_Ref1 = methods["Means"]["Ref1"]
+            except (KeyError, TypeError):
+                print("No Mean_Ref1 specified!")
+                Mean_Ref1 = Ref1.mean()
+            finally:
+                extra_args["Mean_Ref1"] = Mean_Ref1
+            try:
+                Mean_Ref2 = methods["Means"]["Ref2"]
+            except (KeyError, TypeError):
+                print("No Mean_Ref2 specified!")
+                Mean_Ref2 = Ref2.mean()
+            finally:
+                extra_args["Mean_Ref2"] = Mean_Ref2
+
             results_Means = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
-            # Fit reference populations
-            for data, label in zip([Ref1, Ref2], labels):
-                kdes[label] = {}
-                X = data[:, np.newaxis]
-                # for kernel in ['gaussian', 'tophat', 'epanechnikov']:
-                kde = KernelDensity(kernel=kernel, bandwidth=bin_width).fit(X)
-                # kdes[label][kernel] = kde
-                kdes[label] = kde
+        if "Excess" in methods:
+        # --------------------------- Excess method --------------------------
+            # TODO: Check and rename to Ref1_median?
+            if isinstance(methods["Excess"], dict):
+                if "Median_Ref1" not in methods["Excess"]:
+                    methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
+                if "Median_Ref2" not in methods["Excess"]:
+                    methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
+                median = methods["Excess"]["Median_Ref2"]
+                if "adjustment_factor" not in methods["Excess"]:
+                    methods["Excess"]["adjustment_factor"] = 1
+                extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
 
-            # kernel = 'gaussian'  #' epanechnikov'
+            extra_args['population_median'] = median
+
+            if verbose:
+                print("Ref1 median:", np.median(Ref1))
+                print("Ref2 median:", np.median(Ref2))
+                print("Population median: {}".format(median))
+#                print("Mixture size:", sample_size)
+
             results_Excess = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
+        if "EMD" in methods:
+        # ---------------------------- EMD method ----------------------------
+
+            max_EMD = bin_edges[-1] - bin_edges[0]
+
+            # Interpolate the cdfs at the same points for comparison
+            i_CDF_Ref1 = pe.interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
+            i_CDF_Ref2 = pe.interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
+
+            # EMDs computed with interpolated CDFs
+            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+    #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
+    #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
+    #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
+
+            extra_args['max_EMD'] = max_EMD
+            extra_args['i_CDF_Ref1'] = i_CDF_Ref1
+            extra_args['i_CDF_Ref2'] = i_CDF_Ref2
+            extra_args['i_EMD_1_2'] = i_EMD_1_2
+
+            results_EMD = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+
+        if "KDE" in methods:
+            # -------------------------- KDE method --------------------------
+
+            labels = ['Ref1', 'Ref2']  # Reference populations
+
+            bw = bin_width  # Bandwidth
+            # Fit reference populations
+            kdes = pe.fit_kernels(scores, bw)
+
+            try:
+                KDE_kernel = methods["KDE"]["kernel"]
+            except (KeyError, TypeError):
+                if verbose:
+                    print("No kernel specified!")
+                KDE_kernel = "gaussian"  # Default kernel
+            else:
+                try:
+                    bw = methods["KDE"]["bandwidth"]
+                except (KeyError, TypeError):
+                    bw = bins["width"]
+            finally:
+                if verbose:
+                    print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
+
+            # Define the KDE models
+            # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
+#            def kde_Ref1(x, amp_Ref1):
+#                return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#
+#            def kde_Ref2(x, amp_Ref2):
+#                return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#
+#            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
 
             params_mix = model.make_params()
             params_mix['amp_Ref1'].value = 1
+            params_mix['amp_Ref1'].min = 0
             params_mix['amp_Ref2'].value = 1
+            params_mix['amp_Ref2'].min = 0
 
-        #    if run_KDE:
+#            extra_args['model'] = model  # This breaks joblib
+            extra_args['initial_params'] = params_mix
+            extra_args['KDE_kernel'] = KDE_kernel
+            extra_args['bin_width'] = bin_width
+            extra_args['kdes'] = kdes
 
-            # kwargs['model'] = model  # This breaks joblib
-            kwargs['params_mix'] = params_mix
-            kwargs['kernel'] = kernel
-            kwargs['bin_width'] = bin_width
-
-        if run_EMD:
-
-            max_emd = bin_edges[-1] - bin_edges[0]
-
-            mat_EMD_31 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-            mat_EMD_32 = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-            if check_EMD:
-                emd_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-                rms_dev_from_fit = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-            results_EMD = np.zeros((len(sample_sizes), len(proportions), bootstraps))
-
-            # Interpolate the cdfs at the same points for comparison
-            x_Ref1 = [bins[tag]['min'], *sorted(Ref1), bins[tag]['max']]
-            y_Ref1 = np.linspace(0, 1, len(x_Ref1))
-            (iv, ii) = np.unique(x_Ref1, return_index=True)
-            i_CDF_1 = np.interp(bin_centers, iv, y_Ref1[ii])
-
-            x_Ref2 = [bins[tag]['min'], *sorted(Ref2), bins[tag]['max']]
-            y_Ref2 = np.linspace(0, 1, len(x_Ref2))
-            (iv, ii) = np.unique(x_Ref2, return_index=True)
-            i_CDF_2 = np.interp(bin_centers, iv, y_Ref2[ii])
-
-            # EMDs computed with interpolated CDFs
-            i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bins[tag]['width'] / max_emd
-
-            kwargs['max_emd'] = max_emd
-            kwargs['i_CDF_1'] = i_CDF_1
-            kwargs['i_CDF_2'] = i_CDF_2
-            kwargs['i_EMD_21'] = i_EMD_21
-
-        if run_means:
-            Ref1_mean = Ref1.mean()
-            Ref2_mean = Ref2.mean()
-            kwargs['Ref1_mean'] = Ref1_mean
-            kwargs['Ref2_mean'] = Ref2_mean
-
-        if run_excess:
-            population_median = medians[tag]
-            kwargs['population_median'] = population_median
             results_KDE = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
         # Spawn threads
-        with Parallel(n_jobs=nprocs) as parallel:
-            for s, sample_size in enumerate(sample_sizes):
-                for p, prop_Ref1 in enumerate(proportions):
+#        with Parallel(n_jobs=nprocs) as parallel:
+        for s, sample_size in enumerate(sample_sizes):
+            for p, prop_Ref1 in enumerate(proportions):
 
+#        for s, sample_size in enumerate(tqdm.tqdm(sample_sizes)):
+#            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions)):
+                with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over bootstraps
-                    results = parallel(delayed(estimate_Ref1)(sample_size, prop_Ref1, b, **kwargs)
+                    results = parallel(delayed(construct_bootstrap)(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
                                        for b in range(bootstraps))
+#                    results = [construct_bootstrap(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+#                                       for b in range(bootstraps)]
 
                     for b in range(bootstraps):
                         if run_means:
@@ -318,3 +423,5 @@ if __name__ == '__main__':
 
     # run_bootstrap('T1GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
     # run_bootstrap('T2GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
+
+    print("Bootstrapping of datasets: {} complete!".format(list(datasets)))
