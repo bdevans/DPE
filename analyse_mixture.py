@@ -83,7 +83,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None):  #, means=None, median=None, KDE_kernel='gaussian'):
+def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1):  #, means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -102,14 +102,16 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         try:
             Mean_Ref1 = methods["Means"]["Ref1"]
         except (KeyError, TypeError):
-            print("No Mean_Ref1 specified!")
+            if verbose > 1:
+                print("No Mean_Ref1 specified!")
             Mean_Ref1 = Ref1.mean()
         finally:
             extra_args["Mean_Ref1"] = Mean_Ref1
         try:
             Mean_Ref2 = methods["Means"]["Ref2"]
         except (KeyError, TypeError):
-            print("No Mean_Ref2 specified!")
+            if verbose > 1:
+                print("No Mean_Ref2 specified!")
             Mean_Ref2 = Ref2.mean()
         finally:
             extra_args["Mean_Ref2"] = Mean_Ref2
@@ -136,10 +138,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 #            # The Excess method assumes that...
 #            median = np.median(scores["Ref2"])
         extra_args['population_median'] = median
-        print("Ref1 median:", np.median(Ref1))
-        print("Ref2 median:", np.median(Ref2))
-        print("Population median: {}".format(median))
-        print("Mixture size:", sample_size)
+        if verbose > 1:
+            print("Ref1 median:", np.median(Ref1))
+            print("Ref2 median:", np.median(Ref2))
+            print("Population median: {}".format(median))
+            print("Mixture size:", sample_size)
 
 
     if "EMD" in methods:
@@ -173,7 +176,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         try:
             KDE_kernel = methods["KDE"]["kernel"]
         except (KeyError, TypeError):
-            print("No kernel specified!")
+            if verbose > 1:
+                print("No kernel specified!")
             KDE_kernel = "gaussian"  # Default kernel
         else:
             try:
@@ -181,7 +185,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             except (KeyError, TypeError):
                 bw = bins["width"]
         finally:
-            print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
+            if verbose > 1:
+                print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
 
         # Define the KDE models
         # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
@@ -358,15 +363,17 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
     # Get initial estimate of proportions
     initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **extra_args)
-    pprint(initial_results)
+    if verbose > 1:
+        pprint(initial_results)
     if true_prop_Ref1:
-        print("Ground truth: {:.5f}".format(true_prop_Ref1))
+        if verbose > 1:
+            print("Ground truth: {:.5f}".format(true_prop_Ref1))
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
     if bootstraps > 1:
-
-        print('Running {} bootstraps...'.format(bootstraps), flush=True)
+        if verbose:
+            print('Running {} bootstraps...'.format(bootstraps), flush=True)
 
         results = OrderedDict()
 
@@ -391,25 +398,25 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     else:
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
 
-
-    # ------------ Summarise proportions for the whole distribution --------------
-    print()
-    print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
-    print("="*61)
-    for method in methods:
-#        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        print("{:14} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} ".format(method, np.mean(df_pe[method]), np.std(df_pe[method]), 1-np.mean(df_pe[method]), np.std(1-df_pe[method])))  #  (+/- SD)
-        if bootstraps > 1:
-            nobs = len(df_pe[method])
-            count = int(np.mean(df_pe[method])*nobs)
-            ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
-            ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
-            print("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} ".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-#            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_pe[method]), ci_upp1, ci_low2, 1-np.mean(df_pe[method]), ci_upp2))
-        print("-"*61)
-    if true_prop_Ref1:
-        print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
+    if verbose:
+        # ------------ Summarise proportions for the whole distribution --------------
+        print()
+        print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
         print("="*61)
-    print()
+        for method in methods:
+    #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
+            print("{:14} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} ".format(method, np.mean(df_pe[method]), np.std(df_pe[method]), 1-np.mean(df_pe[method]), np.std(1-df_pe[method])))  #  (+/- SD)
+            if bootstraps > 1:
+                nobs = len(df_pe[method])
+                count = int(np.mean(df_pe[method])*nobs)
+                ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
+                ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
+                print("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} ".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
+    #            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_pe[method]), ci_upp1, ci_low2, 1-np.mean(df_pe[method]), ci_upp2))
+            print("-"*61)
+        if true_prop_Ref1:
+            print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
+            print("="*61)
+        print()
 
     return df_pe
