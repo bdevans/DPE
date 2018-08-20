@@ -43,7 +43,7 @@ check_EMD = False
 seed = 42
 
 bootstraps = 1000
-sample_sizes = np.arange(100, 1501, 100)  # 3100
+sample_sizes = np.arange(100, 2501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
 
 KDE_kernel = 'gaussian'
@@ -110,19 +110,36 @@ def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
 
     # ---------------------- Difference of Means method ----------------------
     if "Means" in methods:
-        proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-        results['Means'] = abs(proportion_of_Ref1)
+        # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+        # results['Means'] = abs(proportion_of_Ref1)
+
+        # TODO!!!
+        if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
+            proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+        else:
+            proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
+        if proportion_of_Ref1 < 0:
+            proportion_of_Ref1 = 0.0
+        if proportion_of_Ref1 > 1:
+            proportion_of_Ref1 = 1.0
+        results['Means'] = proportion_of_Ref1
 
     # ----------------------------- Excess method ----------------------------
     if "Excess" in methods:
         # Calculate the proportion of another population w.r.t. the excess
         # number of cases from the mixture's assumed majority population.
         # TODO: Flip these around for when using the T2GRS
-#        Median_Mix = np.median(RM)
-#        if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
-#            population_median = methods["Excess"]["Median_Ref2"]
-#        else:  # Ref1 is closets to the mixture
-#            population_median = methods["Excess"]["Median_Ref1"]
+        # Median_Mix = np.median(Mix)
+
+
+        # TODO!!!
+        # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
+        #     population_median = methods["Excess"]["Median_Ref2"]
+        # else:  # Ref1 is closets to the mixture
+        #     population_median = methods["Excess"]["Median_Ref1"]
+
+
+
         number_low = len(RM[RM <= kwargs['population_median']])
         number_high = len(RM[RM > kwargs['population_median']])
         sample_size = len(RM)
@@ -146,10 +163,15 @@ def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
 #            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
         results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
+        # Clip results
+        if results['Excess'] > 1:
+            results['Excess'] = 1.0
+        if results['Excess'] < 0:
+            results['Excess'] = 0.0
+
     # ------------------------------ KDE method ------------------------------
     if "KDE" in methods:
         # TODO: Print out warnings if goodness of fit is poor?
-#        model = kwargs["model"]
         results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
 
     # ------------------------------ EMD method ------------------------------
@@ -259,7 +281,7 @@ if __name__ == '__main__':
             results_Means = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
         if "Excess" in methods:
-        # --------------------------- Excess method --------------------------
+            # --------------------------- Excess method --------------------------
             # TODO: Check and rename to Ref1_median?
             if isinstance(methods["Excess"], dict):
                 if "Median_Ref1" not in methods["Excess"]:
@@ -282,7 +304,7 @@ if __name__ == '__main__':
             results_Excess = np.zeros((len(sample_sizes), len(proportions), bootstraps))
 
         if "EMD" in methods:
-        # ---------------------------- EMD method ----------------------------
+            # ---------------------------- EMD method ----------------------------
 
             max_EMD = bin_edges[-1] - bin_edges[0]
 

@@ -219,8 +219,19 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
         # ---------------------- Difference of Means method ----------------------
         if "Means" in methods:
-            proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-            results['Means'] = abs(proportion_of_Ref1)
+            # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+            # results['Means'] = abs(proportion_of_Ref1)
+
+            # TODO!!!
+            if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
+                proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+            else:
+                proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
+            if proportion_of_Ref1 < 0:
+                proportion_of_Ref1 = 0.0
+            if proportion_of_Ref1 > 1:
+                proportion_of_Ref1 = 1.0
+            results['Means'] = proportion_of_Ref1
 
         # -------------------------- Subtraction method --------------------------
         if "Excess" in methods:
@@ -231,10 +242,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
 
             # TODO!!!
-            if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
-                population_median = methods["Excess"]["Median_Ref2"]
-            else:  # Ref1 is closets to the mixture
-                population_median = methods["Excess"]["Median_Ref1"]
+            # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
+            #     population_median = methods["Excess"]["Median_Ref2"]
+            # else:  # Ref1 is closets to the mixture
+            #     population_median = methods["Excess"]["Median_Ref1"]
 
 
 
@@ -260,6 +271,12 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
 #            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
             results['Excess'] *= methods["Excess"]["adjustment_factor"]
+
+            # Clip results
+            if results['Excess'] > 1:
+                results['Excess'] = 1.0
+            if results['Excess'] < 0:
+                results['Excess'] = 0.0
 
         # ------------------------------ KDE method ------------------------------
         if "KDE" in methods:
