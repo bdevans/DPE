@@ -3,6 +3,10 @@
 """
 Created on Fri Jan 19 14:39:28 2018
 
+Parallelised script for systematically characterising the parameter space for
+proportion estimation methods by generating artificial mixtures across a grid
+of proprtions and sample sizes.
+
 @author: ben
 
 Original Diabetes data was processed with commit 01a9705b
@@ -131,14 +135,11 @@ def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         # TODO: Flip these around for when using the T2GRS
         # Median_Mix = np.median(Mix)
 
-
         # TODO!!!
         # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
         #     population_median = methods["Excess"]["Median_Ref2"]
         # else:  # Ref1 is closets to the mixture
         #     population_median = methods["Excess"]["Median_Ref1"]
-
-
 
         number_low = len(RM[RM <= kwargs['population_median']])
         number_high = len(RM[RM > kwargs['population_median']])
