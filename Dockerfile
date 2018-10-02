@@ -12,16 +12,6 @@ ENTRYPOINT [ "/bin/bash", "-c" ]
 
 #EXPOSE 5000
 
-# Conda supports delegating to pip to install dependencies
-# that aren’t available in anaconda or need to be compiled
-# for other reasons. In our case, we need psycopg compiled
-# with SSL support. These commands install prereqs necessary
-# to build psycopg.
-#RUN apt-get update && apt-get install -y \
-# libpq-dev \
-# build-essential \
-#&& rm -rf /var/lib/apt/lists/*
-
 # Use the environment.yml to create the conda environment.
 # https://fmgdata.kinja.com/using-docker-with-conda-environments-1790901398
 RUN [ "conda", "update", "conda", "-y" ]
