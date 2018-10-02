@@ -2,6 +2,7 @@
 # TODO: Remove sensitive data from the repository
 data
 data/previous*
+data*
 *results*/
 figs/
 tmp*
