@@ -1,0 +1,8 @@
+data_previous
+*results*
+figs
+.*
+*.m
+*.ipynb
+tmp*
+__pycache__
