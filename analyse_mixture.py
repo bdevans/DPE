@@ -83,7 +83,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1):  #, means=None, median=None, KDE_kernel='gaussian'):
+def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):  #, means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -418,5 +418,29 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
             print("="*61)
         print()
+
+    if logfile == '':
+        logfile = "proportion_estimate.log"
+    with open(logfile, 'w') as lf:
+        lf.write("{:20} | {:^17s} | {:^17s} \n".format("Proportion Estimates", "Reference 1", "Reference 2"))
+        lf.write("="*61)
+        lf.write("\n")
+        for method in methods:
+    #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
+            lf.write("{:14} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} \n".format(method, np.mean(df_pe[method]), np.std(df_pe[method]), 1-np.mean(df_pe[method]), np.std(1-df_pe[method])))  #  (+/- SD)
+            if bootstraps > 1:
+                nobs = len(df_pe[method])
+                count = int(np.mean(df_pe[method])*nobs)
+                ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
+                ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
+                lf.write("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} \n".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
+    #            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_pe[method]), ci_upp1, ci_low2, 1-np.mean(df_pe[method]), ci_upp2))
+            lf.write("-"*61)
+            lf.write("\n")
+        if true_prop_Ref1:
+            lf.write("{:20} | {:<17.5f} | {:<17.5f}\n".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
+            lf.write("="*61)
+            lf.write("\n")
+        lf.write("\n")
 
     return df_pe
