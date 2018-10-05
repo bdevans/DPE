@@ -266,42 +266,79 @@ def plot_distributions(scores, bins, data_label, ax=None): #, kernel, bandwidth)
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, ylims=None):
+def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
+                    ci_method='normal', legend=True, orient='v'):
 
     c = sns.color_palette()[-3]  # 'gray'
 
     if not ax:
         f, ax = plt.subplots()
-    if ylims:
-        ax.set_ylim(ylims)
+    if limits:
+        if orient == 'v':
+            ax.set_ylim(limits)
+        if orient == 'h':
+            ax.set_xlim(limits)
+
 
     # Adding this because a bug means that moving yaxis to right removes tickmarks
-    #sns.set_style("whitegrid")
+#    sns.set_style("whitegrid")
 
     # Draw violin plots of bootstraps
-    sns.violinplot(data=df_bs, ax=ax)  # , inner="stick")
-    sns.despine(top=True, bottom=True, left=True, right=False, trim=True)
+    sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0)  # , inner="stick")
+    if orient == 'v':
+        # sns.violinplot(data=df_bs, ax=ax, cut=0)  # , inner="stick")
+        sns.despine(ax=ax, top=True, bottom=True, left=False, right=True, trim=True)
+    elif orient == 'h':
+        # sns.violinplot(x="Proportion", y="Sample Size", data=df_bs, ax=ax, cut=0)  # , inner="stick")
+        sns.despine(ax=ax, top=False, bottom=True, left=True, right=True, trim=True)
 
     if prop_Ref1:
         # Add ground truth
-        ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--',
-                   label="Ground Truth: {:3.2}".format(prop_Ref1))
+        if orient == 'v':
+            ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--',
+                       label="Ground Truth: {:4.3}".format(prop_Ref1))
+        elif orient == 'h':
+            ax.axvline(x=prop_Ref1, ymin=0, ymax=1, ls='--',
+                       label="Ground Truth: {:4.3}".format(prop_Ref1))
 
     # Add confidence intervals
-    x = ax.get_xticks()
-    y = df_bs.mean()
+    if orient == 'v':
+        x, y = ax.get_xticks(), df_bs.mean().values
+        means = y
+    elif orient =='h':
+        x, y = df_bs.mean().values, ax.get_yticks()
+        means = x
     errors = np.zeros(shape=(2, len(methods)))
+
     for midx, method in enumerate(methods):
         nobs = len(df_bs[method])
         count = int(np.mean(df_bs[method])*nobs)
-        ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
+        ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
+                                            method=ci_method)
         # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
-        errors[0, midx] = y[midx] - ci_low1
-        errors[1, midx] = ci_upp1 - y[midx]
+        errors[0, midx] = means[midx] - ci_low
+        errors[1, midx] = ci_upp - means[midx]
 
+
+#    if orient == 'v':
+#        x, y = ax.get_xticks(), df_bs.mean()
+#    elif orient == 'h':
+#        y, x = ax.get_xticks(), df_bs.mean()
+#    print(x)
+#    print(y)
+#    print(errors)
+
+#    ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
     # Add white border around error bars
     # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
-    ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+
+#    ax.plot(x, y, '*', markersize=15)
+#    ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+    if orient == 'v':
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+    elif orient == 'h':
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+
     #f, ax = plt.subplots()
     #ax = sns.pointplot(data=df_bs, join=False, ci=100*(1-alpha), capsize=.2)
     #sns.despine(top=True, bottom=True, trim=True)
@@ -310,13 +347,21 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, ylims=None):
     #yticks = ax.get_yticks()
     #ax.set_yticks(yticks)
 
-    ax.yaxis.tick_right()
+    if orient == 'v':
+        ax.yaxis.tick_left()
+        ax.set_ylabel("$p_1^*$", {"rotation": "horizontal"})
+#        ax.set_xticks([])  # Remove ticks for method labels
+    elif orient == 'h':
+        ax.xaxis.tick_bottom()
+        ax.set_xlabel("$p_1$")
+        # ax.set_yticks([])  # Remove ticks for method labels
     #plt.setp(ax, yticks=yticks)
     #ax.yaxis.set_ticks_position('right')
 
     #ax.set_xticks([])
     #ax.set_xticklabels(list(methods))
-    ax.legend()
+    if legend:
+        ax.legend()
     # plt.savefig('figs/violins_{}.png'.format(data_label))
 
     if False:
