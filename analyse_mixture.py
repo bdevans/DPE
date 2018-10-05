@@ -3,19 +3,15 @@
 """
 Created on Thu Jun 21 11:47:27 2018
 
+Module to analyse an unknown mixture population.
+
 @author: ben
 """
 
-# import os
-# import time
-# import math
-# import sys
-from collections import defaultdict, OrderedDict
-
+from collections import OrderedDict  # , defaultdict
 from pprint import pprint
 
 import numpy as np
-# import scipy as sp
 import pandas as pd
 from sklearn.neighbors import KernelDensity
 # from statsmodels.nonparametric.kde import KDEUnivariate
