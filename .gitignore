@@ -1,8 +1,7 @@
 # Project directories
 # TODO: Remove sensitive data from the repository
-data
 data/previous*
-data*
+data_*
 *results*/
 figs/
 tmp*
