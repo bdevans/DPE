@@ -1,15 +1,20 @@
-Diabetes Proportion Estimation
-==============================
+Distribution Proportion Estimation
+==================================
 
 Evaluation of algorithms for estimating the proportions of Type I (and Type II) diabetics in a mixture population based on genetic risk scores.
 
 Execution
 ---------
 
-1. Run `bootstrap.py` on a multicore server. This is best done in a Docker container as follows:
+1. Run `bootstrap.py` on a multicore server. This is best done in a Docker container (using `screen` to avoid disconnection problems) as follows:
     1. `docker build -t dpe https://git.exeter.ac.uk/bdevans/DPE.git`
-    2. `docker run -it -v dpe:/usr/dpe/data --name dpe dpe`
+    2. `screen`
+    3. `docker run -it -v dpe:/usr/dpe/results --name dpe dpe`
 2. Collect results and run `plots.py`.
+    0. Use `screen -r` to list the detached sessions
+    1. `screen -r 10654.pts-8.thuemorse`
+    2. `docker cp dpe:/usr/dpe/results .`
+    3. `scp -r results ben@144.173.111.1:/Users/ben/EXE/repos/DPE/results`
 
 Methods
 -------
@@ -136,6 +141,7 @@ Discussion points to be agreed
 - [ ] How to calculate "pseudo ground truth" for Diabetes data
 - [ ] How to generate a single proportion from EMD method
 - [ ] Supplementary figure showing the Excess breakdown for different degrees of overlap?
+- [ ] Should the grid search plots colour +/- error?
 
 
 TODO
@@ -147,6 +153,11 @@ TODO
 - [ ] Apply excess and kde to mixture plots for mean and CI
 - [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
 - [ ] Plot residuals for KDE to help identify "third" groups
+- [ ] Ensure all relevant data access forms are signed
+- [ ] Adapt EMD to be non-parametric
+- [ ] Adapt KDE to be non-parametric
+- [ ] Reference for the 8% Excess underestimate?
+- [ ] The Wellcome Trust requires that the research is made open access: https://www.exeter.ac.uk/research/openresearch/payingopenaccess/
 
 Continuous characteristics (eg, BMI) were derived by use of the mean value of the low susceptibility group (type 2 diabetes) and the mean of the high susceptibility group (combined type 1 and type 2 diabetes) to calculate a mean for the group with type 1 diabetes. For example, for BMI:
 
@@ -170,3 +181,4 @@ Display Items
 
 1. Bootstraps (as for Fig. 3) for e.g. Depression, Menieres, Renal.
 2. Mixture histograms with estimates and confidence intervals for each method
+3. Distributions of Ref1, Ref2 and Mix for each dataset
