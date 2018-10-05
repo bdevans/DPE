@@ -133,7 +133,6 @@ def plot_distributions(scores, bins, data_label, ax=None):
 
     if not ax:
         f, ax = plt.subplots()
-    #sns.set_style("ticks")
 
     with sns.axes_style("ticks"):
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
@@ -168,21 +167,14 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
         if orient == 'h':
             ax.set_xlim(limits)
 
-
-    # Adding this because a bug means that moving yaxis to right removes tickmarks
-#    sns.set_style("whitegrid")
-
     # Draw violin plots of bootstraps
     sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0)  # , inner="stick")
     if orient == 'v':
-        # sns.violinplot(data=df_bs, ax=ax, cut=0)  # , inner="stick")
         sns.despine(ax=ax, top=True, bottom=True, left=False, right=True, trim=True)
     elif orient == 'h':
-        # sns.violinplot(x="Proportion", y="Sample Size", data=df_bs, ax=ax, cut=0)  # , inner="stick")
         sns.despine(ax=ax, top=False, bottom=True, left=True, right=True, trim=True)
 
-    if prop_Ref1:
-        # Add ground truth
+    if prop_Ref1:  # Add ground truth
         if orient == 'v':
             ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--',
                        label="Ground Truth: {:4.3}".format(prop_Ref1))
@@ -204,42 +196,24 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
         count = int(np.mean(df_bs[method])*nobs)
         ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
                                             method=ci_method)
-        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
         errors[0, midx] = means[midx] - ci_low
         errors[1, midx] = ci_upp - means[midx]
 
-
-#    if orient == 'v':
-#        x, y = ax.get_xticks(), df_bs.mean()
-#    elif orient == 'h':
-#        y, x = ax.get_xticks(), df_bs.mean()
-#    print(x)
-#    print(y)
-#    print(errors)
-
-#    ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
     # Add white border around error bars
     # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
 
-#    ax.plot(x, y, '*', markersize=15)
-#    ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
     if orient == 'v':
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4,
+                    capsize=10, capthick=4, label=error_label)
     elif orient == 'h':
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
-
-    #f, ax = plt.subplots()
-    #ax = sns.pointplot(data=df_bs, join=False, ci=100*(1-alpha), capsize=.2)
-    #sns.despine(top=True, bottom=True, trim=True)
-    #plt.savefig('figs/conf_int_{}.png'.format(data_label))
-
-    #yticks = ax.get_yticks()
-    #ax.set_yticks(yticks)
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=5, c=c, lw=4,
+                    capsize=10, capthick=4, label=error_label)
 
     if orient == 'v':
         ax.yaxis.tick_left()
         ax.set_ylabel("$p_1^*$", {"rotation": "horizontal"})
-#        ax.set_xticks([])  # Remove ticks for method labels
+        # ax.set_xticks([])  # Remove ticks for method labels
     elif orient == 'h':
         ax.xaxis.tick_bottom()
         ax.set_xlabel("$p_1$")
@@ -332,19 +306,15 @@ KDE_kernel = 'gaussian'
 
 # Grid Search Plots
 # Configure plots
-PLOT_RELATIVE_ERROR = False
-PLOT_ABSOLUTE_ERROR = True
-PLOT_STANDARD_DEVIATION = True
-ADJUST_EXCESS = True
 
 LINEAR_COLOURBAR = True
 ABSOLUTE_ERROR = False
-LABELS = ['Means', 'Excess', 'EMD', 'KDE']
-COLOURS = ['r', 'g', 'b', 'k']
+# LABELS = ['Means', 'Excess', 'EMD', 'KDE']
+# COLOURS = ['r', 'g', 'b', 'k']
 average = np.mean
 deviation = np.std
 
-METRICS = ['T1GRS', 'T2GRS']
+# METRICS = ['T1GRS', 'T2GRS']
 
 
 # ----------------------------------------------------------------------------
@@ -377,17 +347,6 @@ np.random.seed(seed)
 
 np.seterr(divide='ignore', invalid='ignore')
 
-#if True:
-#    #metric = 'T1GRS'
-#    data_label ='Diabetes'
-#    (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T1GRS')
-#    bs_ylims = None
-#else:
-#    data_label ='Renal'
-#    (scores, bins, means, medians, prop_Ref1) = load_renal_data()
-#    bs_ylims = (0, 0.12)
-
-# plot_distributions(scores, bins, data_label)  #KDE_kernel, bins['width'])
 
 for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                          ("Renal", load_renal_data())]:
@@ -435,8 +394,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     #    exec(open("./bootstrap.py").read())
 
     sns.set_style("ticks")
-
-
 
     # Load bootstraps of accurarcy data
     (errors, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
@@ -705,10 +662,8 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 #            ax_vio.get_yticklabels().set_visible(False)
             g.set(xlim=(0, 1))
 
-
-            if ADD_CI:
+            if ADD_CI:  # Add confidence intervals
                 df_means = df.groupby('Method').mean()
-                # Add confidence intervals
                 errors = np.zeros(shape=(2, len(methods)))
                 means = []
                 for midx, method in enumerate(methods):
