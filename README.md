@@ -10,6 +10,7 @@ Execution
     1. `docker build -t dpe https://git.exeter.ac.uk/bdevans/DPE.git`
     2. `screen`
     3. `docker run -it -v dpe:/usr/dpe/results --name dpe dpe`
+    4. To detach, press `Ctrl+a` followed by `d`
 2. Collect results and run `plots.py`.
     0. Use `screen -r` to list the detached sessions
     1. `screen -r 10654.pts-8.thuemorse`
