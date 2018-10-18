@@ -41,11 +41,18 @@ def load_diabetes_data(metric):
 
     scores = {}
     means = {}
+    prop_Ref1 = None
 
     # Arrays of metric scores for each group
     scores = {'Ref1': data.loc[data['group'] == 1, metric].values,
               'Ref2': data.loc[data['group'] == 2, metric].values,
               'Mix': data.loc[data['group'] == 3, metric].values}
+    # Try creating a "ground truth" by combining both reference populations
+              # 'Mix': np.r_[data.loc[data['group'] == 1, metric].values,
+              #              data.loc[data['group'] == 2, metric].values]}
+
+    # if metric == 'T1GRS':
+    #     prop_Ref1 = len(scores['Ref1'])/(len(scores['Ref1']) + len(scores['Ref2']))
 
     means = {'Ref1': scores['Ref1'].mean(),
              'Ref2': scores['Ref2'].mean()}
@@ -74,7 +81,6 @@ def load_diabetes_data(metric):
         sns.jointplot(x='T1GRS', y='T2GRS', color='g', data=data.loc[data["group"]==3])
     #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
 
-    prop_Ref1 = None
     return scores, bins, means, medians, prop_Ref1
 
 
