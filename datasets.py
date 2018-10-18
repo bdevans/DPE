@@ -81,7 +81,9 @@ def load_diabetes_data(metric):
 def load_renal_data():
 
     '''Load individuals with Type 2 Diabetes GRS and renal disease (microalbuminuria)
-    Group: 1 is controls; 2 is non insulin treated type 2; 3 is mixture (microalbuminuria) in all individuals not on insulin.
+    Group: 1 is controls;
+    2 is non insulin treated type 2;
+    3 is mixture (microalbuminuria) in all individuals not on insulin.
     Truth is 7.77'''
 
     metric = 'T2GRS'
