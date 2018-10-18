@@ -94,13 +94,14 @@ def load_renal_data():
 
     metric = 'T2GRS'
 
-    # dataset = 'data/renal_data.csv'
-    # headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
-    # prop_Ref1 = 0.0777
+    dataset = 'data/renal_data.csv'
+    headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
+    prop_Ref1 = 0.0777
 
-    dataset = 'data/renal_data_new.csv'
-    headers = {'T2_GRS': 'T2GRS', "Group (1 t2, 2 control, 3 mixture)": 'group'}
-    prop_Ref1 = 0.1053
+    # New "enriched" data set
+    # dataset = 'data/renal_data_new.csv'
+    # headers = {'T2_GRS': 'T2GRS', "Group (1 t2, 2 control, 3 mixture)": 'group'}
+    # prop_Ref1 = 0.1053
 
     bin_width = 0.1  # 0.1
     bin_min = 4.7
@@ -117,9 +118,9 @@ def load_renal_data():
     # Arrays of metric scores for each group
     scores = {#'Ref1': data.loc[data['group'] == 1, metric].sample(n=100000).values,
 #              'Ref1': data.loc[data['group'] == 1, metric].values,
-              'Ref1': data.loc[data['group'] == 1, metric].values,
-              # 'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
-              'Ref2': data.loc[data['group'] == 2, metric].values,
+              'Ref1': data.loc[data['group'] == 2, metric].values,
+              'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+              # 'Ref2': data.loc[data['group'] == 2, metric].values,
               'Mix': data.loc[data['group'] == 3, metric].values}
 
     means = {'Ref1': scores['Ref1'].mean(),
