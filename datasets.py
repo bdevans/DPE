@@ -123,7 +123,8 @@ def load_renal_data():
     scores = {#'Ref1': data.loc[data['group'] == 1, metric].sample(n=100000).values,
 #              'Ref1': data.loc[data['group'] == 1, metric].values,
               'Ref1': data.loc[data['group'] == 2, metric].values,
-              'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+#              'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+              'Ref2': data.loc[data['group'] == 1, metric].sample(n=10000, random_state=42).values,
               # 'Ref2': data.loc[data['group'] == 2, metric].values,
               'Mix': data.loc[data['group'] == 3, metric].values}
 
