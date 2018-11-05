@@ -112,22 +112,6 @@ def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
     bins = kwargs['bins']
     results = {}
 
-    # ---------------------- Difference of Means method ----------------------
-    if "Means" in methods:
-        # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-        # results['Means'] = abs(proportion_of_Ref1)
-
-        # TODO!!!
-        if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
-            proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-        else:
-            proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
-        if proportion_of_Ref1 < 0:
-            proportion_of_Ref1 = 0.0
-        if proportion_of_Ref1 > 1:
-            proportion_of_Ref1 = 1.0
-        results['Means'] = proportion_of_Ref1
-
     # ----------------------------- Excess method ----------------------------
     if "Excess" in methods:
         # Calculate the proportion of another population w.r.t. the excess
@@ -170,10 +154,21 @@ def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         if results['Excess'] < 0:
             results['Excess'] = 0.0
 
-    # ------------------------------ KDE method ------------------------------
-    if "KDE" in methods:
-        # TODO: Print out warnings if goodness of fit is poor?
-        results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
+    # ---------------------- Difference of Means method ----------------------
+    if "Means" in methods:
+        # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+        # results['Means'] = abs(proportion_of_Ref1)
+
+        # TODO!!!
+        if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
+            proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+        else:
+            proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
+        if proportion_of_Ref1 < 0:
+            proportion_of_Ref1 = 0.0
+        if proportion_of_Ref1 > 1:
+            proportion_of_Ref1 = 1.0
+        results['Means'] = proportion_of_Ref1
 
     # ------------------------------ EMD method ------------------------------
     if "EMD" in methods:
@@ -207,6 +202,11 @@ def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         # print("Proportions based on Earth Mover's Distance (interpolated values):")
         # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
         # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
+
+    # ------------------------------ KDE method ------------------------------
+    if "KDE" in methods:
+        # TODO: Print out warnings if goodness of fit is poor?
+        results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
 
     return results
 
@@ -249,11 +249,11 @@ if __name__ == '__main__':
         else:
             adjustment_factor = 1.0
 
-        methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
-                                          'Ref2': means['Ref2']}),
-                               ("Excess", {"Median_Ref1": medians["Ref1"],
+        methods = OrderedDict([("Excess", {"Median_Ref1": medians["Ref1"],
                                            "Median_Ref2": medians["Ref2"],
                                            "adjustment_factor": adjustment_factor}),
+                               ("Means", {'Ref1': means['Ref1'],
+                                          'Ref2': means['Ref2']}),
                                ("EMD", True),
                                ("KDE", {'kernel': KDE_kernel,
                                         'bandwidth': bins['width']})])
@@ -262,24 +262,6 @@ if __name__ == '__main__':
 #        if sample_size == -1:
 #            sample_size = len(Mix)
         extra_args['bins'] = bins
-
-        if "Means" in methods:
-            try:
-                Mean_Ref1 = methods["Means"]["Ref1"]
-            except (KeyError, TypeError):
-                print("No Mean_Ref1 specified!")
-                Mean_Ref1 = Ref1.mean()
-            finally:
-                extra_args["Mean_Ref1"] = Mean_Ref1
-            try:
-                Mean_Ref2 = methods["Means"]["Ref2"]
-            except (KeyError, TypeError):
-                print("No Mean_Ref2 specified!")
-                Mean_Ref2 = Ref2.mean()
-            finally:
-                extra_args["Mean_Ref2"] = Mean_Ref2
-
-            results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures))
 
         if "Excess" in methods:
             # --------------------------- Excess method --------------------------
@@ -303,6 +285,24 @@ if __name__ == '__main__':
 #                print("Mixture size:", sample_size)
 
             results_Excess = np.zeros((len(sample_sizes), len(proportions), mixtures))
+
+        if "Means" in methods:
+            try:
+                Mean_Ref1 = methods["Means"]["Ref1"]
+            except (KeyError, TypeError):
+                print("No Mean_Ref1 specified!")
+                Mean_Ref1 = Ref1.mean()
+            finally:
+                extra_args["Mean_Ref1"] = Mean_Ref1
+            try:
+                Mean_Ref2 = methods["Means"]["Ref2"]
+            except (KeyError, TypeError):
+                print("No Mean_Ref2 specified!")
+                Mean_Ref2 = Ref2.mean()
+            finally:
+                extra_args["Mean_Ref2"] = Mean_Ref2
+
+            results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures))
 
         if "EMD" in methods:
             # ---------------------------- EMD method ----------------------------
@@ -399,16 +399,16 @@ if __name__ == '__main__':
 #                                       for b in range(mixtures)]
 
                     for b in range(mixtures):
-                        if run_means:
-                            results_Means[s, p, b] = results[b]['Means']
                         if run_excess:
                             results_Excess[s, p, b] = results[b]['Excess']
-                        if run_KDE:
-                            results_KDE[s, p, b] = results[b]['KDE']
+                        if run_means:
+                            results_Means[s, p, b] = results[b]['Means']
                         if run_EMD:
                             results_EMD[s, p, b] = results[b]['EMD']
 #                            mat_EMD_31[s, p, b] = results[b]['EMD_31']
 #                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
+                        if run_KDE:
+                            results_KDE[s, p, b] = results[b]['KDE']
 
                     if (it >= bar_element*iterations/max_bars):
                         print('*', end='', flush=True)
@@ -427,17 +427,16 @@ if __name__ == '__main__':
 #            if check_EMD:
 #                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
 #                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
-
-        if run_means:
-            np.save('{}/means_{}'.format(out_dir, tag), results_Means)
         if run_excess:
             np.save('{}/excess_{}'.format(out_dir, tag), results_Excess)
-        if run_KDE:
-            np.save('{}/kde_{}'.format(out_dir, tag), results_KDE)
+        if run_means:
+            np.save('{}/means_{}'.format(out_dir, tag), results_Means)
         if run_EMD:
             np.save('{}/emd_{}'.format(out_dir, tag), results_EMD)
 #            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
 #            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
+        if run_KDE:
+            np.save('{}/kde_{}'.format(out_dir, tag), results_KDE)
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
