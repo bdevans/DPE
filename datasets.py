@@ -152,18 +152,35 @@ def load_renal_data():
     print("Chosen: width = {}".format(bin_width))
     estimate_bins(scores)
     return scores, bins, means, medians, prop_Ref1
-def estimate_bins(data):
+def estimate_bins(data, range=None, verbose=1):
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
     # with n the number of data points and d the number of dimensions
+    bins = {}
     for method in ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']:
         all_scores = []
         for group, scores in data.items():
             all_scores.extend(scores)
-            _, bins = np.histogram(scores, bins=method)
-            print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bins[1]-bins[0], len(bins), bins[0], bins[-1]))
-        _, bins = np.histogram(all_scores, bins=method)
-        print("-"*79)
-        print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, bins[1]-bins[0], len(bins), bins[0], bins[-1]))
-        print("="*79)
+            if verbose > 1:
+                if range is not None:
+                    _, bin_edges = np.histogram(scores, bins=method, range=range)
+                else:
+                    _, bin_edges = np.histogram(scores, bins=method)
+                print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
+        if range is not None:
+            _, bin_edges = np.histogram(all_scores, bins=method, range=range)  # Return edges
+        else:
+            _, bin_edges = np.histogram(all_scores, bins=method)  # Return edges
+        bins[method] = {'width': bin_edges[1] - bin_edges[0],
+                        'min': bin_edges[0],
+                        'max': bin_edges[-1],
+                        'edges': bin_edges,
+                        'centers': (bin_edges[:-1] + bin_edges[1:]) / 2,
+                        'n': len(bin_edges) - 1}
+        if verbose:
+            b = bins[method]
+            print("-"*79)
+            print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
+            print("="*79)
+    return bins
