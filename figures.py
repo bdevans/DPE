@@ -207,11 +207,11 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
 
     error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
     if orient == 'v':
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4,
-                    capsize=10, capthick=4, label=error_label)
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=5,
+                    capsize=12, capthick=3, label=error_label)
     elif orient == 'h':
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=5, c=c, lw=4,
-                    capsize=10, capthick=4, label=error_label)
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=5,
+                    capsize=12, capthick=3, label=error_label)
 
     if orient == 'v':
         ax.yaxis.tick_left()
@@ -813,11 +813,11 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                 if orient == 'v':
                     x = ax_vio.get_xticks()
                     y = means
-                    ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+                    ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
                 elif orient == 'h':
                     x = means
                     y = ax_vio.get_yticks()
-                    ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=5, c=c, lw=4, capsize=10, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+                    ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
 
 
                 g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
