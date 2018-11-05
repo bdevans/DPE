@@ -10,7 +10,7 @@ Generate manuscript figures.
 
 import os
 import time
-from collections import OrderedDict
+# from collections import OrderedDict
 import warnings
 
 import pandas as pd
@@ -39,17 +39,21 @@ def load_accuracy(out_dir, label):
     # Dictionary of p1 errors
     errors = {}
 
-    if os.path.isfile('{}/means_{}.npy'.format(out_dir, label)):
-        errors["Means"] = np.load('{}/means_{}.npy'.format(out_dir, label))
-    if os.path.isfile('{}/excess_{}.npy'.format(out_dir, label)):
-        errors["Excess"] = np.load('{}/excess_{}.npy'.format(out_dir, label))
-        # This is adjusted in the methods for consistency
-        # if ADJUST_EXCESS:
-        #     errors["Excess"] /= 0.92  # adjusted for fact underestimates by 8%
-    if os.path.isfile('{}/emd_{}.npy'.format(out_dir, label)):
-        errors["EMD"] = np.load('{}/emd_{}.npy'.format(out_dir, label))
-    if os.path.isfile('{}/kde_{}.npy'.format(out_dir, label)):
-        errors["KDE"] = np.load('{}/kde_{}.npy'.format(out_dir, label))
+    for method in METHODS_ORDER:
+        if os.path.isfile('{}/{}_{}.npy'.format(out_dir, method.lower(), label)):
+            errors[method] = np.load('{}/{}_{}.npy'.format(out_dir, method.lower(), label))
+
+    # if os.path.isfile('{}/means_{}.npy'.format(out_dir, label)):
+    #     errors["Means"] = np.load('{}/means_{}.npy'.format(out_dir, label))
+    # if os.path.isfile('{}/excess_{}.npy'.format(out_dir, label)):
+    #     errors["Excess"] = np.load('{}/excess_{}.npy'.format(out_dir, label))
+    #     # This is adjusted in the methods for consistency
+    #     # if ADJUST_EXCESS:
+    #     #     errors["Excess"] /= 0.92  # adjusted for fact underestimates by 8%
+    # if os.path.isfile('{}/emd_{}.npy'.format(out_dir, label)):
+    #     errors["EMD"] = np.load('{}/emd_{}.npy'.format(out_dir, label))
+    # if os.path.isfile('{}/kde_{}.npy'.format(out_dir, label)):
+    #     errors["KDE"] = np.load('{}/kde_{}.npy'.format(out_dir, label))
 
     return errors, PROPORTIONS, SAMPLE_SIZES
 
@@ -161,6 +165,8 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
 
     c = sns.color_palette()[-3]  # 'gray'
 
+    df_bs = df_bs[METHODS_ORDER]
+
     if not ax:
         f, ax = plt.subplots()
     if limits:
@@ -195,7 +201,7 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
         means = x
     errors = np.zeros(shape=(2, len(methods)))
 
-    for midx, method in enumerate(methods):
+    for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
         nobs = len(df_bs[method])
         count = int(np.mean(df_bs[method])*nobs)
         ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
@@ -336,7 +342,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
                 df_means = df.groupby('Method').mean()
                 errors = np.zeros(shape=(2, len(methods)))
                 means = []
-                for midx, method in enumerate(methods):
+                for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
                     nobs = size  # len(df_est[method])
                     mean_est = df_means.loc[method, 'Estimate']
                     means.append(mean_est)
@@ -489,7 +495,7 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
                     df_means = df.groupby('Method').mean()
                     errors = np.zeros(shape=(2, len(methods)))
                     means = []
-                    for midx, method in enumerate(methods):
+                    for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
                         nobs = size  # len(df_est[method])
                         mean_est = df_means.loc[method, 'Estimate']
                         means.append(mean_est)
@@ -597,6 +603,7 @@ if plot_results:
 
 # ---------------------------- Define constants ------------------------------
 
+METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 FRESH_DATA = False  # CAUTION!
 #out_dir = "results_1000"
 out_dir = "results"
@@ -676,15 +683,24 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     else:
         adjustment_factor = 1.0
 
-    methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
-                                      'Ref2': means['Ref2']}),
-                           ("Excess", {"Median_Ref1": medians["Ref1"],
-                                       "Median_Ref2": medians["Ref2"],
-                                       "adjustment_factor": adjustment_factor}),
-                           ("EMD", True),
-                           ("KDE", {'kernel': KDE_kernel,
-                                    'bandwidth': bins['width']})])
+#    methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
+#                                      'Ref2': means['Ref2']}),
+#                           ("Excess", {"Median_Ref1": medians["Ref1"],
+#                                       "Median_Ref2": medians["Ref2"],
+#                                       "adjustment_factor": adjustment_factor}),
+#                           ("EMD", True),
+#                           ("KDE", {'kernel': KDE_kernel,
+#                                    'bandwidth': bins['width']})])
 
+    methods = {"Excess": {"Median_Ref1": medians["Ref1"],
+                          "Median_Ref2": medians["Ref2"],
+                          "adjustment_factor": adjustment_factor},
+               "Means": {'Ref1': means['Ref1'],
+                         'Ref2': means['Ref2']},
+               "EMD": True,
+               "KDE": {'kernel': KDE_kernel,
+                       'bandwidth': bins['width']}
+               }
     res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
 
     if FRESH_DATA:  # or True:
@@ -784,50 +800,68 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         fig_dev.savefig('figs/deviation_{}.png'.format(data_label))
 
 
-
     fig = plt.figure(figsize=(16,8))
     gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
 
-    # Plot average accuracy across bootstraps
     cl = [0.02]
-    ax_grid_Means = fig.add_subplot(gs[0,0], xticklabels=[])
-    ax_grid_Means.set_ylabel('Sample size ($n$)')
-    plot_accuracy(errors, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
+    for m, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+        # Plot average accuracy across mixtures
+        ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
+        if m == 0:
+            ax_acc.set_ylabel('Sample size ($n$)')
+        else:
+            ax_acc.set_yticklabels([])
+        plot_accuracy(errors, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl)
 
-    ax_grid_Excess = fig.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
-    plot_accuracy(errors, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
+        # Plot deviation across mixtures
+        ax_dev = fig.add_subplot(gs[1, m])
+        if m == 0:
+            ax_dev.set_ylabel('Sample size ($n$)')
+        else:
+            ax_dev.set_yticklabels([])
+        ax_dev.set_xlabel('$p_1^*$')
+        plot_deviation(errors, proportions, sample_sizes, method, fig, ax_dev, title=False)
 
-    ax_grid_EMD = fig.add_subplot(gs[0,2], xticklabels=[], yticklabels=[])
-    #ax_grid_EMD.set_ylabel('Sample size ($n$)')
-    #ax_grid_EMD.set_xlabel('$p_1^*$')
-    plot_accuracy(errors, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
-
-    ax_grid_KDE = fig.add_subplot(gs[0,3], xticklabels=[], yticklabels=[])
-    #ax_grid_KDE.set_xlabel('$p_1^*$')
-    plot_accuracy(errors, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
-
-
-    # Plot deviation across bootstraps
-    ax_dev_Means = fig.add_subplot(gs[1,0])
-    ax_dev_Means.set_ylabel('Sample size ($n$)')
-    ax_dev_Means.set_xlabel('$p_1^*$')
-    plot_deviation(errors, proportions, sample_sizes, "Means", fig, ax_dev_Means, title=False)
-
-    ax_dev_Excess = fig.add_subplot(gs[1,1], yticklabels=[])
-    ax_dev_Excess.set_xlabel('$p_1^*$')
-    plot_deviation(errors, proportions, sample_sizes, "Excess", fig, ax_dev_Excess, title=False)
-
-    ax_dev_EMD = fig.add_subplot(gs[1,2], yticklabels=[])
-    #ax_dev_EMD.set_ylabel('Sample size ($n$)')
-    ax_dev_EMD.set_xlabel('$p_1^*$')
-    plot_deviation(errors, proportions, sample_sizes, "EMD", fig, ax_dev_EMD, title=False)
-
-    ax_dev_KDE = fig.add_subplot(gs[1,3], yticklabels=[])
-    ax_dev_KDE.set_xlabel('$p_1^*$')
-    plot_deviation(errors, proportions, sample_sizes, "KDE", fig, ax_dev_KDE, title=False)
-
-#    fig_dev.tight_layout()
     fig.savefig('figs/characterise_{}.png'.format(data_label))
+
+    # ax_grid_Means = fig.add_subplot(gs[0,0], xticklabels=[])
+    # ax_grid_Means.set_ylabel('Sample size ($n$)')
+    # plot_accuracy(errors, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
+    #
+    # ax_grid_Excess = fig.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
+    # plot_accuracy(errors, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
+    #
+    # ax_grid_EMD = fig.add_subplot(gs[0,2], xticklabels=[], yticklabels=[])
+    # #ax_grid_EMD.set_ylabel('Sample size ($n$)')
+    # #ax_grid_EMD.set_xlabel('$p_1^*$')
+    # plot_accuracy(errors, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
+    #
+    # ax_grid_KDE = fig.add_subplot(gs[0,3], xticklabels=[], yticklabels=[])
+    # #ax_grid_KDE.set_xlabel('$p_1^*$')
+    # plot_accuracy(errors, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
+
+
+#     # Plot deviation across bootstraps
+#     ax_dev_Means = fig.add_subplot(gs[1,0])
+#     ax_dev_Means.set_ylabel('Sample size ($n$)')
+#     ax_dev_Means.set_xlabel('$p_1^*$')
+#     plot_deviation(errors, proportions, sample_sizes, "Means", fig, ax_dev_Means, title=False)
+#
+#     ax_dev_Excess = fig.add_subplot(gs[1,1], yticklabels=[])
+#     ax_dev_Excess.set_xlabel('$p_1^*$')
+#     plot_deviation(errors, proportions, sample_sizes, "Excess", fig, ax_dev_Excess, title=False)
+#
+#     ax_dev_EMD = fig.add_subplot(gs[1,2], yticklabels=[])
+#     #ax_dev_EMD.set_ylabel('Sample size ($n$)')
+#     ax_dev_EMD.set_xlabel('$p_1^*$')
+#     plot_deviation(errors, proportions, sample_sizes, "EMD", fig, ax_dev_EMD, title=False)
+#
+#     ax_dev_KDE = fig.add_subplot(gs[1,3], yticklabels=[])
+#     ax_dev_KDE.set_xlabel('$p_1^*$')
+#     plot_deviation(errors, proportions, sample_sizes, "KDE", fig, ax_dev_KDE, title=False)
+#
+# #    fig_dev.tight_layout()
+#     fig.savefig('figs/characterise_{}.png'.format(data_label))
 
 
 
