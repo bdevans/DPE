@@ -617,7 +617,7 @@ CI_METHOD = "jeffreys"
 # http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
 
 # TODO: Reimplement this
-adjust_excess = True
+adjust_excess = False
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
