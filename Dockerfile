@@ -36,4 +36,4 @@ VOLUME /usr/dpe/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
-CMD [ "source activate dpe && exec python bootstrap.py" ]
+CMD [ "source activate dpe && exec python characterise.py" ]
