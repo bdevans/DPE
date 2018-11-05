@@ -54,6 +54,7 @@ def load_accuracy(out_dir, label):
     return errors, PROPORTIONS, SAMPLE_SIZES
 
 
+# TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
 def plot_accuracy(errors, proportions, sample_sizes, label, fig, ax,
                   shading_levels=None, contour_levels=[0.02], title=True):
 
