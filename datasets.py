@@ -11,6 +11,9 @@ import pandas as pd
 import seaborn as sns
 
 
+"""Change to R_H (Healthy reference population) and R_D (Disease reference population)
+--> p_D := prevalence"""
+
 def load_diabetes_data(metric):
 
     dataset = 'data/biobank_mix_WTCC_ref.csv'
