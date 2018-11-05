@@ -298,6 +298,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 #            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD #kwargs['max_EMD']
 #            results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
 
+            i_CDF_Ref1 = kwargs["i_CDF_Ref1"]
+            i_CDF_Ref2 = kwargs["i_CDF_Ref2"]
+            i_EMD_1_2 = kwargs["i_EMD_1_2"]
             i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1))
             i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2))
 #            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
