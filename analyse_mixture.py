@@ -18,7 +18,7 @@ from sklearn.neighbors import KernelDensity
 # TODO: replace with a scipy/numpy function to reduce dependencies
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
 import lmfit
-# TODO: Try replacing with scipy.optimize.curve_fit to solve jopblib problem and reduce dependencies:
+# TODO: Try replacing with scipy.optimize.curve_fit to solve joblib problem and reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
 # from joblib import Parallel, delayed, cpu_count
 # import seaborn as sns
