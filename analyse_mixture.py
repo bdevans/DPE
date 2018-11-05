@@ -239,8 +239,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             # Calculate the proportion of another population w.r.t. the excess
             # number of cases from the mixture's assumed majority population.
             # TODO: Flip these around for when using the T2GRS
-            Median_Mix = np.median(Mix)
-
+            # Median_Mix = np.median(Mix)
 
             # TODO!!!
             # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
@@ -248,6 +247,15 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             # else:  # Ref1 is closets to the mixture
             #     population_median = methods["Excess"]["Median_Ref1"]
 
+            # Ref1: disease; Ref2: healthy
+#            if medians["Ref1"] > medians["Ref2"]:
+#                excess_cases = RM[RM > kwargs['population_median']].count()
+#                expected_cases = RM[RM <= kwargs['population_median']].count()
+#            else:  # disease has a lower median than the healthy population
+#                excess_cases = RM[RM <= kwargs['population_median']].count()
+#                expected_cases = RM[RM > kwargs['population_median']].count()
+#            sample_size = len(RM)
+#            results['Excess'] = abs(excess_cases - expected_cases)/sample_size
 
 
             number_low = len(RM[RM <= kwargs['population_median']])
