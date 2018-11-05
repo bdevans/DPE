@@ -137,11 +137,11 @@ def plot_distributions(scores, bins, data_label, ax=None):
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
-                     label="$R_1: n={:,}$".format(len(scores['Ref1'])), ax=ax)
+                     label="$R_1: n={:,}$".format(len(scores['Ref1'])), ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
-                     label="$R_2: n={:,}$".format(len(scores['Ref2'])), ax=ax)
+                     label="$R_2: n={:,}$".format(len(scores['Ref2'])), ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=False,
-                     label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])), ax=ax)
+                     label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])), ax=ax, kde_kws={'bw': bins['width']})
 
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
