@@ -134,7 +134,8 @@ def plot_distributions(scores, bins, data_label, ax=None):
     if not ax:
         f, ax = plt.subplots()
 
-    with sns.axes_style("ticks"):
+    with sns.axes_style("ticks") and warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=FutureWarning)
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
                      label="$R_1: n={:,}$".format(len(scores['Ref1'])), ax=ax)
         sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
@@ -168,7 +169,9 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
             ax.set_xlim(limits)
 
     # Draw violin plots of bootstraps
-    sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0)  # , inner="stick")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=FutureWarning)
+        sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0)  # , inner="stick")
     if orient == 'v':
         sns.despine(ax=ax, top=True, bottom=True, left=False, right=True, trim=True)
     elif orient == 'h':
@@ -590,7 +593,10 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     for p, p_star in enumerate(p_stars):
         df = df_est[np.isclose(p_star, df_est['p1*'])]  # & np.isclose(size, df_vio['Size'])]
         # df.sort_values(by='Size', ascending=False, inplace=True)
-        g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df, ax=ax_vio, orient='h', cut=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=FutureWarning)
+            g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df,
+                               ax=ax_vio, orient='h', cut=0)
         g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
                    #label="Ground Truth: {:3.2}".format(p_star))
         handles, labels = g.get_legend_handles_labels()
@@ -803,13 +809,15 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                 ax_mixes = fig_mixes.add_subplot(gs[-(si+1)], sharex=ax_base)
                 plt.setp(ax_mixes.get_xticklabels(), visible=False)
 
-            sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
-                             #label=r"$R_1$", ax=ax_mixes)
-            for p, p_star in enumerate(p_stars):
-                sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
-                             label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
-            sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
-                             #label=r"$R_2$", ax=ax_mixes)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=FutureWarning)
+                sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
+                                 #label=r"$R_1$", ax=ax_mixes)
+                for p, p_star in enumerate(p_stars):
+                    sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
+                                 label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
+                sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
+                                 #label=r"$R_2$", ax=ax_mixes)
 
             ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
             ax_mixes.set_xlabel("")
