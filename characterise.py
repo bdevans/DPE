@@ -95,10 +95,10 @@ def construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
     n_Ref2 = sample_size - n_Ref1
 
     # Construct mixture
-    bs = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                         np.random.choice(Ref2, n_Ref2, replace=True)))
+    mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+                              np.random.choice(Ref2, n_Ref2, replace=True)))
 
-    results = estimate_Ref1(bs, Ref1, Ref2, methods, **extra_args)
+    results = estimate_Ref1(mixture, Ref1, Ref2, methods, **extra_args)
 
     return results
 
