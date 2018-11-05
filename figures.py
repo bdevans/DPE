@@ -832,13 +832,11 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
 
     # Plot violins for a set of proportions
-    # p_stars = [0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95]
-    p_stars = [0.05, 0.25, 0.50, 0.75, 0.95]
-    # sizes = [100, 250, 500, 1000, 2500, 5000, 10000]
-    sizes = [100, 500, 1000, 5000, 10000]
-
     # p_stars = [0.05, 0.25, 0.50, 0.75, 0.95]
-    # sizes = [100, 1000, 10000]
+    # sizes = [100, 500, 1000, 5000, 10000]
+
+    p_stars = [0.25, 0.50, 0.75]
+    sizes = [500, 1000, 5000]
     # bootstraps = 5
 
     violin_scores = {}
@@ -854,7 +852,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     #ax_dists = fig.add_subplot(gs[-1,-1])
     # with sns.axes_style("ticks"):
     #plot_distributions(scores, bins, data_label, ax=ax_dists)
-
 
     # TODO: Rename this file e.g. pe_results?
     estimates_res_file = '{}/pe_analysis_{}'.format(out_dir, data_label)
