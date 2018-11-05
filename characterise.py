@@ -46,7 +46,7 @@ check_EMD = False
 
 seed = 42
 
-mixtures = 1000
+mixtures = 100  # 1000
 sample_sizes = np.arange(100, 2501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
 
