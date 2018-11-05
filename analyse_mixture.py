@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import tqdm
 from statsmodels.stats.proportion import proportion_confint
 
-METHODS_ORDER = ["Means", "Excess", "EMD", "KDE"]
+METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 
 
 def fit_kernels(scores, bw):
@@ -94,25 +94,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 #    print('Running {} mixture analysis...'.format(tag))
 #    print('--------------------------------------------------------------------------------')
 
-    if "Means" in methods:
-        try:
-            Mean_Ref1 = methods["Means"]["Ref1"]
-        except (KeyError, TypeError):
-            if verbose > 1:
-                print("No Mean_Ref1 specified!")
-            Mean_Ref1 = Ref1.mean()
-        finally:
-            extra_args["Mean_Ref1"] = Mean_Ref1
-        try:
-            Mean_Ref2 = methods["Means"]["Ref2"]
-        except (KeyError, TypeError):
-            if verbose > 1:
-                print("No Mean_Ref2 specified!")
-            Mean_Ref2 = Ref2.mean()
-        finally:
-            extra_args["Mean_Ref2"] = Mean_Ref2
-
-
     if "Excess" in methods:
     # ----------------------------- Excess method -----------------------------
         # TODO: Check and rename to Ref1_median?
@@ -139,6 +120,25 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             print("Ref2 median:", np.median(Ref2))
             print("Population median: {}".format(median))
             print("Mixture size:", sample_size)
+
+
+    if "Means" in methods:
+        try:
+            Mean_Ref1 = methods["Means"]["Ref1"]
+        except (KeyError, TypeError):
+            if verbose > 1:
+                print("No Mean_Ref1 specified!")
+            Mean_Ref1 = Ref1.mean()
+        finally:
+            extra_args["Mean_Ref1"] = Mean_Ref1
+        try:
+            Mean_Ref2 = methods["Means"]["Ref2"]
+        except (KeyError, TypeError):
+            if verbose > 1:
+                print("No Mean_Ref2 specified!")
+            Mean_Ref2 = Ref2.mean()
+        finally:
+            extra_args["Mean_Ref2"] = Mean_Ref2
 
 
     if "EMD" in methods:
@@ -218,22 +218,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         bins = kwargs['bins']
         results = {}
 
-        # ---------------------- Difference of Means method ----------------------
-        if "Means" in methods:
-            # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-            # results['Means'] = abs(proportion_of_Ref1)
-
-            # TODO!!!
-            if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
-                proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-            else:
-                proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
-            if proportion_of_Ref1 < 0:
-                proportion_of_Ref1 = 0.0
-            if proportion_of_Ref1 > 1:
-                proportion_of_Ref1 = 1.0
-            results['Means'] = proportion_of_Ref1
-
         # -------------------------- Subtraction method --------------------------
         if "Excess" in methods:
             # Calculate the proportion of another population w.r.t. the excess
@@ -287,10 +271,21 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             if results['Excess'] < 0:
                 results['Excess'] = 0.0
 
-        # ------------------------------ KDE method ------------------------------
-        if "KDE" in methods:
-            # TODO: Print out warnings if goodness of fit is poor?
-            results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
+        # ---------------------- Difference of Means method ----------------------
+        if "Means" in methods:
+            # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+            # results['Means'] = abs(proportion_of_Ref1)
+
+            # TODO!!!
+            if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
+                proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+            else:
+                proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
+            if proportion_of_Ref1 < 0:
+                proportion_of_Ref1 = 0.0
+            if proportion_of_Ref1 > 1:
+                proportion_of_Ref1 = 1.0
+            results['Means'] = proportion_of_Ref1
 
         # ------------------------------ EMD method ------------------------------
         if "EMD" in methods:
@@ -324,6 +319,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             # print("Proportions based on Earth Mover's Distance (interpolated values):")
             # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
             # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
+
+        # ------------------------------ KDE method ------------------------------
+        if "KDE" in methods:
+            # TODO: Print out warnings if goodness of fit is poor?
+            results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
 
         return results
 
