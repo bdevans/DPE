@@ -21,7 +21,7 @@ def load_diabetes_data(metric):
     headers = {'diabetes_type': 'group', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
 
     if metric == 'T1GRS':
-        bin_width = 0.005
+        bin_width = 0.006  # 0.005
         bin_min = 0.095
         bin_max = 0.350
 
@@ -37,6 +37,7 @@ def load_diabetes_data(metric):
 
     else:
         raise ValueError(metric)
+    binning_method = 'fd'
 
     data = pd.read_csv(dataset)
     data.rename(columns=headers, inplace=True)
@@ -87,7 +88,7 @@ def load_diabetes_data(metric):
     print("Diabetes Data [{}]".format(metric))
     print("=====================")
     print("Chosen: width = {}".format(bin_width))
-    estimate_bins(scores)
+    bins = estimate_bins(scores)[binning_method]
     return scores, bins, means, medians, prop_Ref1
 
 
@@ -104,13 +105,14 @@ def load_renal_data():
     dataset = 'data/renal_data.csv'
     headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
     prop_Ref1 = 0.0777
+    binning_method = 'fd'
 
     # New "enriched" data set
     # dataset = 'data/renal_data_new.csv'
     # headers = {'T2_GRS': 'T2GRS', "Group (1 t2, 2 control, 3 mixture)": 'group'}
     # prop_Ref1 = 0.1053
 
-    bin_width = 0.1  # 0.1
+    bin_width = 0.128  # 0.1
     bin_min = 4.7
     bin_max = 8.9
 
@@ -153,8 +155,11 @@ def load_renal_data():
     print("Renal Data")
     print("==========")
     print("Chosen: width = {}".format(bin_width))
-    estimate_bins(scores)
+    bins = estimate_bins(scores)[binning_method]
     return scores, bins, means, medians, prop_Ref1
+
+
+# Let's use FD!
 def estimate_bins(data, range=None, verbose=1):
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
