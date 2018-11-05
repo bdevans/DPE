@@ -46,7 +46,7 @@ check_EMD = False
 
 seed = 42
 
-bootstraps = 1000
+mixtures = 1000
 sample_sizes = np.arange(100, 2501, 100)  # 3100
 proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
 
@@ -88,13 +88,13 @@ if run_KDE:
         return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
-def construct_bootstrap(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+def construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
 
     assert(0.0 <= prop_Ref1 <= 1.0)
     n_Ref1 = int(round(sample_size * prop_Ref1))
     n_Ref2 = sample_size - n_Ref1
 
-    # Bootstrap mixture
+    # Construct mixture
     bs = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
                          np.random.choice(Ref2, n_Ref2, replace=True)))
 
@@ -279,7 +279,7 @@ if __name__ == '__main__':
             finally:
                 extra_args["Mean_Ref2"] = Mean_Ref2
 
-            results_Means = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures))
 
         if "Excess" in methods:
             # --------------------------- Excess method --------------------------
@@ -302,7 +302,7 @@ if __name__ == '__main__':
                 print("Population median: {}".format(median))
 #                print("Mixture size:", sample_size)
 
-            results_Excess = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            results_Excess = np.zeros((len(sample_sizes), len(proportions), mixtures))
 
         if "EMD" in methods:
             # ---------------------------- EMD method ----------------------------
@@ -324,7 +324,7 @@ if __name__ == '__main__':
             extra_args['i_CDF_Ref2'] = i_CDF_Ref2
             extra_args['i_EMD_1_2'] = i_EMD_1_2
 
-            results_EMD = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            results_EMD = np.zeros((len(sample_sizes), len(proportions), mixtures))
 
         if "KDE" in methods:
             # -------------------------- KDE method --------------------------
@@ -372,10 +372,10 @@ if __name__ == '__main__':
             extra_args['bin_width'] = bin_width
             extra_args['kdes'] = kdes
 
-            results_KDE = np.zeros((len(sample_sizes), len(proportions), bootstraps))
+            results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures))
 
         # Setup progress bar
-        iterations = len(sample_sizes) * len(proportions) # * len(metrics) * bootstraps  #KDE_fits.size
+        iterations = len(sample_sizes) * len(proportions) # * len(metrics) * mixtures  #KDE_fits.size
         max_bars = 78    # number of dots in progress bar
         if iterations < max_bars:
             max_bars = iterations   # if less than 20 points, shorten bar
@@ -392,13 +392,13 @@ if __name__ == '__main__':
 #        for s, sample_size in enumerate(tqdm.tqdm(sample_sizes)):
 #            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions)):
                 with Parallel(n_jobs=nprocs) as parallel:
-                    # Parallelise over bootstraps
-                    results = parallel(delayed(construct_bootstrap)(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
-                                       for b in range(bootstraps))
-#                    results = [construct_bootstrap(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
-#                                       for b in range(bootstraps)]
+                    # Parallelise over mixtures
+                    results = parallel(delayed(construct_mixture)(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+                                       for b in range(mixtures))
+#                    results = [construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+#                                       for b in range(mixtures)]
 
-                    for b in range(bootstraps):
+                    for b in range(mixtures):
                         if run_means:
                             results_Means[s, p, b] = results[b]['Means']
                         if run_excess:
@@ -441,7 +441,7 @@ if __name__ == '__main__':
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
-    # run_bootstrap('T1GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
-    # run_bootstrap('T2GRS', scores, medians, bins, sample_sizes, proportions, bootstraps)
+    # run_mixture('T1GRS', scores, medians, bins, sample_sizes, proportions, mixtures)
+    # run_mixture('T2GRS', scores, medians, bins, sample_sizes, proportions, mixtures)
 
-    print("Bootstrapping of datasets: {} complete!".format(list(datasets)))
+    print("Analysis of methods on datasets: {} complete!".format(list(datasets)))
