@@ -896,7 +896,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
 
     # Plot violins
-    fig_vio = plt.figure(figsize=(8, 8))
+    fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
     # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
     # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
     ax_vio = fig_vio.add_subplot(111)
