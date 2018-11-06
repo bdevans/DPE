@@ -677,8 +677,8 @@ if plot_results:
 
 METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 FRESH_DATA = True  # CAUTION!
-#out_dir = "results_1000"
-out_dir = "results_test"
+#out_dir = "results"
+out_dir = "results_100_100"
 
 verbose = False
 
