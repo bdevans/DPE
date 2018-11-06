@@ -421,8 +421,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 #            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **kwargs)[method]
 #                               for b in range(bootstraps)]
 
-        results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs)
-                   for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
+            results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs)
+                       for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
+        else:  # Disable progress bar
+            results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs)
+                       for b in range(bootstraps)]
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
