@@ -88,8 +88,8 @@ def load_diabetes_data(metric):
     print("Diabetes Data [{}]".format(metric))
     # print("=====================")
     # print("Chosen: width = {}".format(bin_width))
-    bins = estimate_bins(scores)[binning_method]
-    return scores, bins, means, medians, prop_Ref1
+    hist, bins = estimate_bins(scores)
+    return scores, bins[binning_method], means, medians, prop_Ref1
 
 
 def load_renal_data():
@@ -155,8 +155,8 @@ def load_renal_data():
     print("Renal Data")
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
-    bins = estimate_bins(scores)[binning_method]
-    return scores, bins, means, medians, prop_Ref1
+    hist, bins = estimate_bins(scores)
+    return scores, bins[binning_method], means, medians, prop_Ref1
 
 
 # Let's use FD!
@@ -165,6 +165,7 @@ def estimate_bins(data, bin_range=None, verbose=2):
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
     # with n the number of data points and d the number of dimensions
+    hist = {}
     bins = {}
     if verbose:
         print("  Method | Data |   n  |  width  |      range     ", flush=True)
@@ -181,9 +182,10 @@ def estimate_bins(data, bin_range=None, verbose=2):
                 print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
                 # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
         if bin_range is not None:
-            _, bin_edges = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
+            h, bin_edges = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
         else:
-            _, bin_edges = np.histogram(all_scores, bins=method)  # Return edges
+            h, bin_edges = np.histogram(all_scores, bins=method)  # Return edges
+        hist[method] = h
         bins[method] = {'width': bin_edges[1] - bin_edges[0],
                         'min': bin_edges[0],
                         'max': bin_edges[-1],
@@ -200,4 +202,4 @@ def estimate_bins(data, bin_range=None, verbose=2):
                 print("="*50)
             else:
                 print("-"*50)
-    return bins
+    return hist, bins
