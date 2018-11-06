@@ -371,18 +371,20 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
         return results
 
-
-    # Get initial estimate of proportions
-    initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **extra_args)
-    if verbose > 1:
-        pprint(initial_results)
-    if true_prop_Ref1:
-        if verbose > 1:
-            print("Ground truth: {:.5f}".format(true_prop_Ref1))
-
     columns = [method for method in METHODS_ORDER if method in methods]
 
-    if bootstraps > 1:
+    if bootstraps <= 1:
+        # Get initial estimate of proportions
+        initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **extra_args)
+        if verbose > 1:
+            pprint(initial_results)
+        if true_prop_Ref1:
+            if verbose > 1:
+                print("Ground truth: {:.5f}".format(true_prop_Ref1))
+
+        df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
+
+    else:  # if bootstraps > 1:
         if verbose:
             print('Running {} bootstraps...'.format(bootstraps), flush=True)
 
@@ -405,9 +407,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
-
-    else:
-        df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
 
     if verbose:
         # ------------ Summarise proportions for the whole distribution --------------
