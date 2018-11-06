@@ -83,7 +83,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):  #, means=None, median=None, KDE_kernel='gaussian'):
+def prepare_methods(methods, scores, bins, verbose=1):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -92,11 +92,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     bin_edges = bins['edges']
 
     extra_args = {}
-    if sample_size == -1:
-        sample_size = len(Mix)
+    # if sample_size == -1:
+    #     sample_size = len(Mix)
     extra_args['bins'] = bins
-#    print('Running {} mixture analysis...'.format(tag))
-#    print('--------------------------------------------------------------------------------')
 
     if "Excess" in methods:
     # ----------------------------- Excess method -----------------------------
@@ -111,20 +109,19 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
             if "adjustment_factor" not in methods["Excess"]:
                 methods["Excess"]["adjustment_factor"] = 1
             extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
-#        if isinstance(methods["Excess"], float):
-#            # Median passed
-#            median = methods["Excess"]
-#            print("Passed median: {}".format(median))
-#        else:
-#            # The Excess method assumes that...
-#            median = np.median(scores["Ref2"])
+    #        if isinstance(methods["Excess"], float):
+    #            # Median passed
+    #            median = methods["Excess"]
+    #            print("Passed median: {}".format(median))
+    #        else:
+    #            # The Excess method assumes that...
+    #            median = np.median(scores["Ref2"])
         extra_args['population_median'] = median
         if verbose > 1:
             print("Ref1 median:", np.median(Ref1))
             print("Ref2 median:", np.median(Ref2))
             print("Population median: {}".format(median))
-            print("Mixture size:", sample_size)
-
+            print("Mixture size:", len(Mix))  # sample_size)
 
     if "Means" in methods:
         try:
@@ -144,75 +141,97 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         finally:
             extra_args["Mean_Ref2"] = Mean_Ref2
 
-
     if "EMD" in methods:
     # -------------------------------- EMD method --------------------------------
 
-        max_EMD = bin_edges[-1] - bin_edges[0]
+        if 'max_EMD' not in extra_args:
+            max_EMD = bin_edges[-1] - bin_edges[0]
+            extra_args['max_EMD'] = max_EMD
 
         # Interpolate the cdfs at the same points for comparison
-        i_CDF_Ref1 = interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
-        i_CDF_Ref2 = interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
-#        i_CDF_Mix = interpolate_CDF(Mix, bin_centers, bins['min'], bins['max'])
+        if 'i_CDF_Ref1' not in extra_args:
+            i_CDF_Ref1 = interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
+            extra_args['i_CDF_Ref1'] = i_CDF_Ref1
+
+        if 'i_CDF_Ref2' not in extra_args:
+            i_CDF_Ref2 = interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
+            extra_args['i_CDF_Ref2'] = i_CDF_Ref2
+    #        i_CDF_Mix = interpolate_CDF(Mix, bin_centers, bins['min'], bins['max'])
 
         # EMDs computed with interpolated CDFs
-        i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
-#        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
-#        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
-#        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
+        if 'i_EMD_1_2' not in extra_args:
+            i_EMD_1_2 = sum(abs(extra_args['i_CDF_Ref1']-extra_args['i_CDF_Ref2']))
+            extra_args['i_EMD_1_2'] = i_EMD_1_2
+    #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
+    #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
+    #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 
-        extra_args['max_EMD'] = max_EMD
-        extra_args['i_CDF_Ref1'] = i_CDF_Ref1
-        extra_args['i_CDF_Ref2'] = i_CDF_Ref2
-#        extra_args['i_EMD_21'] = i_EMD_21
-        extra_args['i_EMD_1_2'] = i_EMD_1_2
+    #        extra_args['i_EMD_21'] = i_EMD_21
 
     if "KDE" in methods:
         # ------------------------------ KDE method ------------------------------
 
         bw = bin_width  # Bandwidth
-        kdes = fit_kernels(scores, bw)
 
-        try:
-            KDE_kernel = methods["KDE"]["kernel"]
-        except (KeyError, TypeError):
-            if verbose > 1:
-                print("No kernel specified!")
-            KDE_kernel = "gaussian"  # Default kernel
+        if 'kdes' not in extra_args:
+            kdes = fit_kernels(scores, bw)
+            extra_args['kdes'] = kdes
         else:
+            kdes = extra_args['kdes']
+
+        if 'KDE_kernel' not in extra_args or 'bin_width' not in extra_args:
             try:
-                bw = methods["KDE"]["bandwidth"]
+                KDE_kernel = methods["KDE"]["kernel"]
             except (KeyError, TypeError):
-                bw = bins["width"]
-        finally:
-            if verbose > 1:
-                print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
+                if verbose > 1:
+                    print("No kernel specified!")
+                KDE_kernel = "gaussian"  # Default kernel
+            else:
+                try:
+                    bw = methods["KDE"]["bandwidth"]
+                except (KeyError, TypeError):
+                    bw = bins["width"]
+            finally:
+                if verbose > 1:
+                    print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
+            extra_args['KDE_kernel'] = KDE_kernel
+            extra_args['bin_width'] = bin_width
+        else:
+            KDE_kernel = extra_args['KDE_kernel']
 
-        # Define the KDE models
-        # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-        # Assigning a default value to amp initialises them
-        def kde_Ref1(x, amp_Ref1=1):
-            return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+        if 'model' not in extra_args:
+            # Define the KDE models
+            # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
+            # Assigning a default value to amp initialises them
+            def kde_Ref1(x, amp_Ref1=1):
+                return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
-        def kde_Ref2(x, amp_Ref2=1):
-            return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+            def kde_Ref2(x, amp_Ref2=1):
+                return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
-        model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
+            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
+            extra_args['model'] = model  # This breaks joblib
 
-        params_mix = model.make_params()
-        params_mix['amp_Ref1'].value = 1
-        params_mix['amp_Ref1'].min = 0
-        params_mix['amp_Ref2'].value = 1
-        params_mix['amp_Ref2'].min = 0
+        if 'initial_params' not in extra_args:
+            params_mix = extra_args['model'].make_params()
+            params_mix['amp_Ref1'].value = 1
+            params_mix['amp_Ref1'].min = 0
+            params_mix['amp_Ref2'].value = 1
+            params_mix['amp_Ref2'].min = 0
+            extra_args['initial_params'] = params_mix
 
-        extra_args['model'] = model  # This breaks joblib
-        extra_args['initial_params'] = params_mix
-        extra_args['KDE_kernel'] = KDE_kernel
-        extra_args['bin_width'] = bin_width
-        extra_args['kdes'] = kdes
-#        extra_args["fit_KDE_model"] = fit_KDE_model
+    return extra_args
 
-#    print(extra_args)
+
+def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):  #, means=None, median=None, KDE_kernel='gaussian'):
+
+    Ref1 = scores['Ref1']
+    Ref2 = scores['Ref2']
+    Mix = scores['Mix']
+ #        extra_args["fit_KDE_model"] = fit_KDE_model
+    extra_args = prepare_methods(methods, scores, bins, verbose=verbose)
+    model = extra_args['model']
+ #    print(extra_args)
 
 
     def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
