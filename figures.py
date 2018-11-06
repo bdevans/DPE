@@ -939,17 +939,17 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         t = time.time()  # Start timer
         dfs = []
         for s, size in enumerate(sizes):
+            Mixtures = {mix: {} for mix in range(n_mixes)}
+            mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
             for p, p_star in enumerate(p_stars):
                 for mix in range(n_mixes):
-                    # mix_dist_file = '{}/mix_stacks_{}_size{}_{}'.format(out_dir, mix, size, data_label)
-                    # Mixtures = {}
                     print("\n\n")
                     print("Size: {} [#{}/{}]".format(size, s, len(sizes)))
                     print("p1*: {} [#{}/{}]".format(p_star, p, len(p_stars)))
                     print("Mix: {} [#{}/{}]".format(mix, mix, n_mixes), flush=True)
 
                     violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
-                    # Mixtures[p_star] = violin_scores['Mix']
+                    Mixtures[mix][p_star] = violin_scores['Mix']
                     df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                bootstraps=bootstraps, sample_size=size,
                                                alpha=alpha, true_prop_Ref1=p_star, verbose=0)
@@ -958,8 +958,8 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                     df_cm['Mix'] = mix * np.ones(bootstraps)
                     df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
                     dfs.append(df_cm)
-                # df_size = pd.DataFrame(Mixtures, columns=p_stars)
-                # df_size.to_pickle(mix_dist_file)
+            df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
+            df_size.to_pickle(mix_dist_file)
         df_est = pd.concat(dfs, ignore_index=True)
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
@@ -1141,7 +1141,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     fig_mixes = plt.figure(figsize=(8, 8))
     gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
     for si, size in enumerate(sizes):
-        mix_dist_file = '{}/mix_distributions_size{}_{}'.format(out_dir, size, data_label)
+        mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
         if os.path.isfile(mix_dist_file):
             df_mixes = pd.read_pickle(mix_dist_file)
             if si == 0:
