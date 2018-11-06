@@ -831,46 +831,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
     fig.savefig('figs/characterise_{}.png'.format(data_label))
 
-    # ax_grid_Means = fig.add_subplot(gs[0,0], xticklabels=[])
-    # ax_grid_Means.set_ylabel('Sample size ($n$)')
-    # plot_accuracy(errors, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
-    #
-    # ax_grid_Excess = fig.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
-    # plot_accuracy(errors, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
-    #
-    # ax_grid_EMD = fig.add_subplot(gs[0,2], xticklabels=[], yticklabels=[])
-    # #ax_grid_EMD.set_ylabel('Sample size ($n$)')
-    # #ax_grid_EMD.set_xlabel('$p_1^*$')
-    # plot_accuracy(errors, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
-    #
-    # ax_grid_KDE = fig.add_subplot(gs[0,3], xticklabels=[], yticklabels=[])
-    # #ax_grid_KDE.set_xlabel('$p_1^*$')
-    # plot_accuracy(errors, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
-
-
-#     # Plot deviation across bootstraps
-#     ax_dev_Means = fig.add_subplot(gs[1,0])
-#     ax_dev_Means.set_ylabel('Sample size ($n$)')
-#     ax_dev_Means.set_xlabel('$p_1^*$')
-#     plot_deviation(errors, proportions, sample_sizes, "Means", fig, ax_dev_Means, title=False)
-#
-#     ax_dev_Excess = fig.add_subplot(gs[1,1], yticklabels=[])
-#     ax_dev_Excess.set_xlabel('$p_1^*$')
-#     plot_deviation(errors, proportions, sample_sizes, "Excess", fig, ax_dev_Excess, title=False)
-#
-#     ax_dev_EMD = fig.add_subplot(gs[1,2], yticklabels=[])
-#     #ax_dev_EMD.set_ylabel('Sample size ($n$)')
-#     ax_dev_EMD.set_xlabel('$p_1^*$')
-#     plot_deviation(errors, proportions, sample_sizes, "EMD", fig, ax_dev_EMD, title=False)
-#
-#     ax_dev_KDE = fig.add_subplot(gs[1,3], yticklabels=[])
-#     ax_dev_KDE.set_xlabel('$p_1^*$')
-#     plot_deviation(errors, proportions, sample_sizes, "KDE", fig, ax_dev_KDE, title=False)
-#
-# #    fig_dev.tight_layout()
-#     fig.savefig('figs/characterise_{}.png'.format(data_label))
-
-
 
 
     # Plot violins for a set of proportions
@@ -885,62 +845,9 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     violin_scores['Ref1'] = scores['Ref1']
     violin_scores['Ref2'] = scores['Ref2']
 
-#     fig_vio = plt.figure(figsize=(16,16))
-#    gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
-#    gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-#     ax_ci = fig_vio.add_subplot(111)
-
-    #sns.set_style("ticks")
-    #ax_dists = fig.add_subplot(gs[-1,-1])
-    # with sns.axes_style("ticks"):
-    #plot_distributions(scores, bins, data_label, ax=ax_dists)
-
-    # # TODO: Rename this file e.g. pe_results?
-    # estimates_res_file = '{}/pe_analysis_{}'.format(out_dir, data_label)
-    #
-    # if FRESH_DATA:
-    #     print("Running mixture analysis with {} scores...".format(data_label))
-    #     t = time.time()  # Start timer
-    #     dfs = []
-    #     for s, size in enumerate(sizes):
-    #         # ax_ci = fig_vio.add_subplot(gs[len(sizes)-1-s,0])
-    #
-    #         mix_dist_file = '{}/mix_distributions_size{}_{}'.format(out_dir, size, data_label)
-    #         Mixtures = {}
-    #         for p, p_star in enumerate(p_stars):
-    #             print("\n\n")
-    #             print("Size: {} [#{}/{}]".format(size, s, len(sizes)))
-    #             print("p1*: {} [#{}/{}]".format(p_star, p, len(p_stars)), flush=True)
-    #
-    #             violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
-    #             Mixtures[p_star] = violin_scores['Mix']
-    #             df_cm = pe.analyse_mixture(violin_scores, bins, methods,
-    #                                        bootstraps=bootstraps, sample_size=size,
-    #                                        alpha=alpha, true_prop_Ref1=p_star, verbose=0)
-    #             df_cm['Size'] = size * np.ones(bootstraps)
-    #             df_cm['p1*'] = p_star * np.ones(bootstraps)
-    #             df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size'], value_name='Estimate')
-    #             dfs.append(df_cm)
-    #         df_size = pd.DataFrame(Mixtures, columns=p_stars)
-    #         df_size.to_pickle(mix_dist_file)
-    #     df_est = pd.concat(dfs, ignore_index=True)
-    #     elapsed = time.time() - t
-    #     print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
-    #
-    #     # Save results
-    #     df_est.to_pickle(estimates_res_file)
-    # else:
-    #     if os.path.isfile(estimates_res_file):
-    #         df_est = pd.read_pickle(estimates_res_file)
-    #     else:
-    #         warnings.warn("Missing data file: {}".format(estimates_res_file))
-    #         break
-
-
     # Generate multiple mixes
     n_mixes = 5
     estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
-    # TODO: Refactor with above block
     if FRESH_DATA:
         print("Running mixture analysis with {} scores...".format(data_label))
         t = time.time()  # Start timer
@@ -1006,50 +913,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
     g.invert_yaxis()
     fig_vio.savefig('figs/violin_bootstraps_{}.png'.format(data_label))
-
-
-    # # Generate multiple mixes
-    # n_mixes = 5
-    # estimates_res_file = '{}/pe_stack_analysis_{}'.format(out_dir, data_label)
-    # # TODO: Refactor with above block
-    # if FRESH_DATA:
-    #     print("Running mixture analysis with {} scores...".format(data_label))
-    #     t = time.time()  # Start timer
-    #     dfs = []
-    #     for s, size in enumerate(sizes):
-    #         for mix in range(n_mixes):
-    #             mix_dist_file = '{}/mix_stacks_{}_size{}_{}'.format(out_dir, mix, size, data_label)
-    #             Mixtures = {}
-    #             for p, p_star in enumerate(p_stars):
-    #                 print("\n\n")
-    #                 print("Size: {} [#{}/{}]".format(size, s, len(sizes)))
-    #                 print("Mix: {} [#{}/{}]".format(mix, mix, n_mixes))
-    #                 print("p1*: {} [#{}/{}]".format(p_star, p, len(p_stars)), flush=True)
-    #
-    #                 violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
-    #                 Mixtures[p_star] = violin_scores['Mix']
-    #                 df_cm = pe.analyse_mixture(violin_scores, bins, methods,
-    #                                            bootstraps=bootstraps, sample_size=size,
-    #                                            alpha=alpha, true_prop_Ref1=p_star, verbose=0)
-    #                 df_cm['Size'] = size * np.ones(bootstraps)
-    #                 df_cm['p1*'] = p_star * np.ones(bootstraps)
-    #                 df_cm['Mix'] = mix * np.ones(bootstraps)
-    #                 df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
-    #                 dfs.append(df_cm)
-    #             df_size = pd.DataFrame(Mixtures, columns=p_stars)
-    #             df_size.to_pickle(mix_dist_file)
-    #     df_est = pd.concat(dfs, ignore_index=True)
-    #     elapsed = time.time() - t
-    #     print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
-    #
-    #     # Save results
-    #     df_est.to_pickle(estimates_res_file)
-    # else:
-    #     if os.path.isfile(estimates_res_file):
-    #         df_est = pd.read_pickle(estimates_res_file)
-    #     else:
-    #         warnings.warn("Missing data file: {}".format(estimates_res_file))
-    #         break
 
 
 
