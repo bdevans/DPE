@@ -223,7 +223,9 @@ def prepare_methods(methods, scores, bins, verbose=1):
     return kwargs
 
 
-def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):  #, means=None, median=None, KDE_kernel='gaussian'):
+def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
+                    alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):
+                    # , means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
