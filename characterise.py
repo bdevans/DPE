@@ -49,7 +49,9 @@ seed = 42
 mixtures = 10  # 1000
 bootstraps = 10
 sample_sizes = np.arange(100, 2501, 100)  # 3100
-proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
+# sample_sizes = np.linspace(100, 2500, 25, endpoint=True, dtype=int)
+# proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
+proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
