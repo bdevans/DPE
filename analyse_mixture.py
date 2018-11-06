@@ -39,8 +39,11 @@ def fit_kernels(scores, bw):
         X = data[:, np.newaxis]
         for kernel in ['gaussian', 'tophat', 'epanechnikov',
                        'exponential', 'linear', 'cosine']:
-            kde = KernelDensity(kernel=kernel, bandwidth=bw, atol=0, rtol=1e-4).fit(X)  #
-            kernels[label][kernel] = kde
+            # kde = KernelDensity(kernel=kernel, bandwidth=bw, atol=0, rtol=1e-4).fit(X)  #
+            # kernels[label][kernel] = kde
+
+            kernels[label][kernel] = KernelDensity(kernel=kernel, bandwidth=bw,
+                                                   atol=0, rtol=1e-4).fit(X)
     return kernels
 
 
@@ -65,7 +68,8 @@ def fit_KDE_model(Mix, bins, model, params_mix, kernel):
     # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
     x_KDE = bins["centers"]
     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
-    res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+    res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])),
+                        x=x_KDE, params=params_mix)
     amp_Ref1 = res_mix.params['amp_Ref1'].value
     amp_Ref2 = res_mix.params['amp_Ref2'].value
     return amp_Ref1/(amp_Ref1+amp_Ref2)
