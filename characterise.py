@@ -30,7 +30,7 @@ from joblib import Parallel, delayed, cpu_count
 # mem = Memory(cachedir='/tmp')
 # import tqdm
 
-import analyse_mixture as pe
+import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
 
 # ---------------------------- Define constants ------------------------------
