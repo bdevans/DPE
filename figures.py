@@ -254,7 +254,7 @@ def construct_mixture(Ref1, Ref2, p1, size):
     return mix
 
 
-def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
+def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
@@ -269,7 +269,10 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
     for si, size in enumerate(sizes):
 #        ax_vio = fig_select.add_subplot(gs[-(si+1), :-1])
 #        ax_mix = fig_select.add_subplot(gs[-(si+1), -1])
-        mix_dist_file = '{}/mix_distributions_size{}_{}'.format(out_dir, size, data_label)
+        mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
+        if not os.path.isfile(mix_dist_file):
+            warnings.warn("File not found: {}".format(mix_dist_file))
+            return
         df_mixes = pd.read_pickle(mix_dist_file)
 
         if si == 0:
@@ -412,7 +415,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
     fig_select.savefig('figs/violin_selection_{}.png'.format(data_label))
 
 
-def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, out_dir, data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
+def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, out_dir, data_label, selected_mix=0, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
 
     c = sns.color_palette()[-3]  # 'gray'
     palette = sns.color_palette("coolwarm", len(p_stars)+2).as_hex()  # "hls"
@@ -422,7 +425,10 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
 
     for si, size in enumerate(sizes):
         for mix in range(n_mixes):
-            mix_dist_file = '{}/mix_distributions_size{}_{}_{}'.format(out_dir, size, mix, data_label)
+            mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
+            if not os.path.isfile(mix_dist_file):
+                warnings.warn("File not found: {}".format(mix_dist_file))
+                return
             df_mixes = pd.read_pickle(mix_dist_file)
 
             if si == 0:
