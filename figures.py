@@ -59,13 +59,13 @@ def load_accuracy(out_dir, label):
 
 
 # TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
-def plot_accuracy(errors, proportions, sample_sizes, label, fig, ax,
+def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
                   shading_levels=None, contour_levels=[0.02], title=True):
 
     if not ax:
         fig, ax = plt.subplots()
 
-    average_error = average(errors[label], axis=2) - proportions
+    average_error = average(estimates[label], axis=2) - proportions
 
     if ABSOLUTE_ERROR:
         errors = np.abs(errors)
@@ -113,7 +113,7 @@ def plot_accuracy(errors, proportions, sample_sizes, label, fig, ax,
     fig.colorbar(CS, ax=ax)  # , norm=mpl.colors.LogNorm())
 
 
-def plot_deviation(errors, proportions, sample_sizes, label, fig, ax,
+def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
                    shading_levels=np.arange(0.01, 0.1001, 0.005),
                    contour_levels=[0.05], title=True):
 
@@ -123,7 +123,7 @@ def plot_deviation(errors, proportions, sample_sizes, label, fig, ax,
 
     colour = [sns.color_palette()[-3]]
 
-    bs_dev = deviation(errors[label], axis=2)
+    bs_dev = deviation(estimates[label], axis=2)
     if title:
         ax.set_title(label)
     CS = ax.contourf(proportions, sample_sizes, bs_dev,
@@ -730,7 +730,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     sns.set_style("ticks")
 
     # Load bootstraps of accurarcy data
-    (errors, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
+    (estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
 
     if False:
         fig = plt.figure(figsize=(12,8))
@@ -755,19 +755,19 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         ax_grid_Means.set_ylabel('Sample size ($n$)')
     #    ax_p2 = ax_grid_Means.twiny()
     #    ax_p2.set_xticklabels(ax_grid_Means.get_xticks()[::-1])
-        plot_accuracy(errors, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
+        plot_accuracy(estimates, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
 
         ax_grid_Excess = fig.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
-        plot_accuracy(errors, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
+        plot_accuracy(estimates, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
 
         ax_grid_EMD = fig.add_subplot(gs[1,0])
         ax_grid_EMD.set_ylabel('Sample size ($n$)')
         ax_grid_EMD.set_xlabel('$p_1^*$')
-        plot_accuracy(errors, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
+        plot_accuracy(estimates, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
 
         ax_grid_KDE = fig.add_subplot(gs[1,1], yticklabels=[])
         ax_grid_KDE.set_xlabel('$p_1^*$')
-        plot_accuracy(errors, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
+        plot_accuracy(estimates, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
 
         #axes = np.array([[ax_grid_Means, ax_grid_Excess], [ax_grid_EMD, ax_grid_KDE]])
         #plot_bootstrap_results(out_dir, data_label, fig, axes)  # "T1GRS"
@@ -782,19 +782,19 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
         ax_dev_Means = fig_dev.add_subplot(gs[0,0], xticklabels=[])
         ax_dev_Means.set_ylabel('Sample size ($n$)')
-        plot_deviation(errors, proportions, sample_sizes, "Means", fig_dev, ax_dev_Means)
+        plot_deviation(estimates, proportions, sample_sizes, "Means", fig_dev, ax_dev_Means)
 
         ax_dev_Excess = fig_dev.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
-        plot_deviation(errors, proportions, sample_sizes, "Excess", fig_dev, ax_dev_Excess)
+        plot_deviation(estimates, proportions, sample_sizes, "Excess", fig_dev, ax_dev_Excess)
 
         ax_dev_EMD = fig_dev.add_subplot(gs[1,0])
         ax_dev_EMD.set_ylabel('Sample size ($n$)')
         ax_dev_EMD.set_xlabel('$p_1^*$')
-        plot_deviation(errors, proportions, sample_sizes, "EMD", fig_dev, ax_dev_EMD)
+        plot_deviation(estimates, proportions, sample_sizes, "EMD", fig_dev, ax_dev_EMD)
 
         ax_dev_KDE = fig_dev.add_subplot(gs[1,1], yticklabels=[])
         ax_dev_KDE.set_xlabel('$p_1^*$')
-        plot_deviation(errors, proportions, sample_sizes, "KDE", fig_dev, ax_dev_KDE)
+        plot_deviation(estimates, proportions, sample_sizes, "KDE", fig_dev, ax_dev_KDE)
 
     #    fig_dev.tight_layout()
         fig_dev.savefig('figs/deviation_{}.png'.format(data_label))
@@ -811,7 +811,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             ax_acc.set_ylabel('Sample size ($n$)')
         else:
             ax_acc.set_yticklabels([])
-        plot_accuracy(errors, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl)
+        plot_accuracy(estimates, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl)
 
         # Plot deviation across mixtures
         ax_dev = fig.add_subplot(gs[1, m])
@@ -820,7 +820,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         else:
             ax_dev.set_yticklabels([])
         ax_dev.set_xlabel('$p_1^*$')
-        plot_deviation(errors, proportions, sample_sizes, method, fig, ax_dev, title=False)
+        plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False)
 
     fig.savefig('figs/characterise_{}.png'.format(data_label))
 
