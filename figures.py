@@ -342,7 +342,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
                 df_means = df.groupby('Method').mean()
                 errors = np.zeros(shape=(2, len(methods)))
                 means = []
-                for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+                for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
                     nobs = size  # len(df_est[method])
                     mean_est = df_means.loc[method, 'Estimate']
                     means.append(mean_est)
@@ -604,9 +604,9 @@ if plot_results:
 # ---------------------------- Define constants ------------------------------
 
 METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
-FRESH_DATA = False  # CAUTION!
+FRESH_DATA = True  # CAUTION!
 #out_dir = "results_1000"
-out_dir = "results"
+out_dir = "results_test"
 
 verbose = False
 
