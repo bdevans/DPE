@@ -37,11 +37,11 @@ def load_accuracy(out_dir, label):
     # PROPORTIONS_Ref2 = PROPORTIONS_Ref1[::-1]
 
     # Dictionary of p1 errors
-    errors = {}
+    estimates = {}
 
     for method in METHODS_ORDER:
         if os.path.isfile('{}/{}_{}.npy'.format(out_dir, method.lower(), label)):
-            errors[method] = np.load('{}/{}_{}.npy'.format(out_dir, method.lower(), label))
+            estimates[method] = np.load('{}/{}_{}.npy'.format(out_dir, method.lower(), label))
 
     # if os.path.isfile('{}/means_{}.npy'.format(out_dir, label)):
     #     errors["Means"] = np.load('{}/means_{}.npy'.format(out_dir, label))
@@ -55,7 +55,7 @@ def load_accuracy(out_dir, label):
     # if os.path.isfile('{}/kde_{}.npy'.format(out_dir, label)):
     #     errors["KDE"] = np.load('{}/kde_{}.npy'.format(out_dir, label))
 
-    return errors, PROPORTIONS, SAMPLE_SIZES
+    return estimates, PROPORTIONS, SAMPLE_SIZES
 
 
 # TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
