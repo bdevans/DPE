@@ -228,11 +228,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
- #        kwargs["fit_KDE_model"] = fit_KDE_model
+    # kwargs["fit_KDE_model"] = fit_KDE_model
     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
-    model = kwargs['model']
- #    print(kwargs)
-
+    # print(kwargs)
 
     def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         '''Estimate the proportion of two reference populations in an unknown mixture.
@@ -346,7 +344,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         # ------------------------------ KDE method ------------------------------
         if "KDE" in methods:
             # TODO: Print out warnings if goodness of fit is poor?
-            results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
+            results['KDE'] = fit_KDE_model(RM, bins, kwargs['model'], kwargs['initial_params'], kwargs['KDE_kernel'])
 
         return results
 
