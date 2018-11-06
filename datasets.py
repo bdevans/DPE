@@ -160,7 +160,7 @@ def load_renal_data():
 
 
 # Let's use FD!
-def estimate_bins(data, range=None, verbose=2):
+def estimate_bins(data, bin_range=None, verbose=1):
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
@@ -171,13 +171,13 @@ def estimate_bins(data, range=None, verbose=2):
         for group, scores in data.items():
             all_scores.extend(scores)
             if verbose > 1:
-                if range is not None:
-                    _, bin_edges = np.histogram(scores, bins=method, range=range)
+                if bin_range is not None:
+                    _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
                 else:
                     _, bin_edges = np.histogram(scores, bins=method)
                 print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
-        if range is not None:
-            _, bin_edges = np.histogram(all_scores, bins=method, range=range)  # Return edges
+        if bin_range is not None:
+            _, bin_edges = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
         else:
             _, bin_edges = np.histogram(all_scores, bins=method)  # Return edges
         bins[method] = {'width': bin_edges[1] - bin_edges[0],
