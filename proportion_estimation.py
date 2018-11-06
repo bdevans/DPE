@@ -373,7 +373,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 #        return results#[method]
 
 
-    def bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs):
+    def bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size=-1, **kwargs):
 
 #        results = {}
 #        for method in methods:
@@ -384,6 +384,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 #            indiv_method[method] = methods[method]
 #
 #            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **kwargs)[method]
+
+        if sample_size == -1:
+            sample_size = len(Mix)
 
         bs = np.random.choice(Mix, sample_size, replace=True)
         results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
@@ -421,10 +424,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 #            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **kwargs)[method]
 #                               for b in range(bootstraps)]
 
-            results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs)
+            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
                        for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
         else:  # Disable progress bar
-            results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs)
+            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
                        for b in range(bootstraps)]
 
         # Put into dataframe
