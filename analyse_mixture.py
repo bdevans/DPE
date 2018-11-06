@@ -386,7 +386,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         if verbose:
             print('Running {} bootstraps...'.format(bootstraps), flush=True)
 
-        results = OrderedDict()
+        # results = OrderedDict()
 
 #        for method in methods:
             # Fix estimated proportions for each method
