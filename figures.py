@@ -68,7 +68,7 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
     average_error = average(estimates[label], axis=2) - proportions
 
     if ABSOLUTE_ERROR:
-        errors = np.abs(errors)
+        average_error = np.abs(average_error)
 
     # Plot shaded regions for each method on individual subplots
     if not shading_levels:
