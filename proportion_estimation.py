@@ -346,7 +346,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         # ------------------------------ KDE method ------------------------------
         if "KDE" in methods:
             # TODO: Print out warnings if goodness of fit is poor?
-            results['KDE'] = fit_KDE_model(RM, bins, kwargs['model'], kwargs['initial_params'], kwargs['KDE_kernel'])
+            results['KDE'] = fit_KDE_model(RM, bins, kwargs['model'],
+                                           kwargs['initial_params'],
+                                           kwargs['KDE_kernel'])
 
         return results
 
