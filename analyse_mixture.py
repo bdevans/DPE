@@ -91,10 +91,10 @@ def prepare_methods(methods, scores, bins, verbose=1):
     bin_width = bins['width']
     bin_edges = bins['edges']
 
-    extra_args = {}
+    kwargs = {}
     # if sample_size == -1:
     #     sample_size = len(Mix)
-    extra_args['bins'] = bins
+    kwargs['bins'] = bins
 
     if "Excess" in methods:
     # ----------------------------- Excess method -----------------------------
@@ -108,7 +108,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
             median = methods["Excess"]["Median_Ref2"]
             if "adjustment_factor" not in methods["Excess"]:
                 methods["Excess"]["adjustment_factor"] = 1
-            extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
+            kwargs['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
     #        if isinstance(methods["Excess"], float):
     #            # Median passed
     #            median = methods["Excess"]
@@ -116,7 +116,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
     #        else:
     #            # The Excess method assumes that...
     #            median = np.median(scores["Ref2"])
-        extra_args['population_median'] = median
+        kwargs['population_median'] = median
         if verbose > 1:
             print("Ref1 median:", np.median(Ref1))
             print("Ref2 median:", np.median(Ref2))
@@ -131,7 +131,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
                 print("No Mean_Ref1 specified!")
             Mean_Ref1 = Ref1.mean()
         finally:
-            extra_args["Mean_Ref1"] = Mean_Ref1
+            kwargs["Mean_Ref1"] = Mean_Ref1
         try:
             Mean_Ref2 = methods["Means"]["Ref2"]
         except (KeyError, TypeError):
@@ -139,47 +139,47 @@ def prepare_methods(methods, scores, bins, verbose=1):
                 print("No Mean_Ref2 specified!")
             Mean_Ref2 = Ref2.mean()
         finally:
-            extra_args["Mean_Ref2"] = Mean_Ref2
+            kwargs["Mean_Ref2"] = Mean_Ref2
 
     if "EMD" in methods:
     # -------------------------------- EMD method --------------------------------
 
-        if 'max_EMD' not in extra_args:
+        if 'max_EMD' not in kwargs:
             max_EMD = bin_edges[-1] - bin_edges[0]
-            extra_args['max_EMD'] = max_EMD
+            kwargs['max_EMD'] = max_EMD
 
         # Interpolate the cdfs at the same points for comparison
-        if 'i_CDF_Ref1' not in extra_args:
+        if 'i_CDF_Ref1' not in kwargs:
             i_CDF_Ref1 = interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
-            extra_args['i_CDF_Ref1'] = i_CDF_Ref1
+            kwargs['i_CDF_Ref1'] = i_CDF_Ref1
 
-        if 'i_CDF_Ref2' not in extra_args:
+        if 'i_CDF_Ref2' not in kwargs:
             i_CDF_Ref2 = interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
-            extra_args['i_CDF_Ref2'] = i_CDF_Ref2
+            kwargs['i_CDF_Ref2'] = i_CDF_Ref2
     #        i_CDF_Mix = interpolate_CDF(Mix, bin_centers, bins['min'], bins['max'])
 
         # EMDs computed with interpolated CDFs
-        if 'i_EMD_1_2' not in extra_args:
-            i_EMD_1_2 = sum(abs(extra_args['i_CDF_Ref1']-extra_args['i_CDF_Ref2']))
-            extra_args['i_EMD_1_2'] = i_EMD_1_2
+        if 'i_EMD_1_2' not in kwargs:
+            i_EMD_1_2 = sum(abs(kwargs['i_CDF_Ref1']-kwargs['i_CDF_Ref2']))
+            kwargs['i_EMD_1_2'] = i_EMD_1_2
     #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
     #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
     #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 
-    #        extra_args['i_EMD_21'] = i_EMD_21
+    #        kwargs['i_EMD_21'] = i_EMD_21
 
     if "KDE" in methods:
         # ------------------------------ KDE method ------------------------------
 
         bw = bin_width  # Bandwidth
 
-        if 'kdes' not in extra_args:
+        if 'kdes' not in kwargs:
             kdes = fit_kernels(scores, bw)
-            extra_args['kdes'] = kdes
+            kwargs['kdes'] = kdes
         else:
-            kdes = extra_args['kdes']
+            kdes = kwargs['kdes']
 
-        if 'KDE_kernel' not in extra_args or 'bin_width' not in extra_args:
+        if 'KDE_kernel' not in kwargs or 'bin_width' not in kwargs:
             try:
                 KDE_kernel = methods["KDE"]["kernel"]
             except (KeyError, TypeError):
@@ -194,12 +194,12 @@ def prepare_methods(methods, scores, bins, verbose=1):
             finally:
                 if verbose > 1:
                     print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
-            extra_args['KDE_kernel'] = KDE_kernel
-            extra_args['bin_width'] = bin_width
+            kwargs['KDE_kernel'] = KDE_kernel
+            kwargs['bin_width'] = bin_width
         else:
-            KDE_kernel = extra_args['KDE_kernel']
+            KDE_kernel = kwargs['KDE_kernel']
 
-        if 'model' not in extra_args:
+        if 'model' not in kwargs:
             # Define the KDE models
             # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
             # Assigning a default value to amp initialises them
@@ -210,17 +210,17 @@ def prepare_methods(methods, scores, bins, verbose=1):
                 return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
             model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
-            extra_args['model'] = model  # This breaks joblib
+            kwargs['model'] = model  # This breaks joblib
 
-        if 'initial_params' not in extra_args:
-            params_mix = extra_args['model'].make_params()
+        if 'initial_params' not in kwargs:
+            params_mix = kwargs['model'].make_params()
             params_mix['amp_Ref1'].value = 1
             params_mix['amp_Ref1'].min = 0
             params_mix['amp_Ref2'].value = 1
             params_mix['amp_Ref2'].min = 0
-            extra_args['initial_params'] = params_mix
+            kwargs['initial_params'] = params_mix
 
-    return extra_args
+    return kwargs
 
 
 def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):  #, means=None, median=None, KDE_kernel='gaussian'):
@@ -228,10 +228,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
- #        extra_args["fit_KDE_model"] = fit_KDE_model
-    extra_args = prepare_methods(methods, scores, bins, verbose=verbose)
-    model = extra_args['model']
- #    print(extra_args)
+ #        kwargs["fit_KDE_model"] = fit_KDE_model
+    kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
+    model = kwargs['model']
+ #    print(kwargs)
 
 
     def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
@@ -351,7 +351,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
         return results
 
 
-#    def construct_bootstraps(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+#    def construct_bootstraps(sample_size, prop_Ref1, Ref1, Ref2, methods, **kwargs):
 #
 #        results = {}
 #        for method in methods:
@@ -368,12 +368,12 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 #            indiv_method = {}
 #            indiv_method[method] = methods[method]
 #
-#            results[method] = estimate_Ref1(Mix, Ref1, Ref2, indiv_method, **extra_args)[method]
+#            results[method] = estimate_Ref1(Mix, Ref1, Ref2, indiv_method, **kwargs)[method]
 #
 #        return results#[method]
 
 
-    def bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **extra_args):
+    def bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs):
 
 #        results = {}
 #        for method in methods:
@@ -383,10 +383,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 #            indiv_method = {}
 #            indiv_method[method] = methods[method]
 #
-#            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **extra_args)[method]
+#            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **kwargs)[method]
 
         bs = np.random.choice(Mix, sample_size, replace=True)
-        results = estimate_Ref1(bs, Ref1, Ref2, methods, **extra_args)
+        results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
         return results
 
@@ -394,7 +394,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 
     if bootstraps <= 1:
         # Get initial estimate of proportions
-        initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **extra_args)
+        initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
         if verbose > 1:
             pprint(initial_results)
         if true_prop_Ref1:
@@ -418,10 +418,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1, alph
 #                prop_Ref1 = initial_results
 #            individual_method = {}
 #            individual_method[method] = methods[method]
-#            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **extra_args)[method]
+#            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **kwargs)[method]
 #                               for b in range(bootstraps)]
 
-        results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **extra_args)
+        results = [bootstrap_mixture(Mix, sample_size, Ref1, Ref2, methods, **kwargs)
                    for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
 
         # Put into dataframe
