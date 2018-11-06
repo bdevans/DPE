@@ -21,17 +21,17 @@ def load_diabetes_data(metric):
     headers = {'diabetes_type': 'group', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
 
     if metric == 'T1GRS':
-        bin_width = 0.006  # 0.005
-        bin_min = 0.095
-        bin_max = 0.350
+        # bin_width = 0.006  # 0.005
+        # bin_min = 0.095
+        # bin_max = 0.350
 
         # NOTE: This is close to but not equal to the Ref1_median
         median = 0.23137931525707245  # Type 2 population
 
     elif metric == 'T2GRS':
-        bin_width = 0.1
-        bin_min = 4.7
-        bin_max = 8.9
+        # bin_width = 0.1
+        # bin_min = 4.7
+        # bin_max = 8.9
 
         median = 6.78826
 
@@ -41,7 +41,7 @@ def load_diabetes_data(metric):
 
     data = pd.read_csv(dataset)
     data.rename(columns=headers, inplace=True)
-    data.describe()
+    # print(data.describe())
 
     scores = {}
     means = {}
@@ -66,16 +66,16 @@ def load_diabetes_data(metric):
 
     # --------------------------- Bin the data -------------------------------
 #    N = data.count()[0]
-    bins = {}
-
-    bin_edges = np.arange(bin_min, bin_max+bin_width, bin_width)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-
-    bins = {'width': bin_width,
-            'min': bin_min,
-            'max': bin_max,
-            'edges': bin_edges,
-            'centers': bin_centers}
+    # bins = {}
+    #
+    # bin_edges = np.arange(bin_min, bin_max+bin_width, bin_width)
+    # bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    #
+    # bins = {'width': bin_width,
+    #         'min': bin_min,
+    #         'max': bin_max,
+    #         'edges': bin_edges,
+    #         'centers': bin_centers}
 
     if False:
         sns.jointplot(x='T1GRS', y='T2GRS', data=data)
@@ -112,14 +112,14 @@ def load_renal_data():
     # headers = {'T2_GRS': 'T2GRS', "Group (1 t2, 2 control, 3 mixture)": 'group'}
     # prop_Ref1 = 0.1053
 
-    bin_width = 0.128  # 0.1
-    bin_min = 4.7
-    bin_max = 8.9
+    # bin_width = 0.128  # 0.1
+    # bin_min = 4.7
+    # bin_max = 8.9
 
     data = pd.read_csv(dataset)
     data.rename(columns=headers, inplace=True)
     data.dropna(inplace=True)  # Remove empty entries
-    data.describe()
+    # print(data.describe())
 
     scores = {}
     means = {}
@@ -141,16 +141,16 @@ def load_renal_data():
 
     # --------------------------- Bin the data -------------------------------
 #    N = data.count()[0]
-    bins = {}
-
-    bin_edges = np.arange(bin_min, bin_max+bin_width, bin_width)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-
-    bins = {'width': bin_width,
-            'min': bin_min,
-            'max': bin_max,
-            'edges': bin_edges,
-            'centers': bin_centers}
+    # bins = {}
+    #
+    # bin_edges = np.arange(bin_min, bin_max+bin_width, bin_width)
+    # bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    #
+    # bins = {'width': bin_width,
+    #         'min': bin_min,
+    #         'max': bin_max,
+    #         'edges': bin_edges,
+    #         'centers': bin_centers}
 
     print("Renal Data")
     # print("==========")
@@ -160,7 +160,7 @@ def load_renal_data():
 
 
 # Let's use FD!
-def estimate_bins(data, bin_range=None, verbose=2):
+def estimate_bins(data, bin_range=None, verbose=1):
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
