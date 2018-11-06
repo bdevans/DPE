@@ -28,7 +28,7 @@ import lmfit
 from joblib import Parallel, delayed, cpu_count
 # from joblib import Memory
 # mem = Memory(cachedir='/tmp')
-# import tqdm
+import tqdm
 
 import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
@@ -416,21 +416,13 @@ if __name__ == '__main__':
             # -------------------------- KDE method --------------------------
             results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
 
-        # Setup progress bar
-        iterations = len(sample_sizes) * len(proportions) # * len(metrics) * mixtures  #KDE_fits.size
-        max_bars = 78    # number of dots in progress bar
-        if iterations < max_bars:
-            max_bars = iterations   # if less than 20 points, shorten bar
-        print("|" + max_bars*"-" + "|")
-        print('|', end='', flush=True)  # print start of progress bar
-        it = 0
-        bar_element = 0
 
         # Spawn threads
 #        with Parallel(n_jobs=nprocs) as parallel:
-        for s, sample_size in enumerate(sample_sizes):
-            for p, prop_Ref1 in enumerate(proportions):
-
+        for s in tqdm.trange(len(sample_sizes), desc='Size'):
+            sample_size = sample_sizes[s]
+            for p in tqdm.trange(len(proportions), desc='p1*', leave=False):
+                prop_Ref1 = proportions[p]
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
                     results = parallel(delayed(assess_performance)(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **extra_args)
@@ -448,13 +440,6 @@ if __name__ == '__main__':
                         if run_KDE:
                             results_KDE[s, p, m, :] = results[m]['KDE']
 
-
-                    if (it >= bar_element*iterations/max_bars):
-                        print('*', end='', flush=True)
-                        bar_element += 1
-                    if (it >= iterations-1):
-                        print('|', flush=True)
-                    it += 1
 
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
