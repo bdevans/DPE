@@ -577,7 +577,7 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
 
 
 
-def plot_compund_figure():
+def plot_compound_figure():
     """No longer used"""
     fig = plt.figure(figsize=(12,8))
     gs = plt.GridSpec(nrows=2, ncols=3, hspace=0.15, wspace=0.15)
