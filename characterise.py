@@ -46,8 +46,8 @@ check_EMD = False
 
 seed = 42
 
-mixtures = 10  # 1000
-bootstraps = 10
+mixtures = 100  # 1000
+bootstraps = 100
 sample_sizes = np.arange(100, 2501, 100)  # 3100
 # sample_sizes = np.linspace(100, 2500, 25, endpoint=True, dtype=int)
 # proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
