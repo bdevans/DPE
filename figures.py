@@ -65,7 +65,10 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
     if not ax:
         fig, ax = plt.subplots()
 
-    average_error = average(estimates[label], axis=2) - proportions
+    if estimates.ndim > 3:  # Take mean over bootstraps first
+        average_error = average(np.mean(estimates[label], axis=3), axis=2) - proportions
+    else:
+        average_error = average(estimates[label], axis=2) - proportions
 
     if ABSOLUTE_ERROR:
         average_error = np.abs(average_error)
@@ -123,7 +126,10 @@ def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
 
     colour = [sns.color_palette()[-3]]
 
-    bs_dev = deviation(estimates[label], axis=2)
+    if estimates.ndim > 3:  # Take mean over bootstraps first
+        bs_dev = deviation(np.mean(estimates[label], axis=3), axis=2)
+    else:
+        bs_dev = deviation(estimates[label], axis=2)
     if title:
         ax.set_title(label)
     CS = ax.contourf(proportions, sample_sizes, bs_dev,
