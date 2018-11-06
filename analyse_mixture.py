@@ -8,7 +8,7 @@ Module to analyse an unknown mixture population.
 @author: ben
 """
 
-from collections import OrderedDict  # , defaultdict
+# from collections import OrderedDict  # , defaultdict
 from pprint import pprint
 
 import numpy as np
