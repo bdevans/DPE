@@ -577,6 +577,76 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
 
 
 
+def plot_compund_figure():
+    """No longer used"""
+    fig = plt.figure(figsize=(12,8))
+    gs = plt.GridSpec(nrows=2, ncols=3, hspace=0.15, wspace=0.15)
+
+
+    #sns.set_style("ticks")
+    ax_dists = fig.add_subplot(gs[-1,-1])
+    # with sns.axes_style("ticks"):
+    plot_distributions(scores, bins, data_label, ax=ax_dists)
+
+    #sns.set_style("whitegrid")
+    ax_ci = fig.add_subplot(gs[0,-1])
+    # with sns.axes_style("whitegrid"):
+        #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
+    plot_bootstraps(df_pe, prop_Ref1, ax_ci, limits=None, ci_method=CI_METHOD)
+
+
+    # Plot average accuracy across bootstraps
+    cl = [0.02]
+    ax_grid_Means = fig.add_subplot(gs[0,0], xticklabels=[])
+    ax_grid_Means.set_ylabel('Sample size ($n$)')
+#    ax_p2 = ax_grid_Means.twiny()
+#    ax_p2.set_xticklabels(ax_grid_Means.get_xticks()[::-1])
+    plot_accuracy(estimates, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
+
+    ax_grid_Excess = fig.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
+    plot_accuracy(estimates, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
+
+    ax_grid_EMD = fig.add_subplot(gs[1,0])
+    ax_grid_EMD.set_ylabel('Sample size ($n$)')
+    ax_grid_EMD.set_xlabel('$p_1^*$')
+    plot_accuracy(estimates, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
+
+    ax_grid_KDE = fig.add_subplot(gs[1,1], yticklabels=[])
+    ax_grid_KDE.set_xlabel('$p_1^*$')
+    plot_accuracy(estimates, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
+
+    #axes = np.array([[ax_grid_Means, ax_grid_Excess], [ax_grid_EMD, ax_grid_KDE]])
+    #plot_bootstrap_results(out_dir, data_label, fig, axes)  # "T1GRS"
+
+#    fig.tight_layout()
+    fig.savefig('figs/compound_{}.png'.format(data_label))
+
+
+    # Plot deviation across bootstraps
+    fig_dev = plt.figure(figsize=(8,8))
+    gs = plt.GridSpec(nrows=2, ncols=2, hspace=0.15, wspace=0.15)
+
+    ax_dev_Means = fig_dev.add_subplot(gs[0,0], xticklabels=[])
+    ax_dev_Means.set_ylabel('Sample size ($n$)')
+    plot_deviation(estimates, proportions, sample_sizes, "Means", fig_dev, ax_dev_Means)
+
+    ax_dev_Excess = fig_dev.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
+    plot_deviation(estimates, proportions, sample_sizes, "Excess", fig_dev, ax_dev_Excess)
+
+    ax_dev_EMD = fig_dev.add_subplot(gs[1,0])
+    ax_dev_EMD.set_ylabel('Sample size ($n$)')
+    ax_dev_EMD.set_xlabel('$p_1^*$')
+    plot_deviation(estimates, proportions, sample_sizes, "EMD", fig_dev, ax_dev_EMD)
+
+    ax_dev_KDE = fig_dev.add_subplot(gs[1,1], yticklabels=[])
+    ax_dev_KDE.set_xlabel('$p_1^*$')
+    plot_deviation(estimates, proportions, sample_sizes, "KDE", fig_dev, ax_dev_KDE)
+
+#    fig_dev.tight_layout()
+    fig_dev.savefig('figs/deviation_{}.png'.format(data_label))
+
+
+
 
 plot_results = False
 
@@ -738,73 +808,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
     # Load bootstraps of accurarcy data
     (estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
-
-    if False:
-        fig = plt.figure(figsize=(12,8))
-        gs = plt.GridSpec(nrows=2, ncols=3, hspace=0.15, wspace=0.15)
-
-
-        #sns.set_style("ticks")
-        ax_dists = fig.add_subplot(gs[-1,-1])
-        # with sns.axes_style("ticks"):
-        plot_distributions(scores, bins, data_label, ax=ax_dists)
-
-        #sns.set_style("whitegrid")
-        ax_ci = fig.add_subplot(gs[0,-1])
-        # with sns.axes_style("whitegrid"):
-            #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
-        plot_bootstraps(df_pe, prop_Ref1, ax_ci, limits=None, ci_method=CI_METHOD)
-
-
-        # Plot average accuracy across bootstraps
-        cl = [0.02]
-        ax_grid_Means = fig.add_subplot(gs[0,0], xticklabels=[])
-        ax_grid_Means.set_ylabel('Sample size ($n$)')
-    #    ax_p2 = ax_grid_Means.twiny()
-    #    ax_p2.set_xticklabels(ax_grid_Means.get_xticks()[::-1])
-        plot_accuracy(estimates, proportions, sample_sizes, "Means", fig, ax_grid_Means, contour_levels=cl)
-
-        ax_grid_Excess = fig.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
-        plot_accuracy(estimates, proportions, sample_sizes, "Excess", fig, ax_grid_Excess, contour_levels=cl)
-
-        ax_grid_EMD = fig.add_subplot(gs[1,0])
-        ax_grid_EMD.set_ylabel('Sample size ($n$)')
-        ax_grid_EMD.set_xlabel('$p_1^*$')
-        plot_accuracy(estimates, proportions, sample_sizes, "EMD", fig, ax_grid_EMD, contour_levels=cl)
-
-        ax_grid_KDE = fig.add_subplot(gs[1,1], yticklabels=[])
-        ax_grid_KDE.set_xlabel('$p_1^*$')
-        plot_accuracy(estimates, proportions, sample_sizes, "KDE", fig, ax_grid_KDE, contour_levels=cl)
-
-        #axes = np.array([[ax_grid_Means, ax_grid_Excess], [ax_grid_EMD, ax_grid_KDE]])
-        #plot_bootstrap_results(out_dir, data_label, fig, axes)  # "T1GRS"
-
-    #    fig.tight_layout()
-        fig.savefig('figs/compound_{}.png'.format(data_label))
-
-
-        # Plot deviation across bootstraps
-        fig_dev = plt.figure(figsize=(8,8))
-        gs = plt.GridSpec(nrows=2, ncols=2, hspace=0.15, wspace=0.15)
-
-        ax_dev_Means = fig_dev.add_subplot(gs[0,0], xticklabels=[])
-        ax_dev_Means.set_ylabel('Sample size ($n$)')
-        plot_deviation(estimates, proportions, sample_sizes, "Means", fig_dev, ax_dev_Means)
-
-        ax_dev_Excess = fig_dev.add_subplot(gs[0,1], xticklabels=[], yticklabels=[])
-        plot_deviation(estimates, proportions, sample_sizes, "Excess", fig_dev, ax_dev_Excess)
-
-        ax_dev_EMD = fig_dev.add_subplot(gs[1,0])
-        ax_dev_EMD.set_ylabel('Sample size ($n$)')
-        ax_dev_EMD.set_xlabel('$p_1^*$')
-        plot_deviation(estimates, proportions, sample_sizes, "EMD", fig_dev, ax_dev_EMD)
-
-        ax_dev_KDE = fig_dev.add_subplot(gs[1,1], yticklabels=[])
-        ax_dev_KDE.set_xlabel('$p_1^*$')
-        plot_deviation(estimates, proportions, sample_sizes, "KDE", fig_dev, ax_dev_KDE)
-
-    #    fig_dev.tight_layout()
-        fig_dev.savefig('figs/deviation_{}.png'.format(data_label))
 
 
     fig = plt.figure(figsize=(16,8))
