@@ -20,7 +20,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from statsmodels.stats.proportion import proportion_confint
 
-import analyse_mixture as pe
+import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
 
 
