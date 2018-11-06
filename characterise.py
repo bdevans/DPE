@@ -402,7 +402,7 @@ if __name__ == '__main__':
 #            sample_size = len(Mix)
 
         if "Excess" in methods:
-            # --------------------------- Excess method --------------------------
+            # -------------------------- Excess method ------------------------
             # TODO: Check and rename to Ref1_median?
             results_Excess = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
 
@@ -411,20 +411,18 @@ if __name__ == '__main__':
             results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
 
         if "EMD" in methods:
-            # ---------------------------- EMD method ----------------------------
+            # --------------------------- EMD method --------------------------
             results_EMD = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
 
         if "KDE" in methods:
-            # -------------------------- KDE method --------------------------
+            # --------------------------- KDE method --------------------------
             results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
 
-
-        # Spawn threads
-#        with Parallel(n_jobs=nprocs) as parallel:
         for s in tqdm.trange(len(sample_sizes), desc='Size'):
             sample_size = sample_sizes[s]
-            for p in tqdm.trange(len(proportions), desc='p1*', leave=False):
+            for p in tqdm.trange(len(proportions), desc=' p1*', leave=False):
                 prop_Ref1 = proportions[p]
+                # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
                     results = parallel(delayed(assess_performance)(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **extra_args)
@@ -441,7 +439,6 @@ if __name__ == '__main__':
 #                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
                         if run_KDE:
                             results_KDE[s, p, m, :] = results[m]['KDE']
-
 
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
