@@ -148,11 +148,14 @@ def plot_distributions(scores, bins, data_label, ax=None):
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
-                     label="$R_1: n={:,}$".format(len(scores['Ref1'])), ax=ax, kde_kws={'bw': bins['width']})
+                     label="$R_1: n={:,}$".format(len(scores['Ref1'])),
+                     ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
-                     label="$R_2: n={:,}$".format(len(scores['Ref2'])), ax=ax, kde_kws={'bw': bins['width']})
+                     label="$R_2: n={:,}$".format(len(scores['Ref2'])),
+                     ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=False,
-                     label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])), ax=ax, kde_kws={'bw': bins['width']})
+                     label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])),
+                     ax=ax, kde_kws={'bw': bins['width']})
 
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
@@ -257,15 +260,13 @@ def construct_mixture(Ref1, Ref2, p1, size):
     n_Ref1 = int(round(size * p1))
     n_Ref2 = size - n_Ref1
 
-    # Bootstrap mixture
-    bs = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                         np.random.choice(Ref2, n_Ref2, replace=True)))
-    return bs
+    mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+                          np.random.choice(Ref2, n_Ref2, replace=True)))
+    return mix
 
 
 def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
-    # TODO: Implement
-#    ADD_CI = True
+
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
 #             "#9F4800", "#F14CC1", "#A3A3A3", "#FFC400", "#00D7FF"]  # bright
