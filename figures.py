@@ -43,18 +43,6 @@ def load_accuracy(out_dir, label):
         if os.path.isfile('{}/{}_{}.npy'.format(out_dir, method.lower(), label)):
             estimates[method] = np.load('{}/{}_{}.npy'.format(out_dir, method.lower(), label))
 
-    # if os.path.isfile('{}/means_{}.npy'.format(out_dir, label)):
-    #     errors["Means"] = np.load('{}/means_{}.npy'.format(out_dir, label))
-    # if os.path.isfile('{}/excess_{}.npy'.format(out_dir, label)):
-    #     errors["Excess"] = np.load('{}/excess_{}.npy'.format(out_dir, label))
-    #     # This is adjusted in the methods for consistency
-    #     # if ADJUST_EXCESS:
-    #     #     errors["Excess"] /= 0.92  # adjusted for fact underestimates by 8%
-    # if os.path.isfile('{}/emd_{}.npy'.format(out_dir, label)):
-    #     errors["EMD"] = np.load('{}/emd_{}.npy'.format(out_dir, label))
-    # if os.path.isfile('{}/kde_{}.npy'.format(out_dir, label)):
-    #     errors["KDE"] = np.load('{}/kde_{}.npy'.format(out_dir, label))
-
     return estimates, PROPORTIONS, SAMPLE_SIZES
 
 
