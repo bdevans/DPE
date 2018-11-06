@@ -19,6 +19,7 @@ import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from statsmodels.stats.proportion import proportion_confint
+import tqdm
 
 import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
@@ -843,11 +844,15 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         print("Running mixture analysis with {} scores...".format(data_label))
         t = time.time()  # Start timer
         dfs = []
-        for s, size in enumerate(sizes):
+#        for s, size in enumerate(sizes):
+        for s in tqdm.trange(len(sizes), desc='Size'):
+            size = sizes[s]
             Mixtures = {mix: {} for mix in range(n_mixes)}
             mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
-            for p, p_star in enumerate(p_stars):
-                for mix in range(n_mixes):
+#            for p, p_star in enumerate(p_stars):
+            for p in tqdm.trange(len(p_stars), desc=' p1*'):
+                p_star = p_stars[p]
+                for mix in tqdm.trange(n_mixes):
                     print("\n\n")
                     print("Size: {} [#{}/{}]".format(size, s, len(sizes)))
                     print("p1*: {} [#{}/{}]".format(p_star, p, len(p_stars)))
