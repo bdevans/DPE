@@ -86,8 +86,8 @@ def load_diabetes_data(metric):
     #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
 
     print("Diabetes Data [{}]".format(metric))
-    print("=====================")
-    print("Chosen: width = {}".format(bin_width))
+    # print("=====================")
+    # print("Chosen: width = {}".format(bin_width))
     bins = estimate_bins(scores)[binning_method]
     return scores, bins, means, medians, prop_Ref1
 
@@ -153,19 +153,22 @@ def load_renal_data():
             'centers': bin_centers}
 
     print("Renal Data")
-    print("==========")
-    print("Chosen: width = {}".format(bin_width))
+    # print("==========")
+    # print("Chosen: width = {}".format(bin_width))
     bins = estimate_bins(scores)[binning_method]
     return scores, bins, means, medians, prop_Ref1
 
 
 # Let's use FD!
-def estimate_bins(data, bin_range=None, verbose=1):
+def estimate_bins(data, bin_range=None, verbose=2):
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
     # with n the number of data points and d the number of dimensions
     bins = {}
+    if verbose:
+        print("  Method | Data |   n  |  width  |      range     ", flush=True)
+        print("="*50)
     for method in ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']:
         all_scores = []
         for group, scores in data.items():
@@ -175,7 +178,8 @@ def estimate_bins(data, bin_range=None, verbose=1):
                     _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
                 else:
                     _, bin_edges = np.histogram(scores, bins=method)
-                print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
+                print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
+                # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
         if bin_range is not None:
             _, bin_edges = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
         else:
@@ -188,8 +192,12 @@ def estimate_bins(data, bin_range=None, verbose=1):
                         'n': len(bin_edges) - 1}
         if verbose:
             b = bins[method]
-            print("-"*79)
-            print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
             if verbose > 1:
-                print("="*79)
+                print("-"*50)
+            print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, "All", b['n'], b['width'], b['min'], b['max']))
+            # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
+            if verbose > 1:
+                print("="*50)
+            else:
+                print("-"*50)
     return bins
