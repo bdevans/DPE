@@ -467,236 +467,236 @@ if __name__ == '__main__':
 
 
 
-if False:  # __name__ == '__main__':
-
-    #nprocs = multiprocessing.cpu_count()
-    nprocs = cpu_count()
-    #print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
-    print('Running with {} processors...'.format(nprocs))
-
-    # Set random seed
-    np.random.seed(seed)
-    # rng = np.random.RandomState(42)
-
-    np.seterr(divide='ignore', invalid='ignore')
-
-    datasets = {}
-    datasets["Renal"] = load_renal_data()
-    metric = "T1GRS"
-    datasets["Diabetes"] = load_diabetes_data(metric)
-
-    for tag, data in datasets.items():
-
-        print("Running parameter sweep with {} scores...".format(tag))
-
-        t = time.time()  # Start timer
-
-        # Unpack data
-        scores, bins, means, medians, prop_Ref1 = data
-
-        Ref1 = scores['Ref1']
-        Ref2 = scores['Ref2']
-        Mix = scores['Mix']
-        bin_width = bins['width']
-        bin_edges = bins['edges']
-
-        if adjust_excess:
-            adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
-        else:
-            adjustment_factor = 1.0
-
-        methods = OrderedDict([("Excess", {"Median_Ref1": medians["Ref1"],
-                                           "Median_Ref2": medians["Ref2"],
-                                           "adjustment_factor": adjustment_factor}),
-                               ("Means", {'Ref1': means['Ref1'],
-                                          'Ref2': means['Ref2']}),
-                               ("EMD", True),
-                               ("KDE", {'kernel': KDE_kernel,
-                                        'bandwidth': bins['width']})])
-
-        extra_args = {}
-#        if sample_size == -1:
-#            sample_size = len(Mix)
-        extra_args['bins'] = bins
-
-        if "Excess" in methods:
-            # --------------------------- Excess method --------------------------
-            # TODO: Check and rename to Ref1_median?
-            if isinstance(methods["Excess"], dict):
-                if "Median_Ref1" not in methods["Excess"]:
-                    methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
-                if "Median_Ref2" not in methods["Excess"]:
-                    methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
-                median = methods["Excess"]["Median_Ref2"]
-                if "adjustment_factor" not in methods["Excess"]:
-                    methods["Excess"]["adjustment_factor"] = 1
-                extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
-
-            extra_args['population_median'] = median
-
-            if verbose:
-                print("Ref1 median:", np.median(Ref1))
-                print("Ref2 median:", np.median(Ref2))
-                print("Population median: {}".format(median))
-#                print("Mixture size:", sample_size)
-
-            results_Excess = np.zeros((len(sample_sizes), len(proportions), mixtures))
-
-        if "Means" in methods:
-            try:
-                Mean_Ref1 = methods["Means"]["Ref1"]
-            except (KeyError, TypeError):
-                print("No Mean_Ref1 specified!")
-                Mean_Ref1 = Ref1.mean()
-            finally:
-                extra_args["Mean_Ref1"] = Mean_Ref1
-            try:
-                Mean_Ref2 = methods["Means"]["Ref2"]
-            except (KeyError, TypeError):
-                print("No Mean_Ref2 specified!")
-                Mean_Ref2 = Ref2.mean()
-            finally:
-                extra_args["Mean_Ref2"] = Mean_Ref2
-
-            results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures))
-
-        if "EMD" in methods:
-            # ---------------------------- EMD method ----------------------------
-
-            max_EMD = bin_edges[-1] - bin_edges[0]
-
-            # Interpolate the cdfs at the same points for comparison
-            i_CDF_Ref1 = pe.interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
-            i_CDF_Ref2 = pe.interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
-
-            # EMDs computed with interpolated CDFs
-            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
-    #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
-    #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
-    #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
-
-            extra_args['max_EMD'] = max_EMD
-            extra_args['i_CDF_Ref1'] = i_CDF_Ref1
-            extra_args['i_CDF_Ref2'] = i_CDF_Ref2
-            extra_args['i_EMD_1_2'] = i_EMD_1_2
-
-            results_EMD = np.zeros((len(sample_sizes), len(proportions), mixtures))
-
-        if "KDE" in methods:
-            # -------------------------- KDE method --------------------------
-
-            labels = ['Ref1', 'Ref2']  # Reference populations
-
-            bw = bin_width  # Bandwidth
-            # Fit reference populations
-            kdes = pe.fit_kernels(scores, bw)
-
-            try:
-                KDE_kernel = methods["KDE"]["kernel"]
-            except (KeyError, TypeError):
-                if verbose:
-                    print("No kernel specified!")
-                KDE_kernel = "gaussian"  # Default kernel
-            else:
-                try:
-                    bw = methods["KDE"]["bandwidth"]
-                except (KeyError, TypeError):
-                    bw = bins["width"]
-            finally:
-                if verbose:
-                    print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
-
-            # Define the KDE models
-            # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-#            def kde_Ref1(x, amp_Ref1):
-#                return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+# if False:  # __name__ == '__main__':
 #
-#            def kde_Ref2(x, amp_Ref2):
-#                return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#     #nprocs = multiprocessing.cpu_count()
+#     nprocs = cpu_count()
+#     #print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
+#     print('Running with {} processors...'.format(nprocs))
 #
-#            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
-
-            params_mix = model.make_params()
-            params_mix['amp_Ref1'].value = 1
-            params_mix['amp_Ref1'].min = 0
-            params_mix['amp_Ref2'].value = 1
-            params_mix['amp_Ref2'].min = 0
-
-#            extra_args['model'] = model  # This breaks joblib
-            extra_args['initial_params'] = params_mix
-            extra_args['KDE_kernel'] = KDE_kernel
-            extra_args['bin_width'] = bin_width
-            extra_args['kdes'] = kdes
-
-            results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures))
-
-        # Setup progress bar
-        iterations = len(sample_sizes) * len(proportions) # * len(metrics) * mixtures  #KDE_fits.size
-        max_bars = 78    # number of dots in progress bar
-        if iterations < max_bars:
-            max_bars = iterations   # if less than 20 points, shorten bar
-        print("|" + max_bars*"-" + "|")
-        print('|', end='', flush=True)  # print start of progress bar
-        it = 0
-        bar_element = 0
-
-        # Spawn threads
-#        with Parallel(n_jobs=nprocs) as parallel:
-        for s, sample_size in enumerate(sample_sizes):
-            for p, prop_Ref1 in enumerate(proportions):
-
-#        for s, sample_size in enumerate(tqdm.tqdm(sample_sizes)):
-#            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions)):
-                with Parallel(n_jobs=nprocs) as parallel:
-                    # Parallelise over mixtures
-                    results = parallel(delayed(construct_mixture)(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
-                                       for b in range(mixtures))
-#                    results = [construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
-#                                       for b in range(mixtures)]
-
-                    for b in range(mixtures):
-                        if run_excess:
-                            results_Excess[s, p, b] = results[b]['Excess']
-                        if run_means:
-                            results_Means[s, p, b] = results[b]['Means']
-                        if run_EMD:
-                            results_EMD[s, p, b] = results[b]['EMD']
-#                            mat_EMD_31[s, p, b] = results[b]['EMD_31']
-#                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
-                        if run_KDE:
-                            results_KDE[s, p, b] = results[b]['KDE']
-
-                    if (it >= bar_element*iterations/max_bars):
-                        print('*', end='', flush=True)
-                        bar_element += 1
-                    if (it >= iterations-1):
-                        print('|', flush=True)
-                    it += 1
-
-        elapsed = time.time() - t
-        print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
-
-        # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
-#        if run_EMD:
-#            norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
-#            norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-#            if check_EMD:
-#                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
-#                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
-        if run_excess:
-            np.save('{}/excess_{}'.format(out_dir, tag), results_Excess)
-        if run_means:
-            np.save('{}/means_{}'.format(out_dir, tag), results_Means)
-        if run_EMD:
-            np.save('{}/emd_{}'.format(out_dir, tag), results_EMD)
-#            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
-#            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
-        if run_KDE:
-            np.save('{}/kde_{}'.format(out_dir, tag), results_KDE)
-        np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
-        np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
-
-    # run_mixture('T1GRS', scores, medians, bins, sample_sizes, proportions, mixtures)
-    # run_mixture('T2GRS', scores, medians, bins, sample_sizes, proportions, mixtures)
-
-    print("Analysis of methods on datasets: {} complete!".format(list(datasets)))
+#     # Set random seed
+#     np.random.seed(seed)
+#     # rng = np.random.RandomState(42)
+#
+#     np.seterr(divide='ignore', invalid='ignore')
+#
+#     datasets = {}
+#     datasets["Renal"] = load_renal_data()
+#     metric = "T1GRS"
+#     datasets["Diabetes"] = load_diabetes_data(metric)
+#
+#     for tag, data in datasets.items():
+#
+#         print("Running parameter sweep with {} scores...".format(tag))
+#
+#         t = time.time()  # Start timer
+#
+#         # Unpack data
+#         scores, bins, means, medians, prop_Ref1 = data
+#
+#         Ref1 = scores['Ref1']
+#         Ref2 = scores['Ref2']
+#         Mix = scores['Mix']
+#         bin_width = bins['width']
+#         bin_edges = bins['edges']
+#
+#         if adjust_excess:
+#             adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
+#         else:
+#             adjustment_factor = 1.0
+#
+#         methods = OrderedDict([("Excess", {"Median_Ref1": medians["Ref1"],
+#                                            "Median_Ref2": medians["Ref2"],
+#                                            "adjustment_factor": adjustment_factor}),
+#                                ("Means", {'Ref1': means['Ref1'],
+#                                           'Ref2': means['Ref2']}),
+#                                ("EMD", True),
+#                                ("KDE", {'kernel': KDE_kernel,
+#                                         'bandwidth': bins['width']})])
+#
+#         extra_args = {}
+# #        if sample_size == -1:
+# #            sample_size = len(Mix)
+#         extra_args['bins'] = bins
+#
+#         if "Excess" in methods:
+#             # --------------------------- Excess method --------------------------
+#             # TODO: Check and rename to Ref1_median?
+#             if isinstance(methods["Excess"], dict):
+#                 if "Median_Ref1" not in methods["Excess"]:
+#                     methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
+#                 if "Median_Ref2" not in methods["Excess"]:
+#                     methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
+#                 median = methods["Excess"]["Median_Ref2"]
+#                 if "adjustment_factor" not in methods["Excess"]:
+#                     methods["Excess"]["adjustment_factor"] = 1
+#                 extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
+#
+#             extra_args['population_median'] = median
+#
+#             if verbose:
+#                 print("Ref1 median:", np.median(Ref1))
+#                 print("Ref2 median:", np.median(Ref2))
+#                 print("Population median: {}".format(median))
+# #                print("Mixture size:", sample_size)
+#
+#             results_Excess = np.zeros((len(sample_sizes), len(proportions), mixtures))
+#
+#         if "Means" in methods:
+#             try:
+#                 Mean_Ref1 = methods["Means"]["Ref1"]
+#             except (KeyError, TypeError):
+#                 print("No Mean_Ref1 specified!")
+#                 Mean_Ref1 = Ref1.mean()
+#             finally:
+#                 extra_args["Mean_Ref1"] = Mean_Ref1
+#             try:
+#                 Mean_Ref2 = methods["Means"]["Ref2"]
+#             except (KeyError, TypeError):
+#                 print("No Mean_Ref2 specified!")
+#                 Mean_Ref2 = Ref2.mean()
+#             finally:
+#                 extra_args["Mean_Ref2"] = Mean_Ref2
+#
+#             results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures))
+#
+#         if "EMD" in methods:
+#             # ---------------------------- EMD method ----------------------------
+#
+#             max_EMD = bin_edges[-1] - bin_edges[0]
+#
+#             # Interpolate the cdfs at the same points for comparison
+#             i_CDF_Ref1 = pe.interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
+#             i_CDF_Ref2 = pe.interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
+#
+#             # EMDs computed with interpolated CDFs
+#             i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+#     #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
+#     #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
+#     #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
+#
+#             extra_args['max_EMD'] = max_EMD
+#             extra_args['i_CDF_Ref1'] = i_CDF_Ref1
+#             extra_args['i_CDF_Ref2'] = i_CDF_Ref2
+#             extra_args['i_EMD_1_2'] = i_EMD_1_2
+#
+#             results_EMD = np.zeros((len(sample_sizes), len(proportions), mixtures))
+#
+#         if "KDE" in methods:
+#             # -------------------------- KDE method --------------------------
+#
+#             labels = ['Ref1', 'Ref2']  # Reference populations
+#
+#             bw = bin_width  # Bandwidth
+#             # Fit reference populations
+#             kdes = pe.fit_kernels(scores, bw)
+#
+#             try:
+#                 KDE_kernel = methods["KDE"]["kernel"]
+#             except (KeyError, TypeError):
+#                 if verbose:
+#                     print("No kernel specified!")
+#                 KDE_kernel = "gaussian"  # Default kernel
+#             else:
+#                 try:
+#                     bw = methods["KDE"]["bandwidth"]
+#                 except (KeyError, TypeError):
+#                     bw = bins["width"]
+#             finally:
+#                 if verbose:
+#                     print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
+#
+#             # Define the KDE models
+#             # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
+# #            def kde_Ref1(x, amp_Ref1):
+# #                return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+# #
+# #            def kde_Ref2(x, amp_Ref2):
+# #                return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+# #
+# #            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
+#
+#             params_mix = model.make_params()
+#             params_mix['amp_Ref1'].value = 1
+#             params_mix['amp_Ref1'].min = 0
+#             params_mix['amp_Ref2'].value = 1
+#             params_mix['amp_Ref2'].min = 0
+#
+# #            extra_args['model'] = model  # This breaks joblib
+#             extra_args['initial_params'] = params_mix
+#             extra_args['KDE_kernel'] = KDE_kernel
+#             extra_args['bin_width'] = bin_width
+#             extra_args['kdes'] = kdes
+#
+#             results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures))
+#
+#         # Setup progress bar
+#         iterations = len(sample_sizes) * len(proportions) # * len(metrics) * mixtures  #KDE_fits.size
+#         max_bars = 78    # number of dots in progress bar
+#         if iterations < max_bars:
+#             max_bars = iterations   # if less than 20 points, shorten bar
+#         print("|" + max_bars*"-" + "|")
+#         print('|', end='', flush=True)  # print start of progress bar
+#         it = 0
+#         bar_element = 0
+#
+#         # Spawn threads
+# #        with Parallel(n_jobs=nprocs) as parallel:
+#         for s, sample_size in enumerate(sample_sizes):
+#             for p, prop_Ref1 in enumerate(proportions):
+#
+# #        for s, sample_size in enumerate(tqdm.tqdm(sample_sizes)):
+# #            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions)):
+#                 with Parallel(n_jobs=nprocs) as parallel:
+#                     # Parallelise over mixtures
+#                     results = parallel(delayed(construct_mixture)(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+#                                        for b in range(mixtures))
+# #                    results = [construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+# #                                       for b in range(mixtures)]
+#
+#                     for b in range(mixtures):
+#                         if run_excess:
+#                             results_Excess[s, p, b] = results[b]['Excess']
+#                         if run_means:
+#                             results_Means[s, p, b] = results[b]['Means']
+#                         if run_EMD:
+#                             results_EMD[s, p, b] = results[b]['EMD']
+# #                            mat_EMD_31[s, p, b] = results[b]['EMD_31']
+# #                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
+#                         if run_KDE:
+#                             results_KDE[s, p, b] = results[b]['KDE']
+#
+#                     if (it >= bar_element*iterations/max_bars):
+#                         print('*', end='', flush=True)
+#                         bar_element += 1
+#                     if (it >= iterations-1):
+#                         print('|', flush=True)
+#                     it += 1
+#
+#         elapsed = time.time() - t
+#         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
+#
+#         # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
+# #        if run_EMD:
+# #            norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
+# #            norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
+# #            if check_EMD:
+# #                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
+# #                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+#         if run_excess:
+#             np.save('{}/excess_{}'.format(out_dir, tag), results_Excess)
+#         if run_means:
+#             np.save('{}/means_{}'.format(out_dir, tag), results_Means)
+#         if run_EMD:
+#             np.save('{}/emd_{}'.format(out_dir, tag), results_EMD)
+# #            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
+# #            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
+#         if run_KDE:
+#             np.save('{}/kde_{}'.format(out_dir, tag), results_KDE)
+#         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
+#         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
+#
+#     # run_mixture('T1GRS', scores, medians, bins, sample_sizes, proportions, mixtures)
+#     # run_mixture('T2GRS', scores, medians, bins, sample_sizes, proportions, mixtures)
+#
+#     print("Analysis of methods on datasets: {} complete!".format(list(datasets)))
