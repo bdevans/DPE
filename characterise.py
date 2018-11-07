@@ -91,7 +91,7 @@ if not os.path.exists(out_dir):
 #    #     return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
-def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **kwargs):
+def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, seed=None, **kwargs):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
@@ -107,8 +107,8 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
     logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
     results = pe.analyse_mixture(scores, bins, methods, bootstraps=bootstraps,
                                  sample_size=-1, alpha=0.05,
-                                 true_prop_Ref1=prop_Ref1, verbose=0,
-                                 logfile=logfile)
+                                 true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
+                                 verbose=0, logfile=logfile)
 
     return results
 
@@ -433,6 +433,11 @@ if __name__ == '__main__':
             prop_bar = tqdm.tqdm(proportions, dynamic_ncols=True)
             for p, prop_Ref1 in enumerate(prop_bar):
                 prop_bar.set_description(" p1* = {:6.2f}".format(prop_Ref1))
+
+                # Make mixtures deterministic with parallelism
+                # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
+                mix_seeds = np.random.randint(np.iinfo(np.int32).max, size=mixtures)
+
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
@@ -441,8 +446,10 @@ if __name__ == '__main__':
                                                                    Ref1, Ref2,
                                                                    methods,
                                                                    bootstraps,
+                                                                   seed=seed,
                                                                    **kwargs)
-                                       for m in range(mixtures))
+                                       for seed in tqdm.tqdm(mix_seeds, desc="Mixture      ", dynamic_ncols=True))  #, leave=False))
+#                                       for m in range(mixtures))
 
                     for m in range(mixtures):
                         if run_excess:

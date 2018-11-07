@@ -228,6 +228,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
                     verbose=1, logfile=''):
                     # , means=None, median=None, KDE_kernel='gaussian'):
 
+    if seed is not None:
+        np.random.seed(seed)
+
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
@@ -376,7 +379,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 #        return results#[method]
 
 
-    def bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size=-1, **kwargs):
+    def bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size=-1, seed=None, **kwargs):
 
 #        results = {}
 #        for method in methods:
@@ -391,7 +394,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         if sample_size == -1:
             sample_size = len(Mix)
 
-        bs = np.random.choice(Mix, sample_size, replace=True)
+        bs = np.random.RandomState(seed).choice(Mix, sample_size, replace=True)
+        # bs = np.random.choice(Mix, sample_size, replace=True)
         results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
         return results
@@ -418,6 +422,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
             print('Running {} bootstraps with {} processors...'.format(bootstraps, nprocs), flush=True)
 
         # results = OrderedDict()
+        # Make bootstrapping deterministic with parallelism
+        # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
+        boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=bootstraps)
 
         with Parallel(n_jobs=n_jobs) as parallel:
             results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=seed, **kwargs)
