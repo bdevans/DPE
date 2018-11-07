@@ -420,6 +420,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
             else:
                 nprocs = n_jobs
             print('Running {} bootstraps with {} processors...'.format(bootstraps, nprocs), flush=True)
+            disable = False
+        else:
+            disable = True
+        if verbose == -1:  # Allow only progress bar
+            disable = False
 
         # results = OrderedDict()
         # Make bootstrapping deterministic with parallelism
@@ -461,7 +466,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
 
-    if verbose:
+    if verbose > 0:
         # ------------ Summarise proportions for the whole distribution --------------
         print()
         print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
