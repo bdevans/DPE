@@ -24,7 +24,7 @@ import lmfit
 # import seaborn as sns
 # import matplotlib as mpl
 import matplotlib.pyplot as plt
-
+from joblib import Parallel, delayed, cpu_count
 # from tqdm import tqdm
 import tqdm
 from statsmodels.stats.proportion import proportion_confint
@@ -224,7 +224,8 @@ def prepare_methods(methods, scores, bins, verbose=1):
 
 
 def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
-                    alpha=0.05, true_prop_Ref1=None, verbose=1, logfile=''):
+                    alpha=0.05, true_prop_Ref1=None, n_jobs=1, seed=None,
+                    verbose=1, logfile=''):
                     # , means=None, median=None, KDE_kernel='gaussian'):
 
     Ref1 = scores['Ref1']
@@ -409,28 +410,46 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
 
     else:  # if bootstraps > 1:
-        if verbose:
-            print('Running {} bootstraps...'.format(bootstraps), flush=True)
+        if verbose > 0:
+            if n_jobs == -1:
+                nprocs = cpu_count()
+            else:
+                nprocs = n_jobs
+            print('Running {} bootstraps with {} processors...'.format(bootstraps, nprocs), flush=True)
 
         # results = OrderedDict()
 
-#        for method in methods:
-            # Fix estimated proportions for each method
-#            if true_prop_Ref1:
-#                prop_Ref1 = defaultdict(lambda: true_prop_Ref1)
-##                prop_Ref1[method] = true_prop_Ref1
-#            else:
-#                prop_Ref1 = initial_results
-#            individual_method = {}
-#            individual_method[method] = methods[method]
-#            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **kwargs)[method]
-#                               for b in range(bootstraps)]
+        with Parallel(n_jobs=n_jobs) as parallel:
+            results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=seed, **kwargs)
+                               for seed in tqdm.tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
+                               # for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable))
 
-            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
-                       for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
-        else:  # Disable progress bar
-            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
-                       for b in range(bootstraps)]
+        # NOTE: These results are identical to when n_jobs=1 however it takes about 25% less time per iteration
+        # results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
+        #            for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+
+#        # results = OrderedDict()
+#
+##        for method in methods:
+#            # Fix estimated proportions for each method
+##            if true_prop_Ref1:
+##                prop_Ref1 = defaultdict(lambda: true_prop_Ref1)
+###                prop_Ref1[method] = true_prop_Ref1
+##            else:
+##                prop_Ref1 = initial_results
+##            individual_method = {}
+##            individual_method[method] = methods[method]
+##            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **kwargs)[method]
+##                               for b in range(bootstraps)]
+#
+#            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
+#                       for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
+#        else:  # Disable progress bar
+#            with Parallel(n_jobs=n_jobs) as parallel:
+#                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
+#                                   for b in range(bootstraps))
+##            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
+##                       for b in range(bootstraps)]
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
