@@ -15,7 +15,7 @@ dependencies:
   - emcee
   - corner
   - dill
-  - joblib
+  - joblib>=0.13
   - h5py
   - numexpr
   - tqdm

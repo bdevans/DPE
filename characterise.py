@@ -68,27 +68,27 @@ def SecToStr(sec):
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-if run_KDE:
-    # Define the KDE models
-    # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-    def kde_Ref1(x, amp_Ref1=1):
-        return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
-
-    def kde_Ref2(x, amp_Ref2=1):
-        return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
-
-    model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
-
-    # # @mem.cache
-    # def fit_KDE_model(Mix, bins, model, params_mix, kernel):
-    #     # TODO: Think carefully about this!
-    #     # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
-    #     x_KDE = bins["centers"]
-    #     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
-    #     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-    #     amp_Ref1 = res_mix.params['amp_Ref1'].value
-    #     amp_Ref2 = res_mix.params['amp_Ref2'].value
-    #     return amp_Ref1/(amp_Ref1+amp_Ref2)
+#if run_KDE:
+#    # Define the KDE models
+#    # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
+#    def kde_Ref1(x, amp_Ref1=1):
+#        return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#
+#    def kde_Ref2(x, amp_Ref2=1):
+#        return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#
+#    model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
+#
+#    # # @mem.cache
+#    # def fit_KDE_model(Mix, bins, model, params_mix, kernel):
+#    #     # TODO: Think carefully about this!
+#    #     # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
+#    #     x_KDE = bins["centers"]
+#    #     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
+#    #     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+#    #     amp_Ref1 = res_mix.params['amp_Ref1'].value
+#    #     amp_Ref2 = res_mix.params['amp_Ref2'].value
+#    #     return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
 def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **kwargs):
@@ -279,116 +279,120 @@ if __name__ == '__main__':
                                ("KDE", {'kernel': KDE_kernel,
                                         'bandwidth': bins['width']})])
 
-        kwargs = {}
-#        if sample_size == -1:
-#            sample_size = len(Mix)
-        kwargs['bins'] = bins
-
-        if "Excess" in methods:
-            # --------------------------- Excess method --------------------------
-            # TODO: Check and rename to Ref1_median?
-            if isinstance(methods["Excess"], dict):
-                if "Median_Ref1" not in methods["Excess"]:
-                    methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
-                if "Median_Ref2" not in methods["Excess"]:
-                    methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
-                median = methods["Excess"]["Median_Ref2"]
-                if "adjustment_factor" not in methods["Excess"]:
-                    methods["Excess"]["adjustment_factor"] = 1
-                kwargs['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
-
-            kwargs['population_median'] = median
-
-            if verbose:
-                print("Ref1 median:", np.median(Ref1))
-                print("Ref2 median:", np.median(Ref2))
-                print("Population median: {}".format(median))
-#                print("Mixture size:", sample_size)
-
-        if "Means" in methods:
-            try:
-                Mean_Ref1 = methods["Means"]["Ref1"]
-            except (KeyError, TypeError):
-                print("No Mean_Ref1 specified!")
-                Mean_Ref1 = Ref1.mean()
-            finally:
-                kwargs["Mean_Ref1"] = Mean_Ref1
-            try:
-                Mean_Ref2 = methods["Means"]["Ref2"]
-            except (KeyError, TypeError):
-                print("No Mean_Ref2 specified!")
-                Mean_Ref2 = Ref2.mean()
-            finally:
-                kwargs["Mean_Ref2"] = Mean_Ref2
-
-        if "EMD" in methods:
-            # ---------------------------- EMD method ----------------------------
-
-            max_EMD = bin_edges[-1] - bin_edges[0]
-
-            # Interpolate the cdfs at the same points for comparison
-            i_CDF_Ref1 = pe.interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
-            i_CDF_Ref2 = pe.interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
-
-            # EMDs computed with interpolated CDFs
-            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
-    #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
-    #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
-    #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
-
-            kwargs['max_EMD'] = max_EMD
-            kwargs['i_CDF_Ref1'] = i_CDF_Ref1
-            kwargs['i_CDF_Ref2'] = i_CDF_Ref2
-            kwargs['i_EMD_1_2'] = i_EMD_1_2
-
-        if "KDE" in methods:
-            # -------------------------- KDE method --------------------------
-
-            labels = ['Ref1', 'Ref2']  # Reference populations
-
-            bw = bin_width  # Bandwidth
-            # Fit reference populations
-            kdes = pe.fit_kernels(scores, bw)
-
-            try:
-                KDE_kernel = methods["KDE"]["kernel"]
-            except (KeyError, TypeError):
-                if verbose:
-                    print("No kernel specified!")
-                KDE_kernel = "gaussian"  # Default kernel
-            else:
-                try:
-                    bw = methods["KDE"]["bandwidth"]
-                except (KeyError, TypeError):
-                    bw = bins["width"]
-            finally:
-                if verbose:
-                    print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
-
-            # Define the KDE models
-            # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
-#            def kde_Ref1(x, amp_Ref1):
-#                return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#        kwargs = {}
+##        if sample_size == -1:
+##            sample_size = len(Mix)
+#        kwargs['bins'] = bins
 #
-#            def kde_Ref2(x, amp_Ref2):
-#                return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+#        if "Excess" in methods:
+#            # --------------------------- Excess method --------------------------
+#            # TODO: Check and rename to Ref1_median?
+#            if isinstance(methods["Excess"], dict):
+#                if "Median_Ref1" not in methods["Excess"]:
+#                    methods["Excess"]["Median_Ref1"] = np.median(scores["Ref1"])
+#                if "Median_Ref2" not in methods["Excess"]:
+#                    methods["Excess"]["Median_Ref2"] = np.median(scores["Ref2"])
+#                median = methods["Excess"]["Median_Ref2"]
+#                if "adjustment_factor" not in methods["Excess"]:
+#                    methods["Excess"]["adjustment_factor"] = 1
+#                kwargs['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
 #
-#            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
+#            kwargs['population_median'] = median
+#
+#            if verbose:
+#                print("Ref1 median:", np.median(Ref1))
+#                print("Ref2 median:", np.median(Ref2))
+#                print("Population median: {}".format(median))
+##                print("Mixture size:", sample_size)
+#
+#        if "Means" in methods:
+#            try:
+#                Mean_Ref1 = methods["Means"]["Ref1"]
+#            except (KeyError, TypeError):
+#                print("No Mean_Ref1 specified!")
+#                Mean_Ref1 = Ref1.mean()
+#            finally:
+#                kwargs["Mean_Ref1"] = Mean_Ref1
+#            try:
+#                Mean_Ref2 = methods["Means"]["Ref2"]
+#            except (KeyError, TypeError):
+#                print("No Mean_Ref2 specified!")
+#                Mean_Ref2 = Ref2.mean()
+#            finally:
+#                kwargs["Mean_Ref2"] = Mean_Ref2
+#
+#        if "EMD" in methods:
+#            # ---------------------------- EMD method ----------------------------
+#
+#            max_EMD = bin_edges[-1] - bin_edges[0]
+#
+#            # Interpolate the cdfs at the same points for comparison
+#            i_CDF_Ref1 = pe.interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
+#            i_CDF_Ref2 = pe.interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
+#
+#            # EMDs computed with interpolated CDFs
+#            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+#    #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
+#    #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
+#    #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
+#
+#            kwargs['max_EMD'] = max_EMD
+#            kwargs['i_CDF_Ref1'] = i_CDF_Ref1
+#            kwargs['i_CDF_Ref2'] = i_CDF_Ref2
+#            kwargs['i_EMD_1_2'] = i_EMD_1_2
+#
+#        if "KDE" in methods:
+#            # -------------------------- KDE method --------------------------
+#
+#            labels = ['Ref1', 'Ref2']  # Reference populations
+#
+#            bw = bin_width  # Bandwidth
+#            # Fit reference populations
+#            kdes = pe.fit_kernels(scores, bw)
+#
+#            try:
+#                KDE_kernel = methods["KDE"]["kernel"]
+#            except (KeyError, TypeError):
+#                if verbose:
+#                    print("No kernel specified!")
+#                KDE_kernel = "gaussian"  # Default kernel
+#            else:
+#                try:
+#                    bw = methods["KDE"]["bandwidth"]
+#                except (KeyError, TypeError):
+#                    bw = bins["width"]
+#            finally:
+#                if verbose:
+#                    print("Using {} kernel with bandwith = {}".format(KDE_kernel, bw))
+#
+#            # Define the KDE models
+#            # x := Bin centres originally with n_bins = int(np.floor(np.sqrt(N)))
+##            def kde_Ref1(x, amp_Ref1):
+##                return amp_Ref1 * np.exp(kdes['Ref1'][KDE_kernel].score_samples(x[:, np.newaxis]))
+##
+##            def kde_Ref2(x, amp_Ref2):
+##                return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
+##
+##            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
+#
+#            params_mix = model.make_params()
+#            params_mix['amp_Ref1'].value = 1
+#            params_mix['amp_Ref1'].min = 0
+#            params_mix['amp_Ref2'].value = 1
+#            params_mix['amp_Ref2'].min = 0
+#
+##            kwargs['model'] = model  # This breaks joblib
+#            kwargs['initial_params'] = params_mix
+#            kwargs['KDE_kernel'] = KDE_kernel
+#            kwargs['bin_width'] = bin_width
+#            kwargs['kdes'] = kdes
 
-            params_mix = model.make_params()
-            params_mix['amp_Ref1'].value = 1
-            params_mix['amp_Ref1'].min = 0
-            params_mix['amp_Ref2'].value = 1
-            params_mix['amp_Ref2'].min = 0
 
-#            kwargs['model'] = model  # This breaks joblib
-            kwargs['initial_params'] = params_mix
-            kwargs['KDE_kernel'] = KDE_kernel
-            kwargs['bin_width'] = bin_width
-            kwargs['kdes'] = kdes
 
 # AttributeError: Can't pickle local object 'prepare_methods.<locals>.kde_Ref1'
-#        kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
+        kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
+
+
 
 #        if sample_size == -1:
 #            sample_size = len(Mix)
