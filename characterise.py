@@ -422,6 +422,8 @@ if __name__ == '__main__':
             sample_size = sample_sizes[s]
             for p in tqdm.trange(len(proportions), desc=' p1*', leave=False):
                 prop_Ref1 = proportions[p]
+#        for s, sample_size in enumerate(tqdm.tqdm(sample_sizes, desc='Size')):
+#            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions, desc=' p1*', leave=False)):
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
