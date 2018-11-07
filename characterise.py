@@ -418,12 +418,21 @@ if __name__ == '__main__':
             results_KDE = np.zeros((len(sample_sizes), len(proportions),
                                     mixtures, bootstraps))
 
-        for s in tqdm.trange(len(sample_sizes), desc='Size'):
-            sample_size = sample_sizes[s]
-            for p in tqdm.trange(len(proportions), desc=' p1*', leave=False):
-                prop_Ref1 = proportions[p]
+#        for s in tqdm.trange(len(sample_sizes), desc='Size'):
+#            sample_size = sample_sizes[s]
+#            for p in tqdm.trange(len(proportions), desc=' p1*', leave=False):
+#                prop_Ref1 = proportions[p]
+
 #        for s, sample_size in enumerate(tqdm.tqdm(sample_sizes, desc='Size')):
 #            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions, desc=' p1*', leave=False)):
+
+        size_bar = tqdm.tqdm(sample_sizes, dynamic_ncols=True)
+        for s, sample_size in enumerate(size_bar):
+            size_bar.set_description("Size = {:6,}".format(sample_size))
+
+            prop_bar = tqdm.tqdm(proportions, dynamic_ncols=True)
+            for p, prop_Ref1 in enumerate(prop_bar):
+                prop_bar.set_description(" p1* = {:6.2f}".format(prop_Ref1))
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
