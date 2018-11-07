@@ -91,7 +91,7 @@ if run_KDE:
     #     return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
-def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **extra_args):
+def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **kwargs):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
@@ -113,7 +113,7 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
     return results
 
 
-# def construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+# def construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **kwargs):
 #
 #     assert(0.0 <= prop_Ref1 <= 1.0)
 #     n_Ref1 = int(round(sample_size * prop_Ref1))
@@ -123,7 +123,7 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
 #     mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
 #                               np.random.choice(Ref2, n_Ref2, replace=True)))
 #
-#     results = estimate_Ref1(mixture, Ref1, Ref2, methods, **extra_args)
+#     results = estimate_Ref1(mixture, Ref1, Ref2, methods, **kwargs)
 #
 #     return results
 
@@ -279,10 +279,10 @@ if __name__ == '__main__':
                                ("KDE", {'kernel': KDE_kernel,
                                         'bandwidth': bins['width']})])
 
-        extra_args = {}
+        kwargs = {}
 #        if sample_size == -1:
 #            sample_size = len(Mix)
-        extra_args['bins'] = bins
+        kwargs['bins'] = bins
 
         if "Excess" in methods:
             # --------------------------- Excess method --------------------------
@@ -295,9 +295,9 @@ if __name__ == '__main__':
                 median = methods["Excess"]["Median_Ref2"]
                 if "adjustment_factor" not in methods["Excess"]:
                     methods["Excess"]["adjustment_factor"] = 1
-                extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
+                kwargs['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
 
-            extra_args['population_median'] = median
+            kwargs['population_median'] = median
 
             if verbose:
                 print("Ref1 median:", np.median(Ref1))
@@ -312,14 +312,14 @@ if __name__ == '__main__':
                 print("No Mean_Ref1 specified!")
                 Mean_Ref1 = Ref1.mean()
             finally:
-                extra_args["Mean_Ref1"] = Mean_Ref1
+                kwargs["Mean_Ref1"] = Mean_Ref1
             try:
                 Mean_Ref2 = methods["Means"]["Ref2"]
             except (KeyError, TypeError):
                 print("No Mean_Ref2 specified!")
                 Mean_Ref2 = Ref2.mean()
             finally:
-                extra_args["Mean_Ref2"] = Mean_Ref2
+                kwargs["Mean_Ref2"] = Mean_Ref2
 
         if "EMD" in methods:
             # ---------------------------- EMD method ----------------------------
@@ -336,10 +336,10 @@ if __name__ == '__main__':
     #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
     #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 
-            extra_args['max_EMD'] = max_EMD
-            extra_args['i_CDF_Ref1'] = i_CDF_Ref1
-            extra_args['i_CDF_Ref2'] = i_CDF_Ref2
-            extra_args['i_EMD_1_2'] = i_EMD_1_2
+            kwargs['max_EMD'] = max_EMD
+            kwargs['i_CDF_Ref1'] = i_CDF_Ref1
+            kwargs['i_CDF_Ref2'] = i_CDF_Ref2
+            kwargs['i_EMD_1_2'] = i_EMD_1_2
 
         if "KDE" in methods:
             # -------------------------- KDE method --------------------------
@@ -381,14 +381,14 @@ if __name__ == '__main__':
             params_mix['amp_Ref2'].value = 1
             params_mix['amp_Ref2'].min = 0
 
-#            extra_args['model'] = model  # This breaks joblib
-            extra_args['initial_params'] = params_mix
-            extra_args['KDE_kernel'] = KDE_kernel
-            extra_args['bin_width'] = bin_width
-            extra_args['kdes'] = kdes
+#            kwargs['model'] = model  # This breaks joblib
+            kwargs['initial_params'] = params_mix
+            kwargs['KDE_kernel'] = KDE_kernel
+            kwargs['bin_width'] = bin_width
+            kwargs['kdes'] = kdes
 
 # AttributeError: Can't pickle local object 'prepare_methods.<locals>.kde_Ref1'
-#        extra_args = pe.prepare_methods(methods, scores, bins, verbose=0)
+#        kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
 
 #        if sample_size == -1:
 #            sample_size = len(Mix)
@@ -426,7 +426,7 @@ if __name__ == '__main__':
                                                                    Ref1, Ref2,
                                                                    methods,
                                                                    bootstraps,
-                                                                   **extra_args)
+                                                                   **kwargs)
                                        for m in range(mixtures))
 
                     for m in range(mixtures):
@@ -515,10 +515,10 @@ if __name__ == '__main__':
 #                                ("KDE", {'kernel': KDE_kernel,
 #                                         'bandwidth': bins['width']})])
 #
-#         extra_args = {}
+#         kwargs = {}
 # #        if sample_size == -1:
 # #            sample_size = len(Mix)
-#         extra_args['bins'] = bins
+#         kwargs['bins'] = bins
 #
 #         if "Excess" in methods:
 #             # --------------------------- Excess method --------------------------
@@ -531,9 +531,9 @@ if __name__ == '__main__':
 #                 median = methods["Excess"]["Median_Ref2"]
 #                 if "adjustment_factor" not in methods["Excess"]:
 #                     methods["Excess"]["adjustment_factor"] = 1
-#                 extra_args['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
+#                 kwargs['adjustment_factor'] = methods["Excess"]["adjustment_factor"]
 #
-#             extra_args['population_median'] = median
+#             kwargs['population_median'] = median
 #
 #             if verbose:
 #                 print("Ref1 median:", np.median(Ref1))
@@ -550,14 +550,14 @@ if __name__ == '__main__':
 #                 print("No Mean_Ref1 specified!")
 #                 Mean_Ref1 = Ref1.mean()
 #             finally:
-#                 extra_args["Mean_Ref1"] = Mean_Ref1
+#                 kwargs["Mean_Ref1"] = Mean_Ref1
 #             try:
 #                 Mean_Ref2 = methods["Means"]["Ref2"]
 #             except (KeyError, TypeError):
 #                 print("No Mean_Ref2 specified!")
 #                 Mean_Ref2 = Ref2.mean()
 #             finally:
-#                 extra_args["Mean_Ref2"] = Mean_Ref2
+#                 kwargs["Mean_Ref2"] = Mean_Ref2
 #
 #             results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures))
 #
@@ -576,10 +576,10 @@ if __name__ == '__main__':
 #     #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
 #     #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
 #
-#             extra_args['max_EMD'] = max_EMD
-#             extra_args['i_CDF_Ref1'] = i_CDF_Ref1
-#             extra_args['i_CDF_Ref2'] = i_CDF_Ref2
-#             extra_args['i_EMD_1_2'] = i_EMD_1_2
+#             kwargs['max_EMD'] = max_EMD
+#             kwargs['i_CDF_Ref1'] = i_CDF_Ref1
+#             kwargs['i_CDF_Ref2'] = i_CDF_Ref2
+#             kwargs['i_EMD_1_2'] = i_EMD_1_2
 #
 #             results_EMD = np.zeros((len(sample_sizes), len(proportions), mixtures))
 #
@@ -623,11 +623,11 @@ if __name__ == '__main__':
 #             params_mix['amp_Ref2'].value = 1
 #             params_mix['amp_Ref2'].min = 0
 #
-# #            extra_args['model'] = model  # This breaks joblib
-#             extra_args['initial_params'] = params_mix
-#             extra_args['KDE_kernel'] = KDE_kernel
-#             extra_args['bin_width'] = bin_width
-#             extra_args['kdes'] = kdes
+# #            kwargs['model'] = model  # This breaks joblib
+#             kwargs['initial_params'] = params_mix
+#             kwargs['KDE_kernel'] = KDE_kernel
+#             kwargs['bin_width'] = bin_width
+#             kwargs['kdes'] = kdes
 #
 #             results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures))
 #
@@ -650,9 +650,9 @@ if __name__ == '__main__':
 # #            for p, prop_Ref1 in enumerate(tqdm.tqdm(proportions)):
 #                 with Parallel(n_jobs=nprocs) as parallel:
 #                     # Parallelise over mixtures
-#                     results = parallel(delayed(construct_mixture)(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+#                     results = parallel(delayed(construct_mixture)(sample_size, prop_Ref1, Ref1, Ref2, methods, **kwargs)
 #                                        for b in range(mixtures))
-# #                    results = [construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args)
+# #                    results = [construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **kwargs)
 # #                                       for b in range(mixtures)]
 #
 #                     for b in range(mixtures):
