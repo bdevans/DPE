@@ -79,16 +79,16 @@ if run_KDE:
 
     model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
 
-    # @mem.cache
-    def fit_KDE_model(Mix, bins, model, params_mix, kernel):
-        # TODO: Think carefully about this!
-        # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
-        x_KDE = bins["centers"]
-        mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
-        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-        amp_Ref1 = res_mix.params['amp_Ref1'].value
-        amp_Ref2 = res_mix.params['amp_Ref2'].value
-        return amp_Ref1/(amp_Ref1+amp_Ref2)
+    # # @mem.cache
+    # def fit_KDE_model(Mix, bins, model, params_mix, kernel):
+    #     # TODO: Think carefully about this!
+    #     # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
+    #     x_KDE = bins["centers"]
+    #     mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
+    #     res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
+    #     amp_Ref1 = res_mix.params['amp_Ref1'].value
+    #     amp_Ref2 = res_mix.params['amp_Ref2'].value
+    #     return amp_Ref1/(amp_Ref1+amp_Ref2)
 
 
 def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **extra_args):
@@ -113,127 +113,127 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
     return results
 
 
-def construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+# def construct_mixture(sample_size, prop_Ref1, Ref1, Ref2, methods, **extra_args):
+#
+#     assert(0.0 <= prop_Ref1 <= 1.0)
+#     n_Ref1 = int(round(sample_size * prop_Ref1))
+#     n_Ref2 = sample_size - n_Ref1
+#
+#     # Construct mixture
+#     mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+#                               np.random.choice(Ref2, n_Ref2, replace=True)))
+#
+#     results = estimate_Ref1(mixture, Ref1, Ref2, methods, **extra_args)
+#
+#     return results
 
-    assert(0.0 <= prop_Ref1 <= 1.0)
-    n_Ref1 = int(round(sample_size * prop_Ref1))
-    n_Ref2 = sample_size - n_Ref1
 
-    # Construct mixture
-    mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                              np.random.choice(Ref2, n_Ref2, replace=True)))
-
-    results = estimate_Ref1(mixture, Ref1, Ref2, methods, **extra_args)
-
-    return results
-
-
-def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
-    '''Estimate the proportion of two reference populations in an unknown mixture.
-    The returned proportions are with respect to Ref 1. The proportion of Ref 2 is assumed to be 1 pr(Ref1). '''
-
-    # TODO: Import this from proportion_estimation
-
-    bins = kwargs['bins']
-    results = {}
-
-    # ----------------------------- Excess method ----------------------------
-    if "Excess" in methods:
-        # Calculate the proportion of another population w.r.t. the excess
-        # number of cases from the mixture's assumed majority population.
-        # TODO: Flip these around for when using the T2GRS
-        # Median_Mix = np.median(Mix)
-
-        # TODO!!!
-        # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
-        #     population_median = methods["Excess"]["Median_Ref2"]
-        # else:  # Ref1 is closets to the mixture
-        #     population_median = methods["Excess"]["Median_Ref1"]
-
-        number_low = len(RM[RM <= kwargs['population_median']])
-        number_high = len(RM[RM > kwargs['population_median']])
-        sample_size = len(RM)
-#        proportion_Ref1 = (number_high - number_low)/sample_size
-#            print("Passed median:", kwargs['population_median'])
-#            print("Ref1 median:", np.median(Ref1))
-#            print("Ref2 median:", np.median(Ref2))
-#            print("Mixture size:", sample_size)
-#            if kwargs['population_median'] < np.median(Ref1):
-        results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
-#                print("M_Ref2 < M_Ref1")
-#                print("High", number_Ref2_high)
-#                print("Low", number_Ref2_low)
-#            else:
-            # NOTE: This is an extension of the original method (above)
-#                results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
-#                print("M_Ref1 < M_Ref2")
-#                print("High", number_Ref2_high)
-#                print("Low", number_Ref2_low)
-
-#            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
-        results['Excess'] *= methods["Excess"]["adjustment_factor"]
-
-        # Clip results
-        if results['Excess'] > 1:
-            results['Excess'] = 1.0
-        if results['Excess'] < 0:
-            results['Excess'] = 0.0
-
-    # ---------------------- Difference of Means method ----------------------
-    if "Means" in methods:
-        # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-        # results['Means'] = abs(proportion_of_Ref1)
-
-        # TODO!!!
-        if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
-            proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-        else:
-            proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
-        if proportion_of_Ref1 < 0:
-            proportion_of_Ref1 = 0.0
-        if proportion_of_Ref1 > 1:
-            proportion_of_Ref1 = 1.0
-        results['Means'] = proportion_of_Ref1
-
-    # ------------------------------ EMD method ------------------------------
-    if "EMD" in methods:
-        # Interpolated cdf (to compute EMD)
-        i_CDF_Mix = pe.interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
-#            x = [bins['min'], *np.sort(RM), bins['max']]
-#            y = np.linspace(0, 1, num=len(x), endpoint=True)
-#            (iv, ii) = np.unique(x, return_index=True)
-#            si_CDF_Mix = np.interp(bin_centers, iv, y[ii])
-
-        # Compute EMDs
-#            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
-#            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD #kwargs['max_EMD']
-#            results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
-
-        i_CDF_Ref1 = kwargs["i_CDF_Ref1"]
-        i_CDF_Ref2 = kwargs["i_CDF_Ref2"]
-        i_EMD_1_2 = kwargs["i_EMD_1_2"]
-        i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1))
-        i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2))
-#            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
-        results["EMD"] = 0.5 * (1 + (i_EMD_M_2 - i_EMD_M_1)/i_EMD_1_2)
-        # print('Proportions based on counts')
-        # print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
-        # print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
-
-        # print("Proportions based on Earth Mover's Distance (histogram values):")
-        # print('% of Type 1:', 1-EMD_31/EMD_21)
-        # print('% of Type 2:', 1-EMD_32/EMD_21)
-        #
-        # print("Proportions based on Earth Mover's Distance (interpolated values):")
-        # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
-        # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
-
-    # ------------------------------ KDE method ------------------------------
-    if "KDE" in methods:
-        # TODO: Print out warnings if goodness of fit is poor?
-        results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
-
-    return results
+# def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
+#     '''Estimate the proportion of two reference populations in an unknown mixture.
+#     The returned proportions are with respect to Ref 1. The proportion of Ref 2 is assumed to be 1 pr(Ref1). '''
+#
+#     # TODO: Import this from proportion_estimation
+#
+#     bins = kwargs['bins']
+#     results = {}
+#
+#     # ----------------------------- Excess method ----------------------------
+#     if "Excess" in methods:
+#         # Calculate the proportion of another population w.r.t. the excess
+#         # number of cases from the mixture's assumed majority population.
+#         # TODO: Flip these around for when using the T2GRS
+#         # Median_Mix = np.median(Mix)
+#
+#         # TODO!!!
+#         # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
+#         #     population_median = methods["Excess"]["Median_Ref2"]
+#         # else:  # Ref1 is closets to the mixture
+#         #     population_median = methods["Excess"]["Median_Ref1"]
+#
+#         number_low = len(RM[RM <= kwargs['population_median']])
+#         number_high = len(RM[RM > kwargs['population_median']])
+#         sample_size = len(RM)
+# #        proportion_Ref1 = (number_high - number_low)/sample_size
+# #            print("Passed median:", kwargs['population_median'])
+# #            print("Ref1 median:", np.median(Ref1))
+# #            print("Ref2 median:", np.median(Ref2))
+# #            print("Mixture size:", sample_size)
+# #            if kwargs['population_median'] < np.median(Ref1):
+#         results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
+# #                print("M_Ref2 < M_Ref1")
+# #                print("High", number_Ref2_high)
+# #                print("Low", number_Ref2_low)
+# #            else:
+#             # NOTE: This is an extension of the original method (above)
+# #                results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
+# #                print("M_Ref1 < M_Ref2")
+# #                print("High", number_Ref2_high)
+# #                print("Low", number_Ref2_low)
+#
+# #            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
+#         results['Excess'] *= methods["Excess"]["adjustment_factor"]
+#
+#         # Clip results
+#         if results['Excess'] > 1:
+#             results['Excess'] = 1.0
+#         if results['Excess'] < 0:
+#             results['Excess'] = 0.0
+#
+#     # ---------------------- Difference of Means method ----------------------
+#     if "Means" in methods:
+#         # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+#         # results['Means'] = abs(proportion_of_Ref1)
+#
+#         # TODO!!!
+#         if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
+#             proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+#         else:
+#             proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
+#         if proportion_of_Ref1 < 0:
+#             proportion_of_Ref1 = 0.0
+#         if proportion_of_Ref1 > 1:
+#             proportion_of_Ref1 = 1.0
+#         results['Means'] = proportion_of_Ref1
+#
+#     # ------------------------------ EMD method ------------------------------
+#     if "EMD" in methods:
+#         # Interpolated cdf (to compute EMD)
+#         i_CDF_Mix = pe.interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
+# #            x = [bins['min'], *np.sort(RM), bins['max']]
+# #            y = np.linspace(0, 1, num=len(x), endpoint=True)
+# #            (iv, ii) = np.unique(x, return_index=True)
+# #            si_CDF_Mix = np.interp(bin_centers, iv, y[ii])
+#
+#         # Compute EMDs
+# #            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
+# #            i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD #kwargs['max_EMD']
+# #            results["EMD"] = 1 - (i_EMD_M_1 / (i_EMD_M_1 + i_EMD_M_2))
+#
+#         i_CDF_Ref1 = kwargs["i_CDF_Ref1"]
+#         i_CDF_Ref2 = kwargs["i_CDF_Ref2"]
+#         i_EMD_1_2 = kwargs["i_EMD_1_2"]
+#         i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1))
+#         i_EMD_M_2 = sum(abs(i_CDF_Mix-i_CDF_Ref2))
+# #            i_EMD_1_2 = sum(abs(i_CDF_Ref1-i_CDF_Ref2))
+#         results["EMD"] = 0.5 * (1 + (i_EMD_M_2 - i_EMD_M_1)/i_EMD_1_2)
+#         # print('Proportions based on counts')
+#         # print('% of Type 1:', np.nansum(hc3*hc1/(hc1+hc2))/sum(hc3))
+#         # print('% of Type 2:', np.nansum(hc3*hc2/(hc1+hc2))/sum(hc3))
+#
+#         # print("Proportions based on Earth Mover's Distance (histogram values):")
+#         # print('% of Type 1:', 1-EMD_31/EMD_21)
+#         # print('% of Type 2:', 1-EMD_32/EMD_21)
+#         #
+#         # print("Proportions based on Earth Mover's Distance (interpolated values):")
+#         # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
+#         # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
+#
+#     # ------------------------------ KDE method ------------------------------
+#     if "KDE" in methods:
+#         # TODO: Print out warnings if goodness of fit is poor?
+#         results['KDE'] = fit_KDE_model(RM, bins, model, kwargs['initial_params'], kwargs['KDE_kernel'])
+#
+#     return results
 
 
 if __name__ == '__main__':
