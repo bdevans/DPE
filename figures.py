@@ -776,7 +776,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
 
     if FRESH_DATA:  # or True:
-        print("Running mixture analysis with {} scores...".format(data_label))
+        print("Running mixture analysis on {} scores...".format(data_label))
         t = time.time()  # Start timer
 
         df_pe = pe.analyse_mixture(scores, bins, methods,
@@ -839,16 +839,18 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     sizes = [500, 1000, 5000]
     # bootstraps = 5
 
-    violin_scores = {}
-    violin_scores['Ref1'] = scores['Ref1']
-    violin_scores['Ref2'] = scores['Ref2']
-
     # Generate multiple mixes
     n_mixes = 5
+
+
     estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
     if FRESH_DATA:
         print("Running mixture analysis with {} scores...".format(data_label))
         t = time.time()  # Start timer
+
+        violin_scores = {}
+        violin_scores['Ref1'] = scores['Ref1']
+        violin_scores['Ref2'] = scores['Ref2']
         dfs = []
 #        for s, size in enumerate(sizes):
         for s in tqdm.trange(len(sizes), desc='Size'):

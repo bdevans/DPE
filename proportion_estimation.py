@@ -39,8 +39,6 @@ def fit_kernels(scores, bw):
         X = data[:, np.newaxis]
         for kernel in ['gaussian', 'tophat', 'epanechnikov',
                        'exponential', 'linear', 'cosine']:
-            # kde = KernelDensity(kernel=kernel, bandwidth=bw, atol=0, rtol=1e-4).fit(X)  #
-            # kernels[label][kernel] = kde
 
             kernels[label][kernel] = KernelDensity(kernel=kernel, bandwidth=bw,
                                                    atol=0, rtol=1e-4).fit(X)
@@ -426,7 +424,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         if verbose == -1:  # Allow only progress bar
             disable = False
 
-        # results = OrderedDict()
         # Make bootstrapping deterministic with parallelism
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=bootstraps)
