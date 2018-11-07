@@ -428,6 +428,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=bootstraps)
 
+        # TODO: Put in an if clause to reduce the joblib overhead when n_jobs=1 and benchmark
         with Parallel(n_jobs=n_jobs) as parallel:
             results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=seed, **kwargs)
                                for seed in tqdm.tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False

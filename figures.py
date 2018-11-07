@@ -134,6 +134,8 @@ def plot_distributions(scores, bins, data_label, ax=None):
     if not ax:
         f, ax = plt.subplots()
 
+    # TODO: Melt data together so the y-axis is normalised properly?
+
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
