@@ -238,14 +238,11 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
 
 if __name__ == '__main__':
 
-    #nprocs = multiprocessing.cpu_count()
     nprocs = cpu_count()
-    #print('Running with {}:{} processors...'.format(nprocs, cpu_count()))
     print('Running with {} processors...'.format(nprocs))
 
     # Set random seed
     np.random.seed(seed)
-    # rng = np.random.RandomState(42)
 
     np.seterr(divide='ignore', invalid='ignore')
 
@@ -262,7 +259,6 @@ if __name__ == '__main__':
 
         # Unpack data
         scores, bins, means, medians, prop_Ref1 = data
-
         Ref1 = scores['Ref1']
         Ref2 = scores['Ref2']
         Mix = scores['Mix']
@@ -309,7 +305,6 @@ if __name__ == '__main__':
                 print("Population median: {}".format(median))
 #                print("Mixture size:", sample_size)
 
-
         if "Means" in methods:
             try:
                 Mean_Ref1 = methods["Means"]["Ref1"]
@@ -325,7 +320,6 @@ if __name__ == '__main__':
                 Mean_Ref2 = Ref2.mean()
             finally:
                 extra_args["Mean_Ref2"] = Mean_Ref2
-
 
         if "EMD" in methods:
             # ---------------------------- EMD method ----------------------------
@@ -346,7 +340,6 @@ if __name__ == '__main__':
             extra_args['i_CDF_Ref1'] = i_CDF_Ref1
             extra_args['i_CDF_Ref2'] = i_CDF_Ref2
             extra_args['i_EMD_1_2'] = i_EMD_1_2
-
 
         if "KDE" in methods:
             # -------------------------- KDE method --------------------------
@@ -394,7 +387,6 @@ if __name__ == '__main__':
             extra_args['bin_width'] = bin_width
             extra_args['kdes'] = kdes
 
-
 # AttributeError: Can't pickle local object 'prepare_methods.<locals>.kde_Ref1'
 #        extra_args = pe.prepare_methods(methods, scores, bins, verbose=0)
 
@@ -404,19 +396,23 @@ if __name__ == '__main__':
         if "Excess" in methods:
             # -------------------------- Excess method ------------------------
             # TODO: Check and rename to Ref1_median?
-            results_Excess = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
+            results_Excess = np.zeros((len(sample_sizes), len(proportions),
+                                       mixtures, bootstraps))
 
         if "Means" in methods:
             # -------------------------- Means method -------------------------
-            results_Means = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
+            results_Means = np.zeros((len(sample_sizes), len(proportions),
+                                      mixtures, bootstraps))
 
         if "EMD" in methods:
             # --------------------------- EMD method --------------------------
-            results_EMD = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
+            results_EMD = np.zeros((len(sample_sizes), len(proportions),
+                                    mixtures, bootstraps))
 
         if "KDE" in methods:
             # --------------------------- KDE method --------------------------
-            results_KDE = np.zeros((len(sample_sizes), len(proportions), mixtures, bootstraps))
+            results_KDE = np.zeros((len(sample_sizes), len(proportions),
+                                    mixtures, bootstraps))
 
         for s in tqdm.trange(len(sample_sizes), desc='Size'):
             sample_size = sample_sizes[s]
@@ -425,7 +421,12 @@ if __name__ == '__main__':
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
-                    results = parallel(delayed(assess_performance)(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, **extra_args)
+                    results = parallel(delayed(assess_performance)(sample_size,
+                                                                   prop_Ref1,
+                                                                   Ref1, Ref2,
+                                                                   methods,
+                                                                   bootstraps,
+                                                                   **extra_args)
                                        for m in range(mixtures))
 
                     for m in range(mixtures):
