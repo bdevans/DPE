@@ -22,7 +22,7 @@ from collections import OrderedDict
 
 # import pandas as pd
 import numpy as np
-from sklearn.neighbors import KernelDensity
+# from sklearn.neighbors import KernelDensity
 import lmfit
 # import dill
 from joblib import Parallel, delayed, cpu_count
