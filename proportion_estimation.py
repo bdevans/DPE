@@ -9,10 +9,13 @@ Module to analyse an unknown mixture population.
 """
 
 from pprint import pprint
+import warnings
 
 import numpy as np
 import pandas as pd
-from sklearn.neighbors import KernelDensity
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=DeprecationWarning)
+    from sklearn.neighbors import KernelDensity
 # from statsmodels.nonparametric.kde import KDEUnivariate
 # TODO: replace with a scipy/numpy function to reduce dependencies
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/

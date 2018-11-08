@@ -19,7 +19,9 @@ from collections import OrderedDict
 
 import numpy as np
 import lmfit
-from joblib import Parallel, delayed, cpu_count
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=DeprecationWarning)
+    from joblib import Parallel, delayed, cpu_count
 # from joblib import Memory
 # mem = Memory(cachedir='/tmp')
 import tqdm
