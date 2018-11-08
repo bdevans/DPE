@@ -248,10 +248,13 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
     # kwargs["fit_KDE_model"] = fit_KDE_model
     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
 
-
     def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
-        '''Estimate the proportion of two reference populations in an unknown mixture.
-        The returned proportions are with respect to Ref 1. The proportion of Ref 2 is assumed to be 1 pr(Ref1). '''
+        '''Estimate the proportion of two reference populations comprising
+        an unknown mixture.
+
+        The returned proportions are with respect to Ref 1.
+        The proportion of Ref 2 is assumed to be 1 pr(Ref1).
+        '''
 
         bins = kwargs['bins']
         results = {}
@@ -270,24 +273,24 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
             #     population_median = methods["Excess"]["Median_Ref1"]
 
             # Ref1: disease; Ref2: healthy
-#            if medians["Ref1"] > medians["Ref2"]:
-#                excess_cases = RM[RM > kwargs['population_median']].count()
-#                expected_cases = RM[RM <= kwargs['population_median']].count()
-#            else:  # disease has a lower median than the healthy population
-#                excess_cases = RM[RM <= kwargs['population_median']].count()
-#                expected_cases = RM[RM > kwargs['population_median']].count()
-#            sample_size = len(RM)
-#            results['Excess'] = abs(excess_cases - expected_cases)/sample_size
+            # if medians["Ref1"] > medians["Ref2"]:
+            #    excess_cases = RM[RM > kwargs['population_median']].count()
+            #    expected_cases = RM[RM <= kwargs['population_median']].count()
+            # else:  # disease has a lower median than the healthy population
+            #    excess_cases = RM[RM <= kwargs['population_median']].count()
+            #    expected_cases = RM[RM > kwargs['population_median']].count()
+            # sample_size = len(RM)
+            # results['Excess'] = abs(excess_cases - expected_cases)/sample_size
 
             number_low = len(RM[RM <= kwargs['population_median']])
             number_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
 
-#            if kwargs['population_median'] < np.median(Ref1):
+            # if kwargs['population_median'] < np.median(Ref1):
             results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
-#            else:
+            # else:
                 # NOTE: This is an extension of the original method (above)
-#                results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
+                # results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
 
             results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
@@ -355,7 +358,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 
         return results
 
-
     def bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size=-1, seed=None, **kwargs):
 
         if sample_size == -1:
@@ -366,7 +368,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
         return results
-
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
