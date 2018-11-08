@@ -869,19 +869,18 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         violin_scores['Ref1'] = scores['Ref1']
         violin_scores['Ref2'] = scores['Ref2']
         dfs = []
-#        for s, size in enumerate(sizes):
-        for s in tqdm.trange(len(sizes), desc='Size'):
-            size = sizes[s]
+
+        size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
+        for s, size in enumerate(size_bar):
+            size_bar.set_description("Size = {:6,}".format(sample_size))
             Mixtures = {mix: {} for mix in range(n_mixes)}
-#            for p, p_star in enumerate(p_stars):
-            for p in tqdm.trange(len(p_stars), desc=' p1*'):
-                p_star = p_stars[p]
-                for mix in tqdm.trange(n_mixes):
+
+            prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
+            for p, p_star in enumerate(prop_bar):
+                prop_bar.set_description(" p1* = {:6.2f}".format(prop_Ref1))
+
+                for mix in tqdm.trange(n_mixes, dynamic_ncols=True, desc=" Mix"):
                     mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
-                    print("\n\n")
-                    print("Size: {} [#{}/{}]".format(size, s, len(sizes)))
-                    print("p1*: {} [#{}/{}]".format(p_star, p, len(p_stars)))
-                    print("Mix: {} [#{}/{}]".format(mix, mix, n_mixes), flush=True)
 
                     violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
                     Mixtures[mix][p_star] = violin_scores['Mix']
@@ -893,8 +892,10 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                     df_cm['Mix'] = mix * np.ones(bootstraps)
                     df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
                     dfs.append(df_cm)
+
             df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
             df_size.to_pickle(mix_dist_file)
+
         df_est = pd.concat(dfs, ignore_index=True)
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
