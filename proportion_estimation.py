@@ -8,7 +8,6 @@ Module to analyse an unknown mixture population.
 @author: ben
 """
 
-# from collections import OrderedDict  # , defaultdict
 from pprint import pprint
 
 import numpy as np
@@ -21,8 +20,6 @@ import lmfit
 # TODO: Try replacing with scipy.optimize.curve_fit to solve joblib problem and reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
 # from joblib import Parallel, delayed, cpu_count
-# import seaborn as sns
-# import matplotlib as mpl
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed, cpu_count
 # from tqdm import tqdm
@@ -163,7 +160,6 @@ def prepare_methods(methods, scores, bins, verbose=1):
     #        i_EMD_21 = sum(abs(i_CDF_Ref2-i_CDF_Ref1)) * bin_width / max_EMD
     #        i_EMD_M1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD
     #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
-
     #        kwargs['i_EMD_21'] = i_EMD_21
 
     if "KDE" in methods:
@@ -224,7 +220,6 @@ def prepare_methods(methods, scores, bins, verbose=1):
 def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
                     alpha=0.05, true_prop_Ref1=None, n_jobs=1, seed=None,
                     verbose=1, logfile=''):
-                    # , means=None, median=None, KDE_kernel='gaussian'):
 
     if seed is not None:
         np.random.seed(seed)
@@ -234,7 +229,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
     Mix = scores['Mix']
     # kwargs["fit_KDE_model"] = fit_KDE_model
     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
-    # print(kwargs)
+
 
     def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         '''Estimate the proportion of two reference populations in an unknown mixture.
@@ -266,28 +261,16 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 #            sample_size = len(RM)
 #            results['Excess'] = abs(excess_cases - expected_cases)/sample_size
 
-
             number_low = len(RM[RM <= kwargs['population_median']])
             number_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
-    #        proportion_Ref1 = (number_high - number_low)/sample_size
-#            print("Passed median:", kwargs['population_median'])
-#            print("Ref1 median:", np.median(Ref1))
-#            print("Ref2 median:", np.median(Ref2))
-#            print("Mixture size:", sample_size)
+
 #            if kwargs['population_median'] < np.median(Ref1):
             results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
-#                print("M_Ref2 < M_Ref1")
-#                print("High", number_Ref2_high)
-#                print("Low", number_Ref2_low)
 #            else:
                 # NOTE: This is an extension of the original method (above)
 #                results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
-#                print("M_Ref1 < M_Ref2")
-#                print("High", number_Ref2_high)
-#                print("Low", number_Ref2_low)
 
-#            results['Excess'] /= 0.92  # adjusted for fact it underestimates by 8%
             results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
             # Clip results
@@ -355,39 +338,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         return results
 
 
-#    def construct_bootstraps(sample_size, prop_Ref1, Ref1, Ref2, methods, **kwargs):
-#
-#        results = {}
-#        for method in methods:
-#            assert(0.0 <= prop_Ref1[method] <= 1.0)
-#            n_Ref1 = int(round(sample_size * prop_Ref1[method]))
-#            n_Ref2 = sample_size - n_Ref1
-#
-#            # Bootstrap mixture
-#            Mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-#                                  np.random.choice(Ref2, n_Ref2, replace=True)))
-#
-##            run_method = defaultdict(bool)
-##            run_method[method] = True
-#            indiv_method = {}
-#            indiv_method[method] = methods[method]
-#
-#            results[method] = estimate_Ref1(Mix, Ref1, Ref2, indiv_method, **kwargs)[method]
-#
-#        return results#[method]
-
-
     def bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size=-1, seed=None, **kwargs):
-
-#        results = {}
-#        for method in methods:
-#            # Bootstrap mixture
-#            bs = np.random.choice(Mix, sample_size, replace=True)
-#
-#            indiv_method = {}
-#            indiv_method[method] = methods[method]
-#
-#            results[method] = estimate_Ref1(bs, Ref1, Ref2, indiv_method, **kwargs)[method]
 
         if sample_size == -1:
             sample_size = len(Mix)
@@ -397,6 +348,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
         return results
+
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
@@ -437,29 +389,6 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         # NOTE: These results are identical to when n_jobs=1 however it takes about 25% less time per iteration
         # results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
         #            for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
-
-#        # results = OrderedDict()
-#
-##        for method in methods:
-#            # Fix estimated proportions for each method
-##            if true_prop_Ref1:
-##                prop_Ref1 = defaultdict(lambda: true_prop_Ref1)
-###                prop_Ref1[method] = true_prop_Ref1
-##            else:
-##                prop_Ref1 = initial_results
-##            individual_method = {}
-##            individual_method[method] = methods[method]
-##            results[method] = [bootstrap_mixture(sample_size, prop_Ref1, Ref1, Ref2, individual_method, **kwargs)[method]
-##                               for b in range(bootstraps)]
-#
-#            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
-#                       for b in tqdm.trange(bootstraps, ncols=100, desc="Bootstraps")]
-#        else:  # Disable progress bar
-#            with Parallel(n_jobs=n_jobs) as parallel:
-#                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
-#                                   for b in range(bootstraps))
-##            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
-##                       for b in range(bootstraps)]
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
