@@ -13,20 +13,21 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import lmfit
+from joblib import Parallel, delayed, cpu_count
+# from tqdm import tqdm
+import tqdm
+from statsmodels.stats.proportion import proportion_confint
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=DeprecationWarning)
     from sklearn.neighbors import KernelDensity
 # from statsmodels.nonparametric.kde import KDEUnivariate
 # TODO: replace with a scipy/numpy function to reduce dependencies
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
-import lmfit
+
 # TODO: Try replacing with scipy.optimize.curve_fit to solve joblib problem and reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
-# from joblib import Parallel, delayed, cpu_count
-from joblib import Parallel, delayed, cpu_count
-# from tqdm import tqdm
-import tqdm
-from statsmodels.stats.proportion import proportion_confint
+
 
 METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 
