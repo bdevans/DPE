@@ -160,7 +160,7 @@ def load_renal_data():
 
 
 # Let's use FD!
-def estimate_bins(data, bin_range=None, verbose=1):
+def estimate_bins(data, bin_range=None, verbose=0):
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
