@@ -216,7 +216,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
     for method in df_pe:
         values = df_pe[method]
 #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        report.append("{:14} (µ±σ) | {:.5f}  ±  {:.3f} | {:.5f}  ±  {:.3f} "
+        report.append(" {:13} (µ±σ) | {:.5f}  ±  {:.3f} | {:.5f}  ±  {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
         if bootstraps > 1:
@@ -228,7 +228,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
         report.append("-"*61)
     if true_p1:
-        report.append("{:20} | {:<17.5f} | {:<17.5f} "
+        report.append(" {:19} | {:<17.5f} | {:<17.5f} "
                       .format("Ground Truth", true_p1, 1-true_p1))
         report.append("="*61)
     # report.append("\n")
