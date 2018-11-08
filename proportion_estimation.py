@@ -23,7 +23,6 @@ import lmfit
 # TODO: Try replacing with scipy.optimize.curve_fit to solve joblib problem and reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
 # from joblib import Parallel, delayed, cpu_count
-import matplotlib.pyplot as plt
 from joblib import Parallel, delayed, cpu_count
 # from tqdm import tqdm
 import tqdm
@@ -43,21 +42,6 @@ def fit_kernels(scores, bw):
             kernels[label][kernel] = KernelDensity(kernel=kernel, bandwidth=bw,
                                                    atol=0, rtol=1e-4).fit(X)
     return kernels
-
-
-def plot_kernels(scores, bins):
-
-    kernels = fit_kernels(scores, bins['width'])
-    fig, axes = plt.subplots(len(scores), 1, sharex=True)
-    X_plot = bins['centers'][:, np.newaxis]
-    for (label, data), ax in zip(scores.items(), axes):
-        X = data[:, np.newaxis]
-        for name, kernel in kernels[label].items():
-            ax.plot(X_plot[:, 0], np.exp(kernel.score_samples(X_plot)), '-',
-                    label="kernel = '{0}'; bandwidth = {1}".format(name, bins['width']))
-        ax.legend(loc='upper left')
-        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
-        ax.set_ylabel(label)
 
 
 # @mem.cache

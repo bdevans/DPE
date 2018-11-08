@@ -31,6 +31,21 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
+def plot_kernels(scores, bins):
+
+    kernels = pe.fit_kernels(scores, bins['width'])
+    fig, axes = plt.subplots(len(scores), 1, sharex=True)
+    X_plot = bins['centers'][:, np.newaxis]
+    for (label, data), ax in zip(scores.items(), axes):
+        X = data[:, np.newaxis]
+        for name, kernel in kernels[label].items():
+            ax.plot(X_plot[:, 0], np.exp(kernel.score_samples(X_plot)), '-',
+                    label="kernel = '{0}'; bandwidth = {1}".format(name, bins['width']))
+        ax.legend(loc='upper left')
+        ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
+        ax.set_ylabel(label)
+
+
 def load_accuracy(out_dir, label):
 
     PROPORTIONS = np.load('{}/proportions_{}.npy'.format(out_dir, label))
