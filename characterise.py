@@ -16,6 +16,7 @@ https://git.exeter.ac.uk/bdevans/DPE/commit/01a9705b6fa1bf0d1df4fd3a4beaa1a413f6
 import os
 import time
 from collections import OrderedDict
+import warnings
 
 import numpy as np
 import lmfit
