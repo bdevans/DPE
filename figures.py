@@ -873,11 +873,11 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         for s in tqdm.trange(len(sizes), desc='Size'):
             size = sizes[s]
             Mixtures = {mix: {} for mix in range(n_mixes)}
-            mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
 #            for p, p_star in enumerate(p_stars):
             for p in tqdm.trange(len(p_stars), desc=' p1*'):
                 p_star = p_stars[p]
                 for mix in tqdm.trange(n_mixes):
+                    mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
                     print("\n\n")
                     print("Size: {} [#{}/{}]".format(size, s, len(sizes)))
                     print("p1*: {} [#{}/{}]".format(p_star, p, len(p_stars)))
