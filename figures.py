@@ -736,9 +736,9 @@ if plot_results:
 # ---------------------------- Define constants ------------------------------
 
 METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
-FRESH_DATA = True  # CAUTION!
-#out_dir = "results"
-out_dir = "results_100_100"
+FRESH_DATA = False  # CAUTION!
+out_dir = "results_test"
+#out_dir = "results_100_100"
 fig_dir = os.path.join(out_dir, "figs")
 
 verbose = False
