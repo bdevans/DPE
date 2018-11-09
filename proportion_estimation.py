@@ -76,8 +76,6 @@ def prepare_methods(methods, scores, bins, verbose=1):
 
     # TODO: Consolidate kwargs into methods
     kwargs = {}
-    # if sample_size == -1:
-    #     sample_size = len(Mix)
     kwargs['bins'] = bins
 
     # ----------------------------- Excess method -----------------------------
@@ -105,7 +103,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
             print("Ref1 median:", np.median(Ref1))
             print("Ref2 median:", np.median(Ref2))
             print("Population median: {}".format(median))
-            print("Mixture size:", len(Mix))  # sample_size)
+            print("Mixture size:", len(Mix))  # boot_size)
 
     # ----------------------------- Means method ------------------------------
     if "Means" in methods:
@@ -238,7 +236,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
     return "\n".join(report)
 
 
-def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
+def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
                     alpha=0.05, true_p1=None, n_jobs=1, seed=None,
                     verbose=1, logfile='', kwargs=None):
 
@@ -283,14 +281,14 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
             # else:  # disease has a lower median than the healthy population
             #    excess_cases = RM[RM <= kwargs['population_median']].count()
             #    expected_cases = RM[RM > kwargs['population_median']].count()
-            # sample_size = len(RM)
-            # results['Excess'] = abs(excess_cases - expected_cases)/sample_size
+            # boot_size = len(RM)
+            # results['Excess'] = abs(excess_cases - expected_cases)/boot_size
 
             number_low = len(RM[RM <= kwargs['population_median']])
             number_high = len(RM[RM > kwargs['population_median']])
-            sample_size = len(RM)
+            boot_size = len(RM)
 
-            results['Excess'] = abs(number_high - number_low)/sample_size
+            results['Excess'] = abs(number_high - number_low)/boot_size
             results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
             # Clip results
@@ -351,15 +349,15 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
 
         return results
 
-    def bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size=-1, seed=None, **kwargs):
+    def bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size=-1, seed=None, **kwargs):
 
-        if sample_size == -1:
-            sample_size = len(Mix)
+        if boot_size == -1:
+            boot_size = len(Mix)
 
         if seed is None:
-            bs = np.random.choice(Mix, sample_size, replace=True)
+            bs = np.random.choice(Mix, boot_size, replace=True)
         else:
-            bs = np.random.RandomState(seed).choice(Mix, sample_size, replace=True)
+            bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
 
         return estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
@@ -396,11 +394,11 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
         # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
         if n_jobs == 1 or n_jobs is None:
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
-            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, seed=None, **kwargs)
+            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size, seed=None, **kwargs)
                        for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
         else:
             with Parallel(n_jobs=n_jobs) as parallel:
-                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=b_seed, **kwargs)
+                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, boot_size, seed=b_seed, **kwargs)
                                    for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
 
         # Put into dataframe
