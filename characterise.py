@@ -23,9 +23,9 @@ import lmfit
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=DeprecationWarning)
     from joblib import Parallel, delayed, cpu_count
+from tqdm import tqdm
 # from joblib import Memory
 # mem = Memory(cachedir='/tmp')
-import tqdm
 
 import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
@@ -147,11 +147,11 @@ if __name__ == '__main__':
             boots_arrays[method] = np.zeros((len(sample_sizes), len(proportions),
                                              mixtures, bootstraps))
 
-        size_bar = tqdm.tqdm(sample_sizes, dynamic_ncols=True)
+        size_bar = tqdm(sample_sizes, dynamic_ncols=True)
         for s, sample_size in enumerate(size_bar):
             size_bar.set_description("Size = {:6,}".format(sample_size))
 
-            prop_bar = tqdm.tqdm(proportions, dynamic_ncols=True)
+            prop_bar = tqdm(proportions, dynamic_ncols=True)
             for p, prop_Ref1 in enumerate(prop_bar):
                 prop_bar.set_description(" p1* = {:6.2f}".format(prop_Ref1))
 
@@ -166,9 +166,9 @@ if __name__ == '__main__':
                                                        Ref1, Ref2, methods,
                                                        bootstraps, seed=seed,
                                                        **kwargs)
-                                       for seed in tqdm.tqdm(mix_seeds,
-                                                             desc=" Mixture     ",
-                                                             dynamic_ncols=True))
+                                       for seed in tqdm(mix_seeds,
+                                                        desc=" Mixture     ",
+                                                        dynamic_ncols=True))
 
                     for m in range(mixtures):
                         point, boots = results[m]
