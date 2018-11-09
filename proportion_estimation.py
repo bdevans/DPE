@@ -74,7 +74,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
     bin_width = bins['width']
     bin_edges = bins['edges']
 
-    # if kwargs is None:
+    # TODO: Consolidate kwargs into methods
     kwargs = {}
     # if sample_size == -1:
     #     sample_size = len(Mix)

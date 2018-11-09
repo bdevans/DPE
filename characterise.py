@@ -111,7 +111,6 @@ if __name__ == '__main__':
     for tag, data in datasets.items():
 
         print("Running parameter sweep with {} scores...".format(tag))
-
         t = time.time()  # Start timer
 
         # Unpack data
@@ -137,9 +136,11 @@ if __name__ == '__main__':
         point_arrays = {}
         boots_arrays = {}
         for method in methods:
-            point_arrays[method] = np.zeros((len(sample_sizes), len(proportions),
+            point_arrays[method] = np.zeros((len(sample_sizes),
+                                             len(proportions),
                                              mixtures))
-            boots_arrays[method] = np.zeros((len(sample_sizes), len(proportions),
+            boots_arrays[method] = np.zeros((len(sample_sizes),
+                                             len(proportions),
                                              mixtures, bootstraps))
 
         size_bar = tqdm(sample_sizes, dynamic_ncols=True)
@@ -184,6 +185,7 @@ if __name__ == '__main__':
         for method in methods:
             np.save('{}/point_{}_{}'.format(out_dir, method, tag), point_arrays[method])
             np.save('{}/boots_{}_{}'.format(out_dir, method, tag), boots_arrays[method])
+        # TODO: Save the arrays in the dictionary as a pickle file
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
