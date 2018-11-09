@@ -903,7 +903,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
         size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
         for s, size in enumerate(size_bar):
-            size_bar.set_description("Size = {:6,}".format(sample_size))
+            size_bar.set_description("Size = {:6,}".format(size))
             Mixtures = {mix: {} for mix in range(n_mixes)}
 
             prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
