@@ -298,10 +298,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
             results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
             # Clip results
-            if results['Excess'] > 1:
-                results['Excess'] = 1.0
-            if results['Excess'] < 0:
-                results['Excess'] = 0.0
+            results['Excess'] = np.clip(results['Excess'], 0.0, 1.0)
 
         # ---------------------- Difference of Means method ----------------------
         if "Means" in methods:
@@ -313,11 +310,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
                 proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
             else:
                 proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
-            if proportion_of_Ref1 < 0:
-                proportion_of_Ref1 = 0.0
-            if proportion_of_Ref1 > 1:
-                proportion_of_Ref1 = 1.0
-            results['Means'] = proportion_of_Ref1
+
+            results['Means'] = np.clip(proportion_of_Ref1, 0.0, 1.0)
 
         # ------------------------------ EMD method ------------------------------
         if "EMD" in methods:
