@@ -15,7 +15,6 @@ https://git.exeter.ac.uk/bdevans/DPE/commit/01a9705b6fa1bf0d1df4fd3a4beaa1a413f6
 
 import os
 import time
-from collections import OrderedDict
 
 import numpy as np
 from tqdm import tqdm
@@ -129,14 +128,15 @@ if __name__ == '__main__':
         else:
             adjustment_factor = 1.0
 
-        methods = OrderedDict([("Excess", {"Median_Ref1": medians["Ref1"],
-                                           "Median_Ref2": medians["Ref2"],
-                                           "adjustment_factor": adjustment_factor}),
-                               ("Means", {'Ref1': means['Ref1'],
-                                          'Ref2': means['Ref2']}),
-                               ("EMD", True),
-                               ("KDE", {'kernel': KDE_kernel,
-                                        'bandwidth': bins['width']})])
+        methods = {"Excess": {"Median_Ref1": medians["Ref1"],
+                              "Median_Ref2": medians["Ref2"],
+                              "adjustment_factor": adjustment_factor},
+                   "Means": {'Ref1': means['Ref1'],
+                             'Ref2': means['Ref2']},
+                   "EMD": True,
+                   "KDE": {'kernel': KDE_kernel,
+                           'bandwidth': bins['width']}
+                   }
 
         kwargs = {}
         kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
