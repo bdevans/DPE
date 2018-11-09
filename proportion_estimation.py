@@ -371,9 +371,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         else:
             bs = np.random.RandomState(seed).choice(Mix, sample_size, replace=True)
 
-        results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
-
-        return results
+        return estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
