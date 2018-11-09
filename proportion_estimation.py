@@ -208,7 +208,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
 
 def generate_report(df_pe, true_p1=None, alpha=0.05):
     # methods = df_pe.columns
-    bootstraps = len(df_pe)  # NOTE: This may chnage if prepending the initial estimate
+    n_boot = len(df_pe)  # NOTE: This may chnage if prepending the initial estimate
     report = []
     report.append("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates",
                                                       "Reference 1",
@@ -220,7 +220,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
         report.append(" {:13} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
-        if bootstraps > 1:
+        if n_boot > 1:
             nobs = len(values)
             count = int(np.mean(values)*nobs)
             # TODO: Multiply the numbers by 10 for more accuracy 45/100 --> 457/1000 ?
@@ -237,7 +237,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
     return "\n".join(report)
 
 
-def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
+def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
                     alpha=0.05, true_p1=None, n_jobs=1, seed=None,
                     verbose=1, logfile='', kwargs=None):
 
@@ -376,7 +376,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
     columns = [method for method in METHODS_ORDER if method in methods]
 
     # df_pe = pd.DataFrame(columns=columns)
-    if bootstraps <= 0:
+    if n_boot <= 0:
         # Get initial estimate of proportions
         initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
         if verbose > 1:
@@ -388,13 +388,13 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
         # df_pe.loc[0] = initial_results
 
-    else:  # if bootstraps > 0:
+    else:  # if n_boot > 0:
         if verbose > 0:
             if n_jobs == -1:
                 nprocs = cpu_count()
             else:
                 nprocs = n_jobs
-            print('Running {} bootstraps with {} processors...'.format(bootstraps, nprocs), flush=True)
+            print('Running {} bootstraps with {} processors...'.format(n_boot, nprocs), flush=True)
             disable = False
         else:
             disable = True
@@ -403,12 +403,12 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 
         # Make bootstrapping deterministic with parallelism
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
-        boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=bootstraps)
+        boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
 
         if n_jobs == 1 or n_jobs is None:  # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
             results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, seed=None, **kwargs)
-                       for b in trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+                       for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
         else:
             with Parallel(n_jobs=n_jobs) as parallel:
                 results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=b_seed, **kwargs)

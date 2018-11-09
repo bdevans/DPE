@@ -160,7 +160,7 @@ def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
 
 
 def plot_characterisation(estimates, proportions, sample_sizes,
-                          figsize=(16,8), cl=None):
+                          figsize=(16, 8), cl=None):
     if cl is None:
         cl = [0.02]
 
@@ -745,7 +745,7 @@ verbose = False
 
 
 seed = 42
-bootstraps = 1000
+n_boot = 1000
 sample_size = 1000  # -1
 n_mixes = 5
 selected_mix = 0
@@ -847,7 +847,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         t = time.time()  # Start timer
 
         df_pe = pe.analyse_mixture(scores, bins, methods,
-                                   bootstraps=bootstraps, sample_size=sample_size,
+                                   n_boot=n_boot, sample_size=sample_size,
                                    alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
                                    logfile="results/pe_{}.log".format(data_label))
 
@@ -888,7 +888,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
     p_stars = [0.25, 0.50, 0.75]
     sizes = [500, 1000, 5000]
-    # bootstraps = 5
+    # n_boot = 5
 
     # Generate multiple mixes
     estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
@@ -916,12 +916,12 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                     violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
                     Mixtures[mix][p_star] = violin_scores['Mix']
                     df_cm = pe.analyse_mixture(violin_scores, bins, methods,
-                                               bootstraps=bootstraps, sample_size=size,
+                                               n_boot=n_boot, sample_size=size,
                                                alpha=alpha, true_p1=p_star,
                                                n_jobs=-1, verbose=0)
-                    df_cm['Size'] = size * np.ones(bootstraps)
-                    df_cm['p1*'] = p_star * np.ones(bootstraps)
-                    df_cm['Mix'] = mix * np.ones(bootstraps)
+                    df_cm['Size'] = size * np.ones(n_boot)
+                    df_cm['p1*'] = p_star * np.ones(n_boot)
+                    df_cm['Mix'] = mix * np.ones(n_boot)
                     df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
                     dfs.append(df_cm)
 
@@ -1130,7 +1130,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     #
     # for n_boots in [0, 1, 10, 100, 1000]:
     #     if n_boots == 0:
-    #         df = pe.analyse_mixture(scores, bins, methods, bootstraps=0,
+    #         df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
     #                                 sample_size=sample_size, alpha=alpha,
     #                                 true_p1=prop_Ref1, n_jobs=-1,
     #                                 logfile="results/pe_{}.log".format(data_label))

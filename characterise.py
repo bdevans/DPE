@@ -38,7 +38,7 @@ check_EMD = False
 seed = 42
 
 mixtures = 100  # 1000
-bootstraps = 100
+n_boot = 100
 sample_sizes = np.arange(100, 2501, 100)  # 3100
 # sample_sizes = np.linspace(100, 2500, 25, endpoint=True, dtype=int)
 # proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
@@ -46,7 +46,7 @@ proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 
 # Very quick testing run
 mixtures = 4  # 1000
-bootstraps = 4
+n_boot = 4
 sample_sizes = np.arange(100, 201, 100)
 proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
 
@@ -65,7 +65,7 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
-def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, seed=None, **kwargs):
+def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, n_boot, seed=None, **kwargs):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
@@ -79,13 +79,13 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, seed=None, *
     scores = {'Ref1': Ref1, 'Ref2': Ref2}
     scores['Mix'] = mixture
 
-    point = pe.analyse_mixture(scores, bins, methods, bootstraps=0,
+    point = pe.analyse_mixture(scores, bins, methods, n_boot=0,
                                sample_size=-1, alpha=0.05,
                                true_p1=prop_Ref1, n_jobs=1, seed=seed,
                                verbose=0, logfile=None, kwargs=kwargs)
 
     logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
-    boots = pe.analyse_mixture(scores, bins, methods, bootstraps=bootstraps,
+    boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
                                sample_size=-1, alpha=0.05,
                                true_p1=prop_Ref1, n_jobs=1, seed=seed,
                                verbose=0, logfile=logfile, kwargs=kwargs)
@@ -141,7 +141,7 @@ if __name__ == '__main__':
                                              mixtures))
             boots_arrays[method] = np.zeros((len(sample_sizes),
                                              len(proportions),
-                                             mixtures, bootstraps))
+                                             mixtures, n_boot))
 
         size_bar = tqdm(sample_sizes, dynamic_ncols=True)
         for s, sample_size in enumerate(size_bar):
@@ -160,7 +160,7 @@ if __name__ == '__main__':
                     # Parallelise over mixtures
                     results = parallel(delayed(assess)(sample_size, prop_Ref1,
                                                        Ref1, Ref2, methods,
-                                                       bootstraps, seed=seed,
+                                                       n_boot, seed=seed,
                                                        **kwargs)
                                        for seed in tqdm(mix_seeds,
                                                         desc=" Mixture     ",
