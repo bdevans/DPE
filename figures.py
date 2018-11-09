@@ -144,6 +144,35 @@ def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
     fig.colorbar(CS, ax=ax)
 
 
+def plot_characterisation(estimates, proportions, sample_sizes,
+                          figsize=(16,8), cl=None):
+    if cl is None:
+        cl = [0.02]
+
+    fig = plt.figure(figsize=figsize)
+    gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
+
+    for m, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+        # Plot average accuracy across mixtures
+        ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
+        if m == 0:
+            ax_acc.set_ylabel('Sample size ($n$)')
+        else:
+            ax_acc.set_yticklabels([])
+        plot_accuracy(estimates, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl)
+
+        # Plot deviation across mixtures
+        ax_dev = fig.add_subplot(gs[1, m])
+        if m == 0:
+            ax_dev.set_ylabel('Sample size ($n$)')
+        else:
+            ax_dev.set_yticklabels([])
+        ax_dev.set_xlabel('$p_1^*$')
+        plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False)
+
+    return fig
+
+
 def plot_distributions(scores, bins, data_label, ax=None):
 
     if not ax:
@@ -819,32 +848,8 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     sns.set_style("ticks")
 
     # Load bootstraps of accurarcy data
-    (estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
 
 
-    fig = plt.figure(figsize=(16,8))
-    gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
-
-    cl = [0.02]
-    for m, method in enumerate(METHODS_ORDER):  # enumerate(methods):
-        # Plot average accuracy across mixtures
-        ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
-        if m == 0:
-            ax_acc.set_ylabel('Sample size ($n$)')
-        else:
-            ax_acc.set_yticklabels([])
-        plot_accuracy(estimates, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl)
-
-        # Plot deviation across mixtures
-        ax_dev = fig.add_subplot(gs[1, m])
-        if m == 0:
-            ax_dev.set_ylabel('Sample size ($n$)')
-        else:
-            ax_dev.set_yticklabels([])
-        ax_dev.set_xlabel('$p_1^*$')
-        plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False)
-
-    fig.savefig('figs/characterise_{}.png'.format(data_label))
 
 
 
