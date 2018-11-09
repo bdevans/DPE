@@ -363,8 +363,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         if sample_size == -1:
             sample_size = len(Mix)
 
-        bs = np.random.RandomState(seed).choice(Mix, sample_size, replace=True)
-        # bs = np.random.choice(Mix, sample_size, replace=True)
+        if seed is None:
+            bs = np.random.choice(Mix, sample_size, replace=True)
+        else:
+            bs = np.random.RandomState(seed).choice(Mix, sample_size, replace=True)
+
         results = estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
 
         return results
