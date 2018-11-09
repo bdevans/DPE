@@ -31,7 +31,6 @@ out_dir = "results"
 verbose = False
 run_means = True
 run_excess = True
-adjust_excess = False
 run_KDE = True
 run_EMD = True
 check_EMD = False
@@ -123,14 +122,8 @@ if __name__ == '__main__':
         bin_width = bins['width']
         bin_edges = bins['edges']
 
-        if adjust_excess:
-            adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
-        else:
-            adjustment_factor = 1.0
-
         methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-                              "Median_Ref2": medians["Ref2"],
-                              "adjustment_factor": adjustment_factor},
+                              "Median_Ref2": medians["Ref2"]},
                    "Means": {'Ref1': means['Ref1'],
                              'Ref2': means['Ref2']},
                    "EMD": True,
