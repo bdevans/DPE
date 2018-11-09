@@ -78,13 +78,19 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
 
     scores = {'Ref1': Ref1, 'Ref2': Ref2}
     scores['Mix'] = mixture
+
+    point = pe.analyse_mixture(scores, bins, methods, bootstraps=0,
+                                sample_size=-1, alpha=0.05,
+                                true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
+                                verbose=0, logfile=None, kwargs=kwargs)
+
     logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
-    results = pe.analyse_mixture(scores, bins, methods, bootstraps=bootstraps,
+    boots = pe.analyse_mixture(scores, bins, methods, bootstraps=bootstraps,
                                  sample_size=-1, alpha=0.05,
                                  true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
                                  verbose=0, logfile=logfile, kwargs=kwargs)
 
-    return results
+    return (point, boots)
 
 
 if __name__ == '__main__':
@@ -133,26 +139,13 @@ if __name__ == '__main__':
         kwargs = {}
         kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
 
-        if "Excess" in methods:
-            # -------------------------- Excess method ------------------------
-            # TODO: Check and rename to Ref1_median?
-            results_Excess = np.zeros((len(sample_sizes), len(proportions),
-                                       mixtures, bootstraps))
-
-        if "Means" in methods:
-            # -------------------------- Means method -------------------------
-            results_Means = np.zeros((len(sample_sizes), len(proportions),
-                                      mixtures, bootstraps))
-
-        if "EMD" in methods:
-            # --------------------------- EMD method --------------------------
-            results_EMD = np.zeros((len(sample_sizes), len(proportions),
-                                    mixtures, bootstraps))
-
-        if "KDE" in methods:
-            # --------------------------- KDE method --------------------------
-            results_KDE = np.zeros((len(sample_sizes), len(proportions),
-                                    mixtures, bootstraps))
+        point_arrays = {}
+        boots_arrays = {}
+        for method in methods:
+            point_arrays[method] = np.zeros((len(sample_sizes), len(proportions),
+                                             mixtures))
+            boots_arrays[method] = np.zeros((len(sample_sizes), len(proportions),
+                                             mixtures, bootstraps))
 
         size_bar = tqdm.tqdm(sample_sizes, dynamic_ncols=True)
         for s, sample_size in enumerate(size_bar):
@@ -179,16 +172,10 @@ if __name__ == '__main__':
                                        for seed in tqdm.tqdm(mix_seeds, desc="Mixture      ", dynamic_ncols=True))  #, leave=False))
 
                     for m in range(mixtures):
-                        if run_excess:
-                            results_Excess[s, p, m, :] = results[m]['Excess']
-                        if run_means:
-                            results_Means[s, p, m, :] = results[m]['Means']
-                        if run_EMD:
-                            results_EMD[s, p, m, :] = results[m]['EMD']
-#                            mat_EMD_31[s, p, b] = results[b]['EMD_31']
-#                            mat_EMD_32[s, p, b] = results[b]['EMD_32']
-                        if run_KDE:
-                            results_KDE[s, p, m, :] = results[m]['KDE']
+                        point, boots = results[m]
+                        for method in methods:
+                            point_arrays[method][s, p, m] = point[method]
+                            boots_arrays[method][s, p, m, :] = boots[method]
 
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
@@ -200,16 +187,9 @@ if __name__ == '__main__':
 #            if check_EMD:
 #                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
 #                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
-        if run_excess:
-            np.save('{}/excess_{}'.format(out_dir, tag), results_Excess)
-        if run_means:
-            np.save('{}/means_{}'.format(out_dir, tag), results_Means)
-        if run_EMD:
-            np.save('{}/emd_{}'.format(out_dir, tag), results_EMD)
-#            np.save('{}/emd_31_{}'.format(out_dir, tag), norm_mat_EMD_31)
-#            np.save('{}/emd_32_{}'.format(out_dir, tag), norm_mat_EMD_32)
-        if run_KDE:
-            np.save('{}/kde_{}'.format(out_dir, tag), results_KDE)
+        for method in methods:
+            np.save('{}/point_{}_{}'.format(out_dir, method, tag), point_arrays[method])
+            np.save('{}/boots_{}_{}'.format(out_dir, method, tag), boots_arrays[method])
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
