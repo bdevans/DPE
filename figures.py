@@ -292,7 +292,7 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
         ax = sns.boxplot(data=df_bs)
         ax = sns.swarmplot(data=df_bs, color=".25")
         sns.despine(top=True, bottom=True, trim=True)
-        plt.savefig('figs/boxes_{}.png'.format(data_label))
+        plt.savefig(os.path.join(fig_dir, 'boxes_{}.png'.format(data_label)))
 
 
 def construct_mixture(Ref1, Ref2, p1, size):
@@ -463,7 +463,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
 #    plt.tight_layout()
-    fig_select.savefig('figs/violin_selection_{}.png'.format(data_label))
+    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}.png'.format(data_label)))
 
 
 def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, out_dir, data_label, selected_mix=0, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
@@ -619,8 +619,7 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
 #    plt.tight_layout()
-    fig_select.savefig('figs/violin_selection_{}.png'.format(data_label))
-
+    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}.png'.format(data_label)))
 
 
 def plot_compound_figure():
@@ -665,7 +664,7 @@ def plot_compound_figure():
     #plot_bootstrap_results(out_dir, data_label, fig, axes)  # "T1GRS"
 
 #    fig.tight_layout()
-    fig.savefig('figs/compound_{}.png'.format(data_label))
+    fig.savefig(os.path.join(fig_dir, 'compound_{}.png'.format(data_label)))
 
 
     # Plot deviation across bootstraps
@@ -689,7 +688,7 @@ def plot_compound_figure():
     plot_deviation(estimates, proportions, sample_sizes, "KDE", fig_dev, ax_dev_KDE)
 
 #    fig_dev.tight_layout()
-    fig_dev.savefig('figs/deviation_{}.png'.format(data_label))
+    fig_dev.savefig(os.path.join(fig_dir, 'deviation_{}.png'.format(data_label)))
 
 
 
@@ -730,6 +729,7 @@ METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 FRESH_DATA = True  # CAUTION!
 #out_dir = "results"
 out_dir = "results_100_100"
+fig_dir = os.path.join(out_dir, "figs")
 
 verbose = False
 
@@ -788,6 +788,10 @@ mpl.rc('savefig', dpi=300)
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
+
+if not os.path.exists(fig_dir):
+    os.makedirs(fig_dir)
+
 
 # Set random seed
 np.random.seed(seed)
@@ -952,7 +956,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     # sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
     sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
     g.invert_yaxis()
-    fig_vio.savefig('figs/violin_bootstraps_{}.png'.format(data_label))
+    fig_vio.savefig(os.path.join(fig_dir, 'violin_bootstraps_{}.png'.format(data_label)))
 
 
 
@@ -962,7 +966,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
 #    ax_vio = fig_vio.add_subplot(111)
     gs = plt.GridSpec(nrows=1, ncols=len(methods), hspace=0.2, wspace=0.015)
-
 
     for m, method in enumerate(methods):
         ax_stack = fig_stack.add_subplot(gs[m])
@@ -991,7 +994,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
 #        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
         g.invert_yaxis()
-    fig_stack.savefig('figs/violin_stacks_{}.png'.format(data_label))
+    fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
 
 
     # Plot selected violins
@@ -1043,7 +1046,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     #     sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
         g.invert_yaxis()
-        fig_vio.savefig('figs/ci_selection_{}.png'.format(data_label))
+        fig_vio.savefig(os.path.join(fig_dir, 'ci_selection_{}.png'.format(data_label)))
 
 
 
@@ -1085,7 +1088,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             warnings.warn("Missing data file: {}".format(mix_dist_file))
             break
     ax_base.set_xlabel("GRS")
-    fig_mixes.savefig('figs/constructions_{}.png'.format(data_label))
+    fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
 
 
@@ -1104,7 +1107,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     with sns.axes_style("ticks"):
         plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
 
-    fig_ex.savefig('figs/application_{}.png'.format(data_label))
+    fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
 
     # Plot distributions around the estimated proportion with given sample_size from the characterisation data
     # if prop_Ref1 is not None:
