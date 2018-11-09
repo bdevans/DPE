@@ -798,7 +798,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
         df_pe = pe.analyse_mixture(scores, bins, methods,
                                    bootstraps=bootstraps, sample_size=sample_size,
-                                   alpha=alpha, true_prop_Ref1=prop_Ref1,
+                                   alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
                                    logfile="results/pe_{}.log".format(data_label))
 
         elapsed = time.time() - t
@@ -886,7 +886,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                     Mixtures[mix][p_star] = violin_scores['Mix']
                     df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                bootstraps=bootstraps, sample_size=size,
-                                               alpha=alpha, true_prop_Ref1=p_star, verbose=0)
+                                               alpha=alpha, true_p1=p_star,
                     df_cm['Size'] = size * np.ones(bootstraps)
                     df_cm['p1*'] = p_star * np.ones(bootstraps)
                     df_cm['Mix'] = mix * np.ones(bootstraps)

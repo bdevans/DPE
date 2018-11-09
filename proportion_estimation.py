@@ -238,7 +238,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
 
 
 def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
-                    alpha=0.05, true_prop_Ref1=None, n_jobs=1, seed=None,
+                    alpha=0.05, true_p1=None, n_jobs=1, seed=None,
                     verbose=1, logfile='', kwargs=None):
 
     if seed is not None:
@@ -381,9 +381,9 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
         if verbose > 1:
             pprint(initial_results)
-        if true_prop_Ref1:
+        if true_p1:
             if verbose > 1:
-                print("Ground truth: {:.5f}".format(true_prop_Ref1))
+                print("Ground truth: {:.5f}".format(true_p1))
 
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
         # df_pe.loc[0] = initial_results
@@ -420,7 +420,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         # df_pe.append(df_bs)
 
     # ----------- Summarise proportions for the whole distribution ------------
-    report = generate_report(df_pe, true_p1=true_prop_Ref1, alpha=alpha)
+    report = generate_report(df_pe, true_p1=true_p1, alpha=alpha)
     if verbose > 0:
         print("\n", report, "\n")
 
