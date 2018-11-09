@@ -74,6 +74,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
     bin_width = bins['width']
     bin_edges = bins['edges']
 
+    # if kwargs is None:
     kwargs = {}
     # if sample_size == -1:
     #     sample_size = len(Mix)
@@ -222,6 +223,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
         if bootstraps > 1:
             nobs = len(values)
             count = int(np.mean(values)*nobs)
+            # TODO: Multiply the numbers by 10 for more accuracy 45/100 --> 457/1000 ?
             ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
             ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
             report.append(" C.I. (level={:3.1%})  | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
@@ -375,6 +377,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
     columns = [method for method in METHODS_ORDER if method in methods]
 
     if bootstraps <= 1:
+    # if single_estimate:
         # Get initial estimate of proportions
         initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
         if verbose > 1:
@@ -384,8 +387,10 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
                 print("Ground truth: {:.5f}".format(true_prop_Ref1))
 
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
+        # df_pe.loc[0] = initial_results
 
     else:  # if bootstraps > 1:
+    # if bootstraps > 0:
         if verbose > 0:
             if n_jobs == -1:
                 nprocs = cpu_count()
@@ -414,53 +419,19 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
+        # df_bs = pd.DataFrame.from_records(results, columns=columns)
+        # df_pe.append(df_bs)
 
+    # ----------- Summarise proportions for the whole distribution ------------
     report = generate_report(df_pe, true_p1=true_prop_Ref1, alpha=alpha)
     if verbose > 0:
-        # ------------ Summarise proportions for the whole distribution --------------
-        print()
-        print(report)
-    #     print("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates", "Reference 1", "Reference 2"))
-    #     print("="*61)
-    #     for method in methods:
-    # #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-    #         print("{:14} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} ".format(method, np.mean(df_pe[method]), np.std(df_pe[method]), 1-np.mean(df_pe[method]), np.std(1-df_pe[method])))  #  (+/- SD)
-    #         if bootstraps > 1:
-    #             nobs = len(df_pe[method])
-    #             count = int(np.mean(df_pe[method])*nobs)
-    #             ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
-    #             ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
-    #             print("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} ".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-    # #            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_pe[method]), ci_upp1, ci_low2, 1-np.mean(df_pe[method]), ci_upp2))
-    #         print("-"*61)
-    #     if true_prop_Ref1:
-    #         print("{:20} | {:<17.5f} | {:<17.5f}".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
-    #         print("="*61)
-        print()
+        print("\n", report, "\n")
 
-    if logfile == '':
-        logfile = "proportion_estimate.log"
-    with open(logfile, 'w') as lf:
-        lf.write(report)
-    #     lf.write("{:20} | {:^17s} | {:^17s} \n".format("Proportion Estimates", "Reference 1", "Reference 2"))
-    #     lf.write("="*61)
-    #     lf.write("\n")
-    #     for method in methods:
-    # #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-    #         lf.write("{:14} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} \n".format(method, np.mean(df_pe[method]), np.std(df_pe[method]), 1-np.mean(df_pe[method]), np.std(1-df_pe[method])))  #  (+/- SD)
-    #         if bootstraps > 1:
-    #             nobs = len(df_pe[method])
-    #             count = int(np.mean(df_pe[method])*nobs)
-    #             ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
-    #             ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
-    #             lf.write("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} \n".format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-    # #            print("{:20} | {:.3f}, {:.3f}, {:.3f} | {:.3f}, {:.3f}, {:.3f} |".format("C.I. (level=95%)", ci_low1, np.mean(df_pe[method]), ci_upp1, ci_low2, 1-np.mean(df_pe[method]), ci_upp2))
-    #         lf.write("-"*61)
-    #         lf.write("\n")
-    #     if true_prop_Ref1:
-    #         lf.write("{:20} | {:<17.5f} | {:<17.5f}\n".format("Ground Truth", true_prop_Ref1, 1-true_prop_Ref1))
-    #         lf.write("="*61)
-    #         lf.write("\n")
-        lf.write("\n")
+    if logfile is not None:
+        if logfile == '':
+            logfile = "proportion_estimate.log"
+        with open(logfile, 'w') as lf:
+            lf.write(report)
+            lf.write("\n")
 
     return df_pe
