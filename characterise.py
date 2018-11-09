@@ -46,6 +46,12 @@ sample_sizes = np.arange(100, 2501, 100)  # 3100
 # proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
 proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 
+# Very quick testing run
+mixtures = 4  # 1000
+bootstraps = 4
+sample_sizes = np.arange(100, 201, 100)
+proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
+
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
