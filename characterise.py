@@ -65,7 +65,7 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
-def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, seed=None, **kwargs):
+def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, seed=None, **kwargs):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
@@ -162,14 +162,13 @@ if __name__ == '__main__':
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
-                    results = parallel(delayed(assess_performance)(sample_size,
-                                                                   prop_Ref1,
-                                                                   Ref1, Ref2,
-                                                                   methods,
-                                                                   bootstraps,
-                                                                   seed=seed,
-                                                                   **kwargs)
-                                       for seed in tqdm.tqdm(mix_seeds, desc="Mixture      ", dynamic_ncols=True))  #, leave=False))
+                    results = parallel(delayed(assess)(sample_size, prop_Ref1,
+                                                       Ref1, Ref2, methods,
+                                                       bootstraps, seed=seed,
+                                                       **kwargs)
+                                       for seed in tqdm.tqdm(mix_seeds,
+                                                             desc=" Mixture     ",
+                                                             dynamic_ncols=True))
 
                     for m in range(mixtures):
                         point, boots = results[m]
