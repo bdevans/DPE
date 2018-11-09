@@ -216,7 +216,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
     for method in df_pe:
         values = df_pe[method]
 #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        report.append(" {:13} (µ±σ) | {:.5f}  ±  {:.3f} | {:.5f}  ±  {:.3f} "
+        report.append(" {:13} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
         if bootstraps > 1:
