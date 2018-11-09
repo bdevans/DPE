@@ -377,8 +377,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
-    if bootstraps <= 1:
-    # if single_estimate:
+    # df_pe = pd.DataFrame(columns=columns)
+    if bootstraps <= 0:
         # Get initial estimate of proportions
         initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
         if verbose > 1:
@@ -390,8 +390,7 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
         # df_pe.loc[0] = initial_results
 
-    else:  # if bootstraps > 1:
-    # if bootstraps > 0:
+    else:  # if bootstraps > 0:
         if verbose > 0:
             if n_jobs == -1:
                 nprocs = cpu_count()
