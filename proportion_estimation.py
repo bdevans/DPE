@@ -15,8 +15,7 @@ import numpy as np
 import pandas as pd
 import lmfit
 from joblib import Parallel, delayed, cpu_count
-# from tqdm import tqdm
-import tqdm
+from tqdm import tqdm, trange
 from statsmodels.stats.proportion import proportion_confint
 from sklearn.neighbors import KernelDensity
 # with warnings.catch_warnings():
@@ -411,12 +410,11 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         if n_jobs == 1 or n_jobs is None:  # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
             results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, seed=None, **kwargs)
-                       for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+                       for b in trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
         else:
             with Parallel(n_jobs=n_jobs) as parallel:
                 results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=b_seed, **kwargs)
-                                   for b_seed in tqdm.tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
-                                   # for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable))
+                                   for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
