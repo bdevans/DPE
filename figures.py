@@ -906,26 +906,27 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             size_bar.set_description("Size = {:6,}".format(size))
             Mixtures = {mix: {} for mix in range(n_mixes)}
 
-            prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
-            for p, p_star in enumerate(prop_bar):
-                prop_bar.set_description(" p1* = {:6.2f}".format(prop_Ref1))
+            for mix in tqdm.trange(n_mixes, dynamic_ncols=True, desc=" Mix"):
+                mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
 
-                for mix in tqdm.trange(n_mixes, dynamic_ncols=True, desc=" Mix"):
-                    mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
+                prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
+                for p, p_star in enumerate(prop_bar):
+                    prop_bar.set_description(" p1* = {:6.2f}".format(p_star))
 
                     violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
                     Mixtures[mix][p_star] = violin_scores['Mix']
                     df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                bootstraps=bootstraps, sample_size=size,
                                                alpha=alpha, true_p1=p_star,
+                                               n_jobs=-1, verbose=0)
                     df_cm['Size'] = size * np.ones(bootstraps)
                     df_cm['p1*'] = p_star * np.ones(bootstraps)
                     df_cm['Mix'] = mix * np.ones(bootstraps)
                     df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
                     dfs.append(df_cm)
 
-            df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
-            df_size.to_pickle(mix_dist_file)
+                df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
+                df_size.to_pickle(mix_dist_file)
 
         df_est = pd.concat(dfs, ignore_index=True)
         elapsed = time.time() - t
