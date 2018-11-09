@@ -53,13 +53,18 @@ def load_accuracy(out_dir, label):
     # PROPORTIONS_Ref2 = PROPORTIONS_Ref1[::-1]
 
     # Dictionary of p1 errors
-    estimates = {}
+    point_estimates = {}
+    boots_estimates = {}
 
     for method in METHODS_ORDER:
-        if os.path.isfile('{}/{}_{}.npy'.format(out_dir, method.lower(), label)):
-            estimates[method] = np.load('{}/{}_{}.npy'.format(out_dir, method.lower(), label))
+        point_file = '{}/point_{}_{}.npy'.format(out_dir, method, label)
+        boots_file = '{}/boots_{}_{}.npy'.format(out_dir, method, label)
+        if os.path.isfile(point_file):
+            point_estimates[method] = np.load(point_file)
+        if os.path.isfile(boots_file):
+            boots_estimates[method] = np.load(boots_file)
 
-    return estimates, PROPORTIONS, SAMPLE_SIZES
+    return point_estimates, boots_estimates, PROPORTIONS, SAMPLE_SIZES
 
 
 # TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
@@ -622,7 +627,7 @@ def plot_compound_figure():
     """No longer used"""
     fig = plt.figure(figsize=(12,8))
     gs = plt.GridSpec(nrows=2, ncols=3, hspace=0.15, wspace=0.15)
-
+    estimates = boots_estimates
 
     #sns.set_style("ticks")
     ax_dists = fig.add_subplot(gs[-1,-1])
@@ -848,8 +853,16 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     sns.set_style("ticks")
 
     # Load bootstraps of accurarcy data
+    (point_estimates, boots_estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
 
+    # Plot point estimates of p1
+    if False:
+        fig = plot_characterisation(point_estimates, proportions, sample_sizes)
+        fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
 
+    # Plot bootstrapped estimates of p1
+    fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
+    fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
 
 
 
