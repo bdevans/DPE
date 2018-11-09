@@ -265,14 +265,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         if "Excess" in methods:
             # Calculate the proportion of another population w.r.t. the excess
             # number of cases from the mixture's assumed majority population.
-            # TODO: Flip these around for when using the T2GRS
-            # Median_Mix = np.median(Mix)
-
-            # TODO!!!
-            # if abs(methods["Excess"]["Median_Ref2"] - Median_Mix) < abs(methods["Excess"]["Median_Ref1"] - Median_Mix):
-            #     population_median = methods["Excess"]["Median_Ref2"]
-            # else:  # Ref1 is closets to the mixture
-            #     population_median = methods["Excess"]["Median_Ref1"]
 
             # Ref1: disease; Ref2: healthy
             # if medians["Ref1"] > medians["Ref2"]:
@@ -296,25 +288,21 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
         # --------------------- Difference of Means method --------------------
         if "Means" in methods:
-            # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
-            # results['Means'] = abs(proportion_of_Ref1)
 
-            # TODO!!!
-            if kwargs['Mean_Ref1'] > kwargs['Mean_Ref2']:
-                proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
+            mu1, mu2 = kwargs['Mean_Ref1'], kwargs['Mean_Ref2']
+            if mu1 > mu2:
+                p1_est = (RM.mean() - mu2) / (mu1 - mu2)
             else:
-                proportion_of_Ref1 = (kwargs['Mean_Ref2']-RM.mean())/(kwargs['Mean_Ref2']-kwargs['Mean_Ref1'])
+                p1_est = (mu2 - RM.mean()) / (mu2 - mu1)
 
-            results['Means'] = np.clip(proportion_of_Ref1, 0.0, 1.0)
+            # TODO: Check!
+            # p1_est = abs((RM.mean() - mu2) / (mu1 - mu2))
+            results['Means'] = np.clip(p1_est, 0.0, 1.0)
 
         # ----------------------------- EMD method ----------------------------
         if "EMD" in methods:
             # Interpolated cdf (to compute EMD)
             i_CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
-    #            x = [bins['min'], *np.sort(RM), bins['max']]
-    #            y = np.linspace(0, 1, num=len(x), endpoint=True)
-    #            (iv, ii) = np.unique(x, return_index=True)
-    #            si_CDF_Mix = np.interp(bin_centers, iv, y[ii])
 
             # Compute EMDs
 #            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
