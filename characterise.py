@@ -82,7 +82,7 @@ def assess_performance(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, 
     results = pe.analyse_mixture(scores, bins, methods, bootstraps=bootstraps,
                                  sample_size=-1, alpha=0.05,
                                  true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
-                                 verbose=0, logfile=logfile)
+                                 verbose=0, logfile=logfile, kwargs=kwargs)
 
     return results
 
@@ -130,6 +130,7 @@ if __name__ == '__main__':
                                ("KDE", {'kernel': KDE_kernel,
                                         'bandwidth': bins['width']})])
 
+        kwargs = {}
         kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
 
         if "Excess" in methods:

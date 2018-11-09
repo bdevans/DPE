@@ -239,7 +239,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
 
 def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
                     alpha=0.05, true_prop_Ref1=None, n_jobs=1, seed=None,
-                    verbose=1, logfile=''):
+                    verbose=1, logfile='', kwargs=None):
 
     if seed is not None:
         np.random.seed(seed)
@@ -248,7 +248,8 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
     # kwargs["fit_KDE_model"] = fit_KDE_model
-    kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
+    if kwargs is None:
+        kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
 
     def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
         '''Estimate the proportion of two reference populations comprising
