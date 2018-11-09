@@ -1122,3 +1122,18 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     #     errors[]
     # if prop_Ref1 is None:
     #     prop_Ref1 = np.mean()
+
+
+    # Explore the effect of n_boots
+    # fig_ex = plt.figure(figsize=(12, 6))
+    # gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15)
+    #
+    # for n_boots in [0, 1, 10, 100, 1000]:
+    #     if n_boots == 0:
+    #         df = pe.analyse_mixture(scores, bins, methods, bootstraps=0,
+    #                                 sample_size=sample_size, alpha=alpha,
+    #                                 true_p1=prop_Ref1, n_jobs=-1,
+    #                                 logfile="results/pe_{}.log".format(data_label))
+    #     else:
+    #         df = df_est.loc[:n_boots]
+    #     plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys")
