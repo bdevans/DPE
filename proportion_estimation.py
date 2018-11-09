@@ -399,15 +399,15 @@ def analyse_mixture(scores, bins, methods, bootstraps=1000, sample_size=-1,
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=bootstraps)
 
-        # TODO: Put in an if clause to reduce the joblib overhead when n_jobs=1 and benchmark
-        with Parallel(n_jobs=n_jobs) as parallel:
-            results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=seed, **kwargs)
-                               for seed in tqdm.tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
-                               # for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable))
-
-        # NOTE: These results are identical to when n_jobs=1 however it takes about 25% less time per iteration
-        # results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, **kwargs)
-        #            for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+        if n_jobs == 1 or n_jobs is None:  # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
+            # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
+            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, seed=None, **kwargs)
+                       for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+        else:
+            with Parallel(n_jobs=n_jobs) as parallel:
+                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, sample_size, seed=b_seed, **kwargs)
+                                   for b_seed in tqdm.tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
+                                   # for b in tqdm.trange(bootstraps, desc="Bootstraps", dynamic_ncols=True, disable=disable))
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
