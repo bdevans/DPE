@@ -16,16 +16,12 @@ https://git.exeter.ac.uk/bdevans/DPE/commit/01a9705b6fa1bf0d1df4fd3a4beaa1a413f6
 import os
 import time
 from collections import OrderedDict
-import warnings
 
 import numpy as np
-import lmfit
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=DeprecationWarning)
-    from joblib import Parallel, delayed, cpu_count
 from tqdm import tqdm
 # from joblib import Memory
 # mem = Memory(cachedir='/tmp')
+from joblib import Parallel, delayed, cpu_count
 
 import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
