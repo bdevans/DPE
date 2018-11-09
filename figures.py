@@ -87,12 +87,21 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
         if LINEAR_COLOURBAR:
             if ABSOLUTE_ERROR:
                 SHADING_LEVELS = np.arange(0, 0.051, 0.005)
+                SHADING_TICKS = np.linspace(0, 0.05, 6)
             else:
                 SHADING_LEVELS = np.arange(-0.05, 0.051, 0.005)
+                # SHADING_LABELS = ["{:.2f}".format(tick) for tick in SHADING_LEVELS[::2]]  # ['< -1', '0', '> 1']
+                # ['-0.05', '-0.04', '-0.03', '-0.02', '-0.01', '0.00', '0.01', '0.02', '0.03', '0.04', '0.05']
+                SHADING_TICKS = np.linspace(-0.05, 0.05, 11)
+
+
         else:
             SHADING_LEVELS = np.logspace(-4, -1, num=19)
+            np.logspace(-4, -1, num=4)
     else:
         SHADING_LEVELS = shading_levels
+        SHADING_TICKS = ["{:.2f}".format(tick) for tick in SHADING_LEVELS[::2]]
+    SHADING_LABELS = ["{:.2f}".format(tick) for tick in SHADING_TICKS]
 
     if ABSOLUTE_ERROR:
         cmap = 'viridis_r'
@@ -122,7 +131,8 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
 
     if title:
         ax.set_title(label)
-    fig.colorbar(CS, ax=ax)  # , norm=mpl.colors.LogNorm())
+    cbar = fig.colorbar(CS, ax=ax, ticks=SHADING_TICKS)  # , norm=mpl.colors.LogNorm())
+    # cbar.ax.set_yticklabels(SHADING_LABELS)
 
 
 def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
