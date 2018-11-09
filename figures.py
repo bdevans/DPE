@@ -847,7 +847,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         t = time.time()  # Start timer
 
         df_pe = pe.analyse_mixture(scores, bins, methods,
-                                   n_boot=n_boot, boot_size=sample_size,
+                                   n_boot=n_boot, boot_size=-1,  # boot_size=sample_size,
                                    alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
                                    logfile="results/pe_{}.log".format(data_label))
 
