@@ -82,15 +82,15 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, bootstraps, seed=None, *
     scores['Mix'] = mixture
 
     point = pe.analyse_mixture(scores, bins, methods, bootstraps=0,
-                                sample_size=-1, alpha=0.05,
-                                true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
-                                verbose=0, logfile=None, kwargs=kwargs)
+                               sample_size=-1, alpha=0.05,
+                               true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
+                               verbose=0, logfile=None, kwargs=kwargs)
 
     logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
     boots = pe.analyse_mixture(scores, bins, methods, bootstraps=bootstraps,
-                                 sample_size=-1, alpha=0.05,
-                                 true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
-                                 verbose=0, logfile=logfile, kwargs=kwargs)
+                               sample_size=-1, alpha=0.05,
+                               true_prop_Ref1=prop_Ref1, n_jobs=1, seed=seed,
+                               verbose=0, logfile=logfile, kwargs=kwargs)
 
     return (point, boots)
 
