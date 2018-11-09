@@ -747,6 +747,8 @@ verbose = False
 seed = 42
 bootstraps = 1000
 sample_size = 1000  # -1
+n_mixes = 5
+selected_mix = 0
 alpha = 0.05
 CI_METHOD = "jeffreys"
 # normal : asymptotic normal approximation
@@ -889,9 +891,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     # bootstraps = 5
 
     # Generate multiple mixes
-    n_mixes = 5
-
-
     estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
     if FRESH_DATA:
         print("Running mixture analysis with {} scores...".format(data_label))
@@ -944,7 +943,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
 
     # Plot violins
-    selected_mix = 0
     fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
     # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
     # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
@@ -1057,7 +1055,6 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
         g.invert_yaxis()
         fig_vio.savefig(os.path.join(fig_dir, 'ci_selection_{}.png'.format(data_label)))
-
 
 
     # Plot mixture distributions - add reference populations?
