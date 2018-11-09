@@ -80,8 +80,8 @@ def prepare_methods(methods, scores, bins, verbose=1):
     #     sample_size = len(Mix)
     kwargs['bins'] = bins
 
-    if "Excess" in methods:
     # ----------------------------- Excess method -----------------------------
+    if "Excess" in methods:
         # TODO: Check and rename to Ref1_median?
 
         if isinstance(methods["Excess"], dict):
@@ -107,6 +107,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
             print("Population median: {}".format(median))
             print("Mixture size:", len(Mix))  # sample_size)
 
+    # ----------------------------- Means method ------------------------------
     if "Means" in methods:
         try:
             Mean_Ref1 = methods["Means"]["Ref1"]
@@ -125,8 +126,8 @@ def prepare_methods(methods, scores, bins, verbose=1):
         finally:
             kwargs["Mean_Ref2"] = Mean_Ref2
 
+    # ------------------------------ EMD method -------------------------------
     if "EMD" in methods:
-    # -------------------------------- EMD method --------------------------------
 
         if 'max_EMD' not in kwargs:
             max_EMD = bin_edges[-1] - bin_edges[0]
@@ -151,8 +152,8 @@ def prepare_methods(methods, scores, bins, verbose=1):
     #        i_EMD_M2 = sum(abs(i_CDF_Mix-i_CDF_Ref2)) * bin_width / max_EMD
     #        kwargs['i_EMD_21'] = i_EMD_21
 
+    # ------------------------------ KDE method ------------------------------
     if "KDE" in methods:
-        # ------------------------------ KDE method ------------------------------
 
         bw = bin_width  # Bandwidth
 
@@ -262,7 +263,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
         bins = kwargs['bins']
         results = {}
 
-        # -------------------------- Subtraction method --------------------------
+        # ------------------------- Subtraction method ------------------------
         if "Excess" in methods:
             # Calculate the proportion of another population w.r.t. the excess
             # number of cases from the mixture's assumed majority population.
@@ -289,18 +290,13 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
             number_high = len(RM[RM > kwargs['population_median']])
             sample_size = len(RM)
 
-            # if kwargs['population_median'] < np.median(Ref1):
-            results['Excess'] = abs(number_high - number_low)/sample_size #kwargs['sample_size']
-            # else:
-                # NOTE: This is an extension of the original method (above)
-                # results['Excess'] = (number_Ref2_low - number_Ref2_high)/sample_size
-
+            results['Excess'] = abs(number_high - number_low)/sample_size
             results['Excess'] *= methods["Excess"]["adjustment_factor"]
 
             # Clip results
             results['Excess'] = np.clip(results['Excess'], 0.0, 1.0)
 
-        # ---------------------- Difference of Means method ----------------------
+        # --------------------- Difference of Means method --------------------
         if "Means" in methods:
             # proportion_of_Ref1 = (RM.mean()-kwargs['Mean_Ref2'])/(kwargs['Mean_Ref1']-kwargs['Mean_Ref2'])
             # results['Means'] = abs(proportion_of_Ref1)
@@ -313,7 +309,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
 
             results['Means'] = np.clip(proportion_of_Ref1, 0.0, 1.0)
 
-        # ------------------------------ EMD method ------------------------------
+        # ----------------------------- EMD method ----------------------------
         if "EMD" in methods:
             # Interpolated cdf (to compute EMD)
             i_CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
@@ -346,7 +342,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
             # print('% of Type 1:', 1-i_EMD_31/i_EMD_21)
             # print('% of Type 2:', 1-i_EMD_32/i_EMD_21)
 
-        # ------------------------------ KDE method ------------------------------
+        # ----------------------------- KDE method ----------------------------
         if "KDE" in methods:
             # TODO: Print out warnings if goodness of fit is poor?
             results['KDE'] = fit_KDE_model(RM, bins, kwargs['model'],
@@ -369,7 +365,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
-    # df_pe = pd.DataFrame(columns=columns)
     if n_boot <= 0:
         # Get initial estimate of proportions
         initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
@@ -380,7 +375,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
                 print("Ground truth: {:.5f}".format(true_p1))
 
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
-        # df_pe.loc[0] = initial_results
 
     else:  # if n_boot > 0:
         if verbose > 0:
@@ -399,7 +393,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
 
-        if n_jobs == 1 or n_jobs is None:  # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
+        # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
+        if n_jobs == 1 or n_jobs is None:
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
             results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, sample_size, seed=None, **kwargs)
                        for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
@@ -410,8 +405,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, sample_size=-1,
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
-        # df_bs = pd.DataFrame.from_records(results, columns=columns)
-        # df_pe.append(df_bs)
 
     # ----------- Summarise proportions for the whole distribution ------------
     report = generate_report(df_pe, true_p1=true_p1, alpha=alpha)
