@@ -843,7 +843,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
 
     if FRESH_DATA:  # or True:
-        print("Running mixture analysis on {} scores...".format(data_label))
+        print("Running mixture analysis on {} scores...".format(data_label), flush=True)
         t = time.time()  # Start timer
 
         df_pe = pe.analyse_mixture(scores, bins, methods,
@@ -893,7 +893,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
     # Generate multiple mixes
     estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
     if FRESH_DATA:
-        print("Running mixture analysis with {} scores...".format(data_label))
+        print("Running mixture analysis with {} scores...".format(data_label), flush=True)
         t = time.time()  # Start timer
 
         violin_scores = {}
