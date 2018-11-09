@@ -224,7 +224,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
             count = int(np.mean(values)*nobs)
             ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
             ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
-            report.append("C.I. (level={:3.1%})   | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
+            report.append(" C.I. (level={:3.1%})  | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
         report.append("-"*61)
     if true_p1:
