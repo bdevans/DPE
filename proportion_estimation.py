@@ -25,7 +25,7 @@ from sklearn.neighbors import KernelDensity
 # TODO: replace with a scipy/numpy function to reduce dependencies
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
 
-# TODO: Try replacing with scipy.optimize.curve_fit to solve joblib problem and reduce dependencies:
+# TODO: Try replacing with scipy.optimize.curve_fit to reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
 
 
@@ -47,15 +47,13 @@ def fit_kernels(scores, bw):
 
 # @mem.cache
 def fit_KDE_model(Mix, bins, model, params_mix, kernel):
-    # TODO: Think carefully about this!
-    # x_KDE = np.linspace(bins['min'], bins['max'], len(Mix)+2)
     x_KDE = bins["centers"]
-    mix_kde = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
-    res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])),
+    kde_mix = KernelDensity(kernel=kernel, bandwidth=bins['width']).fit(Mix[:, np.newaxis])
+    res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
                         x=x_KDE, params=params_mix)
     amp_Ref1 = res_mix.params['amp_Ref1'].value
     amp_Ref2 = res_mix.params['amp_Ref2'].value
-    return amp_Ref1/(amp_Ref1+amp_Ref2)
+    return amp_Ref1 / (amp_Ref1 + amp_Ref2)
 
 
 def interpolate_CDF(scores, x_i, min_edge, max_edge):
@@ -80,7 +78,6 @@ def prepare_methods(methods, scores, bins, verbose=1):
 
     # ----------------------------- Excess method -----------------------------
     if "Excess" in methods:
-        # TODO: Check and rename to Ref1_median?
 
         if isinstance(methods["Excess"], dict):
             if "Median_Ref1" not in methods["Excess"]:
@@ -133,13 +130,15 @@ def prepare_methods(methods, scores, bins, verbose=1):
 
         # Interpolate the cdfs at the same points for comparison
         if 'i_CDF_Ref1' not in kwargs:
-            i_CDF_Ref1 = interpolate_CDF(Ref1, bins['centers'], bins['min'], bins['max'])
+            i_CDF_Ref1 = interpolate_CDF(Ref1, bins['centers'],
+                                         bins['min'], bins['max'])
             kwargs['i_CDF_Ref1'] = i_CDF_Ref1
 
         if 'i_CDF_Ref2' not in kwargs:
-            i_CDF_Ref2 = interpolate_CDF(Ref2, bins['centers'], bins['min'], bins['max'])
+            i_CDF_Ref2 = interpolate_CDF(Ref2, bins['centers'],
+                                         bins['min'], bins['max'])
             kwargs['i_CDF_Ref2'] = i_CDF_Ref2
-    #        i_CDF_Mix = interpolate_CDF(Mix, bin_centers, bins['min'], bins['max'])
+    #        i_CDF_Mix = interpolate_CDF(Mix, bins['centers'], bins['min'], bins['max'])
 
         # EMDs computed with interpolated CDFs
         if 'i_EMD_1_2' not in kwargs:
@@ -191,8 +190,7 @@ def prepare_methods(methods, scores, bins, verbose=1):
             def kde_Ref2(x, amp_Ref2=1):
                 return amp_Ref2 * np.exp(kdes['Ref2'][KDE_kernel].score_samples(x[:, np.newaxis]))
 
-            model = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
-            kwargs['model'] = model  # This breaks joblib
+            kwargs['model'] = lmfit.Model(kde_Ref1) + lmfit.Model(kde_Ref2)
 
         if 'initial_params' not in kwargs:
             params_mix = kwargs['model'].make_params()
@@ -206,14 +204,13 @@ def prepare_methods(methods, scores, bins, verbose=1):
 
 
 def generate_report(df_pe, true_p1=None, alpha=0.05):
-    # methods = df_pe.columns
-    n_boot = len(df_pe)  # NOTE: This may chnage if prepending the initial estimate
+    n_boot = len(df_pe)
     report = []
     report.append("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates",
                                                       "Reference 1",
                                                       "Reference 2"))
     report.append("="*61)
-    for method in df_pe:
+    for method in df_pe:  # loop over columns (i.e. methods)
         values = df_pe[method]
 #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
         report.append(" {:13} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
@@ -246,7 +243,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
-    # kwargs["fit_KDE_model"] = fit_KDE_model
+
     if kwargs is None:
         kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
 
@@ -302,7 +299,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         # ----------------------------- EMD method ----------------------------
         if "EMD" in methods:
             # Interpolated cdf (to compute EMD)
-            i_CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
+            i_CDF_Mix = interpolate_CDF(RM, bins['centers'],
+                                        bins['min'], bins['max'])
 
             # Compute EMDs
 #            i_EMD_M_1 = sum(abs(i_CDF_Mix-i_CDF_Ref1)) * bin_width / max_EMD #kwargs['max_EMD']
@@ -368,7 +366,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
                 nprocs = cpu_count()
             else:
                 nprocs = n_jobs
-            print('Running {} bootstraps with {} processors...'.format(n_boot, nprocs), flush=True)
+            print('Running {} bootstraps with {} processors...'
+                  .format(n_boot, nprocs), flush=True)
             disable = False
         else:
             disable = True
@@ -379,7 +378,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
 
-        # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1 for characterise.py
+        # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1
         if n_jobs == 1 or n_jobs is None:
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
             results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size, seed=None, **kwargs)
@@ -387,7 +386,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         else:
             with Parallel(n_jobs=n_jobs) as parallel:
                 results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, boot_size, seed=b_seed, **kwargs)
-                                   for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))  # , leave=False
+                                   for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
 
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
@@ -399,7 +398,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
     if logfile is not None:
         if logfile == '':
-            logfile = "proportion_estimate.log"
+            logfile = "proportion_estimates.log"
         with open(logfile, 'w') as lf:
             lf.write(report)
             lf.write("\n")
