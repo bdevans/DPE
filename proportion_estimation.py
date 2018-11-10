@@ -252,8 +252,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         '''Estimate the proportion of two reference populations comprising
         an unknown mixture.
 
-        The returned proportions are with respect to Ref 1.
-        The proportion of Ref 2 is assumed to be 1 pr(Ref1).
+        The returned proportions are with respect to Ref_1.
+        The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
         '''
 
         # bins = kwargs['bins']
