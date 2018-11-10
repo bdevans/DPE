@@ -65,7 +65,7 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
-def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, n_boot, seed=None, **kwargs):
+def assess(sample_size, prop_Ref1, Ref1, Ref2, methods, n_boot, seed=None, kwargs=None):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
@@ -161,7 +161,7 @@ if __name__ == '__main__':
                     results = parallel(delayed(assess)(sample_size, prop_Ref1,
                                                        Ref1, Ref2, methods,
                                                        n_boot, seed=seed,
-                                                       **kwargs)
+                                                       kwargs=kwargs)
                                        for seed in tqdm(mix_seeds,
                                                         desc=" Mixture     ",
                                                         dynamic_ncols=True))

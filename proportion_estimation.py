@@ -247,7 +247,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
     if kwargs is None:
         kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
 
-    def estimate_Ref1(RM, Ref1, Ref2, methods, **kwargs):
+    def estimate_Ref1(RM, Ref1, Ref2, methods, kwargs):
         '''Estimate the proportion of two reference populations comprising
         an unknown mixture.
 
@@ -335,7 +335,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
         return results
 
-    def bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size=-1, seed=None, **kwargs):
+    def bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size=-1, seed=None, kwargs=None):
 
         if boot_size == -1:
             boot_size = len(Mix)
@@ -345,13 +345,13 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         else:
             bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
 
-        return estimate_Ref1(bs, Ref1, Ref2, methods, **kwargs)
+        return estimate_Ref1(bs, Ref1, Ref2, methods, kwargs)
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
     if n_boot <= 0:
         # Get initial estimate of proportions
-        initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, **kwargs)
+        initial_results = estimate_Ref1(Mix, Ref1, Ref2, methods, kwargs)
         if verbose > 1:
             pprint(initial_results)
         if true_p1:
@@ -381,11 +381,11 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1
         if n_jobs == 1 or n_jobs is None:
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
-            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size, seed=None, **kwargs)
+            results = [bootstrap_mixture(Mix, Ref1, Ref2, methods, boot_size, seed=None, kwargs=kwargs)
                        for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
         else:
             with Parallel(n_jobs=n_jobs) as parallel:
-                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, boot_size, seed=b_seed, **kwargs)
+                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, methods, boot_size, seed=b_seed, kwargs=kwargs)
                                    for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
 
         # Put into dataframe
