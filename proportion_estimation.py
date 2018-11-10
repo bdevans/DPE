@@ -96,7 +96,10 @@ def prepare_methods(methods, scores, bins, verbose=1):
     #        else:
     #            # The Excess method assumes that...
     #            median = np.median(scores["Ref2"])
+
+        # TODO: Check this!!!
         kwargs['population_median'] = median
+
         if verbose > 1:
             print("Ref1 median:", np.median(Ref1))
             print("Ref2 median:", np.median(Ref2))
