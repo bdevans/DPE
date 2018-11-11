@@ -23,18 +23,13 @@ from tqdm import tqdm
 from joblib import Parallel, delayed, cpu_count
 
 import proportion_estimation as pe
-from datasets import (load_diabetes_data, load_renal_data)
+import datasets as ds
+# from datasets import (load_diabetes_data, load_renal_data)
 
 # ---------------------------- Define constants ------------------------------
 
 out_dir = "results"
 verbose = False
-run_means = True
-run_excess = True
-run_KDE = True
-run_EMD = True
-check_EMD = False
-
 seed = 42
 
 mixtures = 100  # 1000
@@ -104,9 +99,8 @@ if __name__ == '__main__':
     np.seterr(divide='ignore', invalid='ignore')
 
     datasets = {}
-    datasets["Renal"] = load_renal_data()
-    metric = "T1GRS"
-    datasets["Diabetes"] = load_diabetes_data(metric)
+    datasets["Renal"] = ds.load_renal_data()
+    datasets["Diabetes"] = ds.load_diabetes_data("T1GRS")
 
     for tag, data in datasets.items():
 
@@ -198,5 +192,6 @@ if __name__ == '__main__':
         # TODO: Save the arrays in the dictionary as a pickle file
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
+
 
     print("Analysis of methods on datasets: {} complete!".format(list(datasets)))
