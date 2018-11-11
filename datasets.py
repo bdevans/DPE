@@ -172,34 +172,45 @@ def estimate_bins(data, bin_range=None, verbose=0):
         print("="*50)
     for method in ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']:
         all_scores = []
+        all_refs = []
         for group, scores in data.items():
             all_scores.extend(scores)
+            if group != "Mix":
+                all_refs.extend(scores)
+            # else:  # Add extremes to ensure the full range is spanned
+            #     all_refs.extend([min(scores), max(scores)])
             if verbose > 1:
-                if bin_range is not None:
-                    _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
-                else:
-                    _, bin_edges = np.histogram(scores, bins=method)
+                _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
                 print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
                 # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
-        if bin_range is not None:
-            h, bin_edges = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
-        else:
-            h, bin_edges = np.histogram(all_scores, bins=method)  # Return edges
-        hist[method] = h
-        bins[method] = {'width': bin_edges[1] - bin_edges[0],
-                        'min': bin_edges[0],
-                        'max': bin_edges[-1],
-                        'edges': bin_edges,
-                        'centers': (bin_edges[:-1] + bin_edges[1:]) / 2,
-                        'n': len(bin_edges) - 1}
+
+        h_r, edges_r = np.histogram(all_refs, bins=method,
+                                    range=(min(all_scores), max(all_scores)))
+        if verbose > 1:
+            print("-"*50)
+            print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]"
+                  .format(method, "Refs", len(edges_r)-1, edges_r[1]-edges_r[0], edges_r[0], edges_r[-1]))
+
+        h_a, edges_a = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
+
         if verbose:
-            b = bins[method]
             if verbose > 1:
                 print("-"*50)
-            print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, "All", b['n'], b['width'], b['min'], b['max']))
+            print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]"
+                  .format(method, "All", len(edges_a)-1, edges_a[1]-edges_a[0], edges_a[0], edges_a[-1]))
             # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
             if verbose > 1:
                 print("="*50)
             else:
                 print("-"*50)
+
+        # h, edges = h_a, edges_a
+        h, edges = h_r, edges_r
+        hist[method] = h
+        bins[method] = {'width': edges[1] - edges[0],
+                        'min': edges[0],
+                        'max': edges[-1],
+                        'edges': edges,
+                        'centers': (edges[:-1] + edges[1:]) / 2,
+                        'n': len(edges) - 1}
     return hist, bins
