@@ -137,11 +137,11 @@ if __name__ == '__main__':
         #            "KDE": True
         #            }
 
-        methods = {method: True for method in pe._ALL_METHODS_}
+        # methods = {method: True for method in pe._ALL_METHODS_}
 
         # kwargs = {}
         # kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
-        pe.prepare_methods_(scores, bins, methods=methods)
+        methods = pe.prepare_methods_(scores, bins)  # Get all methods
 
         point_arrays = {}
         boots_arrays = {}
