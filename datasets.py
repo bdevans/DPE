@@ -165,11 +165,13 @@ def estimate_bins(data, bin_range=None, verbose=0):
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
     # with n the number of data points and d the number of dimensions
+    line_width = 49
+
     hist = {}
     bins = {}
     if verbose:
-        print("  Method | Data |   n  |  width  |      range     ", flush=True)
-        print("="*50)
+        print("  Method | Data |  n  |  width  |      range     ", flush=True)
+        print("="*line_width)
     for method in ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']:
         all_scores = []
         all_refs = []
@@ -181,28 +183,28 @@ def estimate_bins(data, bin_range=None, verbose=0):
             #     all_refs.extend([min(scores), max(scores)])
             if verbose > 1:
                 _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
-                print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
+                print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
                 # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
 
         h_r, edges_r = np.histogram(all_refs, bins=method,
                                     range=(min(all_scores), max(all_scores)))
         if verbose > 1:
-            print("-"*50)
-            print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]"
+            print("-"*line_width)
+            print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]"
                   .format(method, "Refs", len(edges_r)-1, edges_r[1]-edges_r[0], edges_r[0], edges_r[-1]))
 
         h_a, edges_a = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
 
         if verbose:
             if verbose > 1:
-                print("-"*50)
-            print(" {:>7} | {:>4} | {:>4,} | {:<7.5f} | [{:5.3}, {:5.3}]"
+                print("-"*line_width)
+            print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]"
                   .format(method, "All", len(edges_a)-1, edges_a[1]-edges_a[0], edges_a[0], edges_a[-1]))
             # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
             if verbose > 1:
-                print("="*50)
+                print("="*line_width)
             else:
-                print("-"*50)
+                print("-"*line_width)
 
         # h, edges = h_a, edges_a
         h, edges = h_r, edges_r
