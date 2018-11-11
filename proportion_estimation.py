@@ -325,7 +325,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
     # if kwargs is None:
     #     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
-    prepare_methods_(scores, bins, methods=methods, verbose=verbose)
+    methods = prepare_methods_(scores, bins, methods=methods, verbose=verbose)
 
     def estimate_Ref1_(RM, Ref1, Ref2, bins, methods=None):
         '''Estimate the proportion of two reference populations comprising
