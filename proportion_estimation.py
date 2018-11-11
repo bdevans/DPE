@@ -301,7 +301,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
 
 def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
                     alpha=0.05, true_p1=None, n_jobs=1, seed=None,
-                    verbose=1, logfile='', kwargs=None):
+                    verbose=1, logfile=''):  #, kwargs=None):
 
     if seed is not None:
         np.random.seed(seed)
@@ -310,8 +310,9 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
 
-    if kwargs is None:
-        kwargs = prepare_methods_(methods, scores, bins, verbose=verbose)
+    # if kwargs is None:
+    #     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
+    prepare_methods_(methods, scores, bins, verbose=verbose)
 
     def estimate_Ref1_(RM, Ref1, Ref2, bins, methods=None):
         '''Estimate the proportion of two reference populations comprising
