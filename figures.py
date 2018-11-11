@@ -56,7 +56,7 @@ def load_accuracy(out_dir, label):
     point_estimates = {}
     boots_estimates = {}
 
-    for method in METHODS_ORDER:
+    for method in pe._ALL_METHODS_:
         point_file = '{}/point_{}_{}.npy'.format(out_dir, method, label)
         boots_file = '{}/boots_{}_{}.npy'.format(out_dir, method, label)
         if os.path.isfile(point_file):
@@ -167,7 +167,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
     fig = plt.figure(figsize=figsize)
     gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
 
-    for m, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+    for m, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
         # Plot average accuracy across mixtures
         ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
         if m == 0:
@@ -224,7 +224,7 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
 
     c = sns.color_palette()[-3]  # 'gray'
 
-    df_bs = df_bs[METHODS_ORDER]
+    df_bs = df_bs[pe._ALL_METHODS_]
 
     if not ax:
         f, ax = plt.subplots()
@@ -260,7 +260,7 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
         means = x
     errors = np.zeros(shape=(2, len(methods)))
 
-    for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+    for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
         nobs = len(df_bs[method])
         count = int(np.mean(df_bs[method])*nobs)
         ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
@@ -402,7 +402,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
                 df_means = df.groupby('Method').mean()
                 errors = np.zeros(shape=(2, len(methods)))
                 means = []
-                for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+                for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
                     nobs = size  # len(df_est[method])
                     mean_est = df_means.loc[method, 'Estimate']
                     means.append(mean_est)
@@ -558,7 +558,7 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
                     df_means = df.groupby('Method').mean()
                     errors = np.zeros(shape=(2, len(methods)))
                     means = []
-                    for midx, method in enumerate(METHODS_ORDER):  # enumerate(methods):
+                    for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
                         nobs = size  # len(df_est[method])
                         mean_est = df_means.loc[method, 'Estimate']
                         means.append(mean_est)
@@ -735,7 +735,7 @@ if plot_results:
 
 # ---------------------------- Define constants ------------------------------
 
-METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
+# METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 FRESH_DATA = False  # CAUTION!
 out_dir = "results_test"
 #out_dir = "results_100_100"

@@ -29,7 +29,7 @@ from sklearn.neighbors import KernelDensity
 # https://lmfit.github.io/lmfit-py/model.html
 
 
-METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
+_ALL_METHODS_ = ["Excess", "Means", "EMD", "KDE"]
 
 
 def fit_kernels(scores, bw):
@@ -69,7 +69,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
 def prepare_methods_(scores, bins, methods=None, verbose=1):
 
     if methods is None:
-        methods = {method: True for method in METHODS_ORDER}
+        methods = {method: True for method in _ALL_METHODS_}
 
     if "Excess" in methods:
         if not isinstance(methods["Excess"], dict):
@@ -473,7 +473,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
         return estimate_Ref1_(bs, Ref1, Ref2, bins, methods)  #, kwargs)
 
-    columns = [method for method in METHODS_ORDER if method in methods]
+    columns = [method for method in _ALL_METHODS_ if method in methods]
 
     if n_boot <= 0:
         # Get initial estimate of proportions
