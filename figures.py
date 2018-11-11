@@ -183,7 +183,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
             ax_dev.set_ylabel('Sample size ($n$)')
         else:
             ax_dev.set_yticklabels([])
-        ax_dev.set_xlabel('$p_1^*$')
+        ax_dev.set_xlabel('$p_D^*$')  # '$p_1^*$'
         plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False)
 
     return fig
@@ -199,10 +199,12 @@ def plot_distributions(scores, bins, data_label, ax=None):
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
-                     label="$R_1: n={:,}$".format(len(scores['Ref1'])),
+                     label="$R_D: n={:,}$".format(len(scores['Ref1'])),
+                     # label="$R_1: n={:,}$".format(len(scores['Ref1'])),
                      ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
-                     label="$R_2: n={:,}$".format(len(scores['Ref2'])),
+                     label="$R_H: n={:,}$".format(len(scores['Ref2'])),
+                     # label="$R_2: n={:,}$".format(len(scores['Ref2'])),
                      ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=False,
                      label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])),
@@ -282,11 +284,11 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
 
     if orient == 'v':
         ax.yaxis.tick_left()
-        ax.set_ylabel("$p_1^*$", {"rotation": "horizontal"})
+        ax.set_ylabel("$p_D$", {"rotation": "horizontal"})  # "$p_1$"
         # ax.set_xticks([])  # Remove ticks for method labels
     elif orient == 'h':
         ax.xaxis.tick_bottom()
-        ax.set_xlabel("$p_1$")
+        ax.set_xlabel("$p_D$")  # "$p_1$"
         # ax.set_yticks([])  # Remove ticks for method labels
     #plt.setp(ax, yticks=yticks)
     #ax.yaxis.set_ticks_position('right')
@@ -356,13 +358,16 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
             warnings.simplefilter("ignore", category=FutureWarning)
             sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True}, # hist=True, norm_hist=True, kde=False)#,
-                         label=r"$p_1^*=0.0\ (R_2)$", ax=ax_mix, color=palette[0])
+                         label=r"$p_D^*=0.0\ (R_H)$", ax=ax_mix, color=palette[0])
+                         # label=r"$p_1^*=0.0\ (R_2)$", ax=ax_mix, color=palette[0])
             for p, p_star in enumerate(p_stars):
                 sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
-                             label=r"$p_1^*={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
+                             label=r"$p_D^*={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
+                             # label=r"$p_1^*={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
             sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True},
-                         label=r"$p_1^*=1.0\ (R_1)$", ax=ax_mix, color=palette[len(p_stars)+1])
+                         label=r"$p_D^*=1.0\ (R_D)$", ax=ax_mix, color=palette[len(p_stars)+1])
+                         # label=r"$p_1^*=1.0\ (R_1)$", ax=ax_mix, color=palette[len(p_stars)+1])
 
         # Plot violins of bootstrapped estimates
         for p, p_star in enumerate(p_stars):
@@ -469,7 +474,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
         ax_mix.set_yticks([])
         ax_mix.set_yticklabels([])
 #    g.invert_yaxis()
-    ax_vio_base.set_xlabel("Estimated $p_1$")
+    ax_vio_base.set_xlabel("Estimated prevalence ($p_D$)")  # $p_1$
     ax_mix_base.set_xlabel("GRS")
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
@@ -625,7 +630,7 @@ def plot_violin_stacks(scores, bins, df_est, methods, p_stars, sizes, n_mixes, o
             ax_mix.set_yticks([])
             ax_mix.set_yticklabels([])
 #    g.invert_yaxis()
-    ax_vio_base.set_xlabel("Estimated $p_1$")
+    ax_vio_base.set_xlabel("Estimated prevalence ($p_D$)")  # $p_1$
     ax_mix_base.set_xlabel("GRS")
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
