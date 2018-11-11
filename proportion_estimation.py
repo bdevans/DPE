@@ -47,13 +47,14 @@ def fit_kernels(scores, bw):
 
 # @mem.cache
 def fit_KDE_model(Mix, bins, model, params_mix, kernel):
+    # model = methods["model"]
     x_KDE = bins["centers"]
     kde_mix = KernelDensity(kernel=kernel, bandwidth=bins['width'])
     kde_mix.fit(Mix[:, np.newaxis])
     res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
                         x=x_KDE, params=params_mix)
-    amp_Ref1 = res_mix.params['amp_Ref1'].value
-    amp_Ref2 = res_mix.params['amp_Ref2'].value
+    amp_Ref1 = res_mix.params['amp_1'].value
+    amp_Ref2 = res_mix.params['amp_2'].value
     return amp_Ref1 / (amp_Ref1 + amp_Ref2)
 
 
@@ -63,6 +64,67 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     y = np.linspace(0, 1, num=len(x), endpoint=True)
     (iv, ii) = np.unique(x, return_index=True)
     return np.interp(x_i, iv, y[ii])
+
+
+def prepare_methods_(methods, scores, bins, verbose=1):
+
+    if "Excess" in methods:
+        if not isinstance(methods["Excess"], dict):
+            methods["Excess"] = {}
+
+        # TODO: CHECK!!! This should be the "healthy" reference population
+        methods["Excess"].setdefault("median", np.median(scores["Ref2"]))
+        methods["Excess"].setdefault("adj_factor", 1)
+
+    if "Means" in methods:
+        if not isinstance(methods["Means"], dict):
+            methods["Means"] = {"mu_1": np.mean(scores["Ref1"]),
+                                "mu_2": np.mean(scores["Ref2"])}
+
+    if "EMD" in methods:
+        if not isinstance(methods["EMD"], dict):
+            methods["EMD"] = {}
+            methods["EMD"]["max_EMD"] = bins["max"] - bins["min"]
+
+            # Interpolate the cdfs at the same points for comparison
+            CDF_1 = interpolate_CDF(scores["Ref1"], bins['centers'],
+                                    bins['min'], bins['max'])
+            methods["EMD"]["CDF_1"] = CDF_1
+
+            CDF_2 = interpolate_CDF(scores["Ref2"], bins['centers'],
+                                    bins['min'], bins['max'])
+            methods["EMD"]["CDF_2"] = CDF_2
+
+            # EMDs computed with interpolated CDFs
+            methods["EMD"]["EMD_1_2"] = sum(abs(CDF_1 - CDF_2))
+
+    if "KDE" in methods:
+        if not isinstance(methods["KDE"], dict):
+            methods["KDE"] = {}
+        methods["KDE"].setdefault("kernel", "gaussian")
+        methods["KDE"].setdefault("bandwidth", bins["width"])
+
+        if "model" not in methods["KDE"]:
+            kdes = fit_kernels(scores, methods["KDE"]["bandwidth"])
+            kde_1 = kdes["Ref1"][methods["KDE"]["kernel"]]
+            kde_2 = kdes["Ref2"][methods["KDE"]["kernel"]]
+
+            # Assigning a default value to amp initialises them
+            # x := Bin centres
+            def dist_1(x, amp_1=1):
+                return amp_1 * np.exp(kde_1.score_samples(x[:, np.newaxis]))
+
+            def dist_2(x, amp_2=1):
+                return amp_2 * np.exp(kde_2.score_samples(x[:, np.newaxis]))
+
+            methods["KDE"]["model"] = lmfit.Model(dist_1) + lmfit.Model(dist_2)
+
+        if "params" not in methods["KDE"]:
+            methods["KDE"]["params"] = methods["KDE"]["model"].make_params()
+            methods["KDE"]["params"]["amp_1"].value = 1
+            methods["KDE"]["params"]["amp_1"].min = 0
+            methods["KDE"]["params"]["amp_2"].value = 1
+            methods["KDE"]["params"]["amp_2"].min = 0
 
 
 def prepare_methods(methods, scores, bins, verbose=1):
@@ -249,7 +311,61 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
     Mix = scores['Mix']
 
     if kwargs is None:
-        kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
+        kwargs = prepare_methods_(methods, scores, bins, verbose=verbose)
+
+    def estimate_Ref1_(RM, Ref1, Ref2, bins, methods):
+        '''Estimate the proportion of two reference populations comprising
+        an unknown mixture.
+
+        The returned proportions are with respect to Ref_1.
+        The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
+        '''
+
+        # bins = kwargs['bins']
+        results = {}
+
+        # ------------------------- Subtraction method ------------------------
+        if "Excess" in methods:
+            # Calculate the proportion of another population w.r.t. the excess
+            # number of cases from the mixture's assumed majority population.
+            # Ref1: disease; Ref2: healthy
+
+            number_low = len(RM[RM <= methods["Excess"]["median"]])
+            number_high = len(RM[RM > methods["Excess"]["median"]])
+            p1_est = abs(number_high - number_low) / len(RM)
+
+            p1_est *= methods["Excess"]["adj_factor"]
+            results['Excess'] = np.clip(p1_est, 0.0, 1.0)
+
+        # --------------------- Difference of Means method --------------------
+        if "Means" in methods:
+
+            mu_1, mu_2 = methods["Means"]["mu_1"], methods["Means"]["mu_2"]
+            if mu_1 > mu_2:
+                p1_est = (RM.mean() - mu_2) / (mu_1 - mu_2)
+            else:
+                p1_est = (mu_2 - RM.mean()) / (mu_2 - mu_1)
+
+            # TODO: Check!
+            # p1_est = abs((RM.mean() - mu2) / (mu1 - mu2))
+            results['Means'] = np.clip(p1_est, 0.0, 1.0)
+
+        # ----------------------------- EMD method ----------------------------
+        if "EMD" in methods:
+            # Interpolated cdf (to compute EMD)
+            CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
+            EMD_M_1 = sum(abs(CDF_Mix - methods["EMD"]["CDF_1"]))
+            EMD_M_2 = sum(abs(CDF_Mix - methods["EMD"]["CDF_2"]))
+            results["EMD"] = 0.5 * (1 + (EMD_M_2 - EMD_M_1)/methods["EMD"]["EMD_1_2"])
+
+        # ----------------------------- KDE method ----------------------------
+        if "KDE" in methods:
+            # TODO: Print out warnings if goodness of fit is poor?
+            results['KDE'] = fit_KDE_model(RM, bins, methods["KDE"]['model'],
+                                           methods["KDE"]["params"],
+                                           methods["KDE"]["kernel"])
+
+        return results
 
     def estimate_Ref1(RM, Ref1, Ref2, bins, methods, kwargs):
         '''Estimate the proportion of two reference populations comprising
@@ -339,7 +455,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
         return results
 
-    def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None, kwargs=None):
+    def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):  #, kwargs=None):
 
         if boot_size == -1:
             boot_size = len(Mix)
@@ -349,13 +465,13 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         else:
             bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
 
-        return estimate_Ref1(bs, Ref1, Ref2, bins, methods, kwargs)
+        return estimate_Ref1_(bs, Ref1, Ref2, bins, methods)  #, kwargs)
 
     columns = [method for method in METHODS_ORDER if method in methods]
 
     if n_boot <= 0:
         # Get initial estimate of proportions
-        initial_results = estimate_Ref1(Mix, Ref1, Ref2, bins, methods, kwargs)
+        initial_results = estimate_Ref1_(Mix, Ref1, Ref2, bins, methods)  #, kwargs)
         if verbose > 1:
             pprint(initial_results)
         if true_p1:
@@ -385,11 +501,11 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1
         if n_jobs == 1 or n_jobs is None:
             # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
-            results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None, kwargs=kwargs)
+            results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None)  #, kwargs=kwargs)
                        for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
         else:
             with Parallel(n_jobs=n_jobs) as parallel:
-                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed, kwargs=kwargs)
+                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)  #, kwargs=kwargs)
                                    for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
 
         # Put into dataframe
