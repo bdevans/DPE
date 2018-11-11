@@ -60,7 +60,7 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
-def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None):  #, kwargs=None):
+def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
@@ -77,13 +77,13 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
     point = pe.analyse_mixture(scores, bins, methods, n_boot=0,
                                boot_size=-1, alpha=0.05,
                                true_p1=prop_Ref1, n_jobs=1, seed=seed,
-                               verbose=0, logfile=None)  #, kwargs=kwargs)
+                               verbose=0, logfile=None)
 
     logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
     boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
                                boot_size=-1, alpha=0.05,
                                true_p1=prop_Ref1, n_jobs=1, seed=seed,
-                               verbose=0, logfile=logfile)  #, kwargs=kwargs)
+                               verbose=0, logfile=logfile)
 
     return (point, boots)
 
@@ -115,26 +115,6 @@ if __name__ == '__main__':
         bin_width = bins['width']
         bin_edges = bins['edges']
 
-        # methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-        #                       "Median_Ref2": medians["Ref2"]},
-        #            "Means": {'Ref1': means['Ref1'],
-        #                      'Ref2': means['Ref2']},
-        #            "EMD": True,
-        #            "KDE": {'kernel': KDE_kernel,
-        #                    'bandwidth': bins['width']}
-        #            }
-
-        # methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-        #                       "Median_Ref2": medians["Ref2"]},
-        #            "Means": True,
-        #            "EMD": True,
-        #            "KDE": True
-        #            }
-
-        # methods = {method: True for method in pe._ALL_METHODS_}
-
-        # kwargs = {}
-        # kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
         methods = pe.prepare_methods_(scores, bins)  # Get all methods
 
         point_arrays = {}
@@ -164,8 +144,8 @@ if __name__ == '__main__':
                     # Parallelise over mixtures
                     results = parallel(delayed(assess)(sample_size, prop_Ref1,
                                                        Ref1, Ref2, bins, methods,
-                                                       n_boot, seed=seed) #,
-                                                       # kwargs=kwargs)
+                                                       n_boot, seed=seed)
+
                                        for seed in tqdm(mix_seeds,
                                                         desc=" Mixture     ",
                                                         dynamic_ncols=True))
