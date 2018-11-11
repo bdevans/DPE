@@ -130,12 +130,14 @@ if __name__ == '__main__':
         #                    'bandwidth': bins['width']}
         #            }
 
-        methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-                              "Median_Ref2": medians["Ref2"]},
-                   "Means": True,
-                   "EMD": True,
-                   "KDE": True
-                   }
+        # methods = {"Excess": {"Median_Ref1": medians["Ref1"],
+        #                       "Median_Ref2": medians["Ref2"]},
+        #            "Means": True,
+        #            "EMD": True,
+        #            "KDE": True
+        #            }
+
+        methods = {method: True for method in pe._ALL_METHODS_}
 
         # kwargs = {}
         # kwargs = pe.prepare_methods(methods, scores, bins, verbose=0)
