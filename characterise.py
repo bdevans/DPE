@@ -186,6 +186,9 @@ if __name__ == '__main__':
 #            if check_EMD:
 #                norm_EMD_dev = emd_dev_from_fit * bin_width / max_emd / i_EMD_21
 #                median_error = 100 * np.median(norm_EMD_dev, axis=2)  # Percentage
+        # TODO: combine and pickle results
+        results_arrays = {}
+
         for method in methods:
             np.save('{}/point_{}_{}'.format(out_dir, method, tag), point_arrays[method])
             np.save('{}/boots_{}_{}'.format(out_dir, method, tag), boots_arrays[method])
