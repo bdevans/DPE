@@ -244,7 +244,7 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
     if orient == 'v':
         sns.despine(ax=ax, top=True, bottom=True, left=False, right=True, trim=True)
     elif orient == 'h':
-        sns.despine(ax=ax, top=False, bottom=True, left=True, right=True, trim=True)
+        sns.despine(ax=ax, top=True, bottom=False, left=False, right=True, trim=True)
 
     if prop_Ref1:  # Add ground truth
         if orient == 'v':
