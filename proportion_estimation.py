@@ -50,13 +50,13 @@ def fit_kernel(scores, bw, kernel='gaussian'):
 
 
 # @mem.cache
-def fit_KDE_model(Mix, bins, model, params_mix, kernel):
+def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
     # model = methods["model"]
     x_KDE = bins["centers"]
     kde_mix = KernelDensity(kernel=kernel, bandwidth=bins['width'])
     kde_mix.fit(Mix[:, np.newaxis])
     res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
-                        x=x_KDE, params=params_mix)
+                        x=x_KDE, params=params_mix, method=method)
     amp_Ref1 = res_mix.params['amp_1'].value
     amp_Ref2 = res_mix.params['amp_2'].value
     return amp_Ref1 / (amp_Ref1 + amp_Ref2)
