@@ -65,7 +65,7 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
-def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None, kwargs=None):
+def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None):  #, kwargs=None):
     '''New method using analyse_mixture'''
 
     assert(0.0 <= prop_Ref1 <= 1.0)
