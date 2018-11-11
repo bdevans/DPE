@@ -34,17 +34,19 @@ from sklearn.neighbors import KernelDensity
 _ALL_METHODS_ = ["Excess", "Means", "EMD", "KDE"]
 
 
-def fit_kernels(scores, bw):
+def fit_kernels(scores, bw, kernel='gaussian'):
+    """No longer used."""
     kernels = {}
     for label, data in scores.items():
-        kernels[label] = {}
         X = data[:, np.newaxis]
-        for kernel in ['gaussian', 'tophat', 'epanechnikov',
-                       'exponential', 'linear', 'cosine']:
-
-            kernels[label][kernel] = KernelDensity(kernel=kernel, bandwidth=bw,
-                                                   atol=0, rtol=1e-4).fit(X)
+        kernels[label] = KernelDensity(kernel=kernel, bandwidth=bw,
+                                       atol=0, rtol=1e-4).fit(X)
     return kernels
+
+
+def fit_kernel(scores, bw, kernel='gaussian'):
+    X = scores[:, np.newaxis]
+    return KernelDensity(kernel=kernel, bandwidth=bw, atol=0, rtol=1e-4).fit(X)
 
 
 # @mem.cache
@@ -110,9 +112,13 @@ def prepare_methods_(scores, bins, methods=None, verbose=1):
         methods["KDE"].setdefault("bandwidth", bins["width"])
 
         if "model" not in methods["KDE"]:
-            kdes = fit_kernels(scores, methods["KDE"]["bandwidth"])
-            kde_1 = kdes["Ref1"][methods["KDE"]["kernel"]]
-            kde_2 = kdes["Ref2"][methods["KDE"]["kernel"]]
+            # kdes = fit_kernels(scores, methods["KDE"]["bandwidth"], methods["KDE"]["kernel"])
+            # kde_1 = kdes["Ref1"]  # [methods["KDE"]["kernel"]]
+            # kde_2 = kdes["Ref2"]  # [methods["KDE"]["kernel"]]
+            kde_1 = fit_kernel(scores["Ref1"], methods["KDE"]["bandwidth"],
+                               methods["KDE"]["kernel"])
+            kde_2 = fit_kernel(scores["Ref2"], methods["KDE"]["bandwidth"],
+                               methods["KDE"]["kernel"])
 
             # Assigning a default value to amp initialises them
             # x := Bin centres
