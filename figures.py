@@ -837,15 +837,16 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 #                           ("KDE", {'kernel': KDE_kernel,
 #                                    'bandwidth': bins['width']})])
 
-    methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-                          "Median_Ref2": medians["Ref2"],
-                          "adjustment_factor": adjustment_factor},
-               "Means": {'Ref1': means['Ref1'],
-                         'Ref2': means['Ref2']},
-               "EMD": True,
-               "KDE": {'kernel': KDE_kernel,
-                       'bandwidth': bins['width']}
-               }
+#    methods = {"Excess": {"Median_Ref1": medians["Ref1"],
+#                          "Median_Ref2": medians["Ref2"],
+#                          "adjustment_factor": adjustment_factor},
+#               "Means": {'Ref1': means['Ref1'],
+#                         'Ref2': means['Ref2']},
+#               "EMD": True,
+#               "KDE": {'kernel': KDE_kernel,
+#                       'bandwidth': bins['width']}
+#               }
+    methods = {method: True for method in pe._ALL_METHODS_}
     res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
 
     if FRESH_DATA:  # or True:
