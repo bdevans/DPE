@@ -957,7 +957,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df,
                                ax=ax_vio, orient='h', cut=0)
         g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
-                   #label="Ground Truth: {:3.2}".format(p_star))
+                  # label="Ground Truth: {:3.2}".format(p_star))
         handles, labels = g.get_legend_handles_labels()
         g.legend(handles, labels[:len(methods)], title="Method")
         # g.legend.set_title("Method")
@@ -1075,12 +1075,12 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
                 sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
-                                 #label=r"$R_1$", ax=ax_mixes)
+                             # label=r"$R_1$", ax=ax_mixes)
                 for p, p_star in enumerate(p_stars):
                     sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
                                  label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
                 sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
-                                 #label=r"$R_2$", ax=ax_mixes)
+                             # label=r"$R_2$", ax=ax_mixes)
 
             ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
             ax_mixes.set_xlabel("")
@@ -1089,7 +1089,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             ax_mixes.set_yticks([])
             ax_mixes.set_yticklabels([])
             if si == len(p_stars)-1:
-                ax_mixes.legend() #title=r"$p_1^*$") #, ncol=len(p_stars))
+                ax_mixes.legend()  # title=r"$p_1^*$") #, ncol=len(p_stars))
             else:
                 ax_mixes.get_legend().set_visible(False)
         else:
