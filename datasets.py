@@ -25,8 +25,8 @@ def load_diabetes_data(metric):
         # bin_min = 0.095
         # bin_max = 0.350
 
-        # NOTE: This is close to but not equal to the Ref1_median
-        median = 0.23137931525707245  # Type 2 population
+        # TODO: Derive this from the scores (this is close to but not equal to the Ref1_median)
+        median = 0.23137931525707245  # Type 2 population (0.231468353)
 
     elif metric == 'T2GRS':
         # bin_width = 0.1
@@ -105,7 +105,7 @@ def load_renal_data():
     dataset = 'data/renal_data.csv'
     headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
     prop_Ref1 = 0.0777
-    binning_method = 'fd'
+    binning_method = 'fd'  # TODO: Take max over Ref1, Ref2?
 
     # New "enriched" data set
     # dataset = 'data/renal_data_new.csv'
