@@ -8,6 +8,8 @@ Module to analyse an unknown mixture population.
 @author: ben
 """
 
+# TODO: Rename {Ref1: R_D, Ref2: R_N}
+
 from pprint import pprint
 # import warnings
 
