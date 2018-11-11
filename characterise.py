@@ -32,7 +32,7 @@ out_dir = "results"
 verbose = False
 seed = 42
 
-mixtures = 100  # 1000
+n_samples = 100  # 1000
 n_boot = 100
 sample_sizes = np.arange(100, 2501, 100)  # 3100
 # sample_sizes = np.linspace(100, 2500, 25, endpoint=True, dtype=int)
@@ -40,7 +40,7 @@ sample_sizes = np.arange(100, 2501, 100)  # 3100
 proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 
 # Very quick testing run
-mixtures = 4  # 1000
+n_samples = 4  # 1000
 n_boot = 4
 sample_sizes = np.arange(100, 201, 100)
 proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
@@ -142,10 +142,10 @@ if __name__ == '__main__':
         for method in methods:
             point_arrays[method] = np.zeros((len(sample_sizes),
                                              len(proportions),
-                                             mixtures))
+                                             n_samples))
             boots_arrays[method] = np.zeros((len(sample_sizes),
                                              len(proportions),
-                                             mixtures, n_boot))
+                                             n_samples, n_boot))
 
         size_bar = tqdm(sample_sizes, dynamic_ncols=True)
         for s, sample_size in enumerate(size_bar):
@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
                 # Make mixtures deterministic with parallelism
                 # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
-                mix_seeds = np.random.randint(np.iinfo(np.int32).max, size=mixtures)
+                mix_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_samples)
 
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
@@ -170,7 +170,7 @@ if __name__ == '__main__':
                                                         desc=" Mixture     ",
                                                         dynamic_ncols=True))
 
-                    for m in range(mixtures):
+                    for m in range(n_samples):
                         point, boots = results[m]
                         for method in methods:
                             point_arrays[method][s, p, m] = point[method]
@@ -195,6 +195,5 @@ if __name__ == '__main__':
         # TODO: Save the arrays in the dictionary as a pickle file
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
-
 
     print("Analysis of methods on datasets: {} complete!".format(list(datasets)))
