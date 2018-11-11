@@ -313,7 +313,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
     if kwargs is None:
         kwargs = prepare_methods_(methods, scores, bins, verbose=verbose)
 
-    def estimate_Ref1_(RM, Ref1, Ref2, bins, methods):
+    def estimate_Ref1_(RM, Ref1, Ref2, bins, methods=None):
         '''Estimate the proportion of two reference populations comprising
         an unknown mixture.
 
@@ -321,6 +321,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
         '''
 
+        if methods is None:
+            methods = {method: True for method in METHODS_ORDER}
         # bins = kwargs['bins']
         results = {}
 
@@ -356,7 +358,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
             CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
             EMD_M_1 = sum(abs(CDF_Mix - methods["EMD"]["CDF_1"]))
             EMD_M_2 = sum(abs(CDF_Mix - methods["EMD"]["CDF_2"]))
-            results["EMD"] = 0.5 * (1 + (EMD_M_2 - EMD_M_1)/methods["EMD"]["EMD_1_2"])
+            results["EMD"] = 0.5 * (1 + (EMD_M_2 - EMD_M_1) / methods["EMD"]["EMD_1_2"])
 
         # ----------------------------- KDE method ----------------------------
         if "KDE" in methods:
