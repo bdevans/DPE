@@ -66,7 +66,10 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def prepare_methods_(methods, scores, bins, verbose=1):
+def prepare_methods_(scores, bins, methods=None, verbose=1):
+
+    if methods is None:
+        methods = {method: True for method in METHODS_ORDER}
 
     if "Excess" in methods:
         if not isinstance(methods["Excess"], dict):
@@ -125,6 +128,8 @@ def prepare_methods_(methods, scores, bins, verbose=1):
             methods["KDE"]["params"]["amp_1"].min = 0
             methods["KDE"]["params"]["amp_2"].value = 1
             methods["KDE"]["params"]["amp_2"].min = 0
+
+    return methods
 
 
 def prepare_methods(methods, scores, bins, verbose=1):
@@ -312,7 +317,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
     # if kwargs is None:
     #     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
-    prepare_methods_(methods, scores, bins, verbose=verbose)
+    prepare_methods_(scores, bins, methods=methods, verbose=verbose)
 
     def estimate_Ref1_(RM, Ref1, Ref2, bins, methods=None):
         '''Estimate the proportion of two reference populations comprising
@@ -322,8 +327,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
         '''
 
-        if methods is None:
-            methods = {method: True for method in METHODS_ORDER}
         # bins = kwargs['bins']
         results = {}
 
