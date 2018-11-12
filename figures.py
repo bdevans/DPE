@@ -325,6 +325,10 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
 #             "#9F4800", "#F14CC1", "#A3A3A3", "#FFC400", "#00D7FF"]  # bright
 #    palette = sns.color_palette().as_hex()
     palette = sns.color_palette("coolwarm", len(p_stars)+2).as_hex()  # "hls"
+    # sns.palplot(sns.diverging_palette(255, 40, s=50, l=70, n=5, center="dark"))
+    # palette = sns.diverging_palette(255, 40, s=50, l=70, n=5, center="dark").as_hex()
+    if len(palette) % 2 == 1:
+        palette[len(palette)//2] = '#bbbbbb'
     print(palette)
 
     fig_select = plt.figure(figsize=(12, 3*len(sizes)))
