@@ -25,6 +25,71 @@ import proportion_estimation as pe
 from datasets import (load_diabetes_data, load_renal_data)
 
 
+# ---------------------------- Define constants ------------------------------
+
+# METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
+FRESH_DATA = False  # CAUTION!
+#out_dir = "results_test"
+out_dir = "results_100_100"
+fig_dir = os.path.join(out_dir, "figs")
+
+verbose = False
+
+
+seed = 42
+n_boot = 1000
+sample_size = 1000  # -1
+n_mixes = 5
+selected_mix = 0
+alpha = 0.05
+CI_METHOD = "stderr" # "centile" "jeffreys"
+# normal : asymptotic normal approximation
+# agresti_coull : Agresti-Coull interval
+# beta : Clopper-Pearson interval based on Beta distribution
+# wilson : Wilson Score interval
+# jeffreys : Jeffreys Bayesian Interval
+# binom_test : experimental, inversion of binom_test
+# http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
+
+# TODO: Reimplement this
+adjust_excess = False
+KDE_kernel = 'gaussian'
+# kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
+
+# Grid Search Plots
+# Configure plots
+
+LINEAR_COLOURBAR = True
+ABSOLUTE_ERROR = False
+# LABELS = ['Means', 'Excess', 'EMD', 'KDE']
+# COLOURS = ['r', 'g', 'b', 'k']
+average = np.mean
+deviation = np.std
+
+# METRICS = ['T1GRS', 'T2GRS']
+
+
+# ----------------------------------------------------------------------------
+
+#with warnings.catch_warnings():
+#    warnings.filterwarnings("ignore", category=DeprecationWarning)
+# warnings.filterwarnings("ignore", message="The 'normed' kwarg is deprecated")
+
+#    mpl.style.use('seaborn')
+# plt.style.use('seaborn-white')
+mpl.rc('figure', figsize=(10, 8))
+mpl.rc('font', size=14)
+mpl.rc('axes', titlesize=14)     # fontsize of the axes title
+mpl.rc('axes', labelsize=14)    # fontsize of the x and y labels
+mpl.rc('xtick', labelsize=12)    # fontsize of the tick labels
+mpl.rc('ytick', labelsize=12)    # fontsize of the tick labels
+mpl.rc('legend', fontsize=11)    # legend fontsize
+mpl.rc('figure', titlesize=14)  # fontsize of the figure title
+mpl.rc('lines', linewidth=2)
+mpl.rc('figure', dpi=100)
+mpl.rc('savefig', dpi=300)
+
+
 def SecToStr(sec):
     m, s = divmod(sec, 60)
     h, m = divmod(m,   60)
@@ -588,69 +653,7 @@ if plot_results:
 
 #if __name__ == "__main__":
 
-# ---------------------------- Define constants ------------------------------
 
-# METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
-FRESH_DATA = False  # CAUTION!
-out_dir = "results_test"
-#out_dir = "results_100_100"
-fig_dir = os.path.join(out_dir, "figs")
-
-verbose = False
-
-
-seed = 42
-n_boot = 1000
-sample_size = 1000  # -1
-n_mixes = 5
-selected_mix = 0
-alpha = 0.05
-CI_METHOD = "stderr" # "centile" "jeffreys"
-# normal : asymptotic normal approximation
-# agresti_coull : Agresti-Coull interval
-# beta : Clopper-Pearson interval based on Beta distribution
-# wilson : Wilson Score interval
-# jeffreys : Jeffreys Bayesian Interval
-# binom_test : experimental, inversion of binom_test
-# http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
-
-# TODO: Reimplement this
-adjust_excess = False
-KDE_kernel = 'gaussian'
-# kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
-
-# Grid Search Plots
-# Configure plots
-
-LINEAR_COLOURBAR = True
-ABSOLUTE_ERROR = False
-# LABELS = ['Means', 'Excess', 'EMD', 'KDE']
-# COLOURS = ['r', 'g', 'b', 'k']
-average = np.mean
-deviation = np.std
-
-# METRICS = ['T1GRS', 'T2GRS']
-
-
-# ----------------------------------------------------------------------------
-
-#with warnings.catch_warnings():
-#    warnings.filterwarnings("ignore", category=DeprecationWarning)
-# warnings.filterwarnings("ignore", message="The 'normed' kwarg is deprecated")
-
-#    mpl.style.use('seaborn')
-# plt.style.use('seaborn-white')
-mpl.rc('figure', figsize=(10, 8))
-mpl.rc('font', size=14)
-mpl.rc('axes', titlesize=14)     # fontsize of the axes title
-mpl.rc('axes', labelsize=14)    # fontsize of the x and y labels
-mpl.rc('xtick', labelsize=12)    # fontsize of the tick labels
-mpl.rc('ytick', labelsize=12)    # fontsize of the tick labels
-mpl.rc('legend', fontsize=11)    # legend fontsize
-mpl.rc('figure', titlesize=14)  # fontsize of the figure title
-mpl.rc('lines', linewidth=2)
-mpl.rc('figure', dpi=100)
-mpl.rc('savefig', dpi=300)
 
 
 if not os.path.exists(out_dir):
