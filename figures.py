@@ -652,6 +652,8 @@ if plot_results:
 # NOTE: KDEs are very expensive when large arrays are passed to score_samples
 # Increasing the tolerance: atol and rtol speeds the process up significantly
 
+
+
 if __name__ == "__main__":
 
     if not os.path.exists(out_dir):
@@ -659,7 +661,6 @@ if __name__ == "__main__":
 
     if not os.path.exists(fig_dir):
         os.makedirs(fig_dir)
-
 
     # Set random seed
     np.random.seed(seed)
@@ -678,24 +679,6 @@ if __name__ == "__main__":
         else:
             adjustment_factor = 1.0
 
-    #    methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
-    #                                      'Ref2': means['Ref2']}),
-    #                           ("Excess", {"Median_Ref1": medians["Ref1"],
-    #                                       "Median_Ref2": medians["Ref2"],
-    #                                       "adjustment_factor": adjustment_factor}),
-    #                           ("EMD", True),
-    #                           ("KDE", {'kernel': KDE_kernel,
-    #                                    'bandwidth': bins['width']})])
-
-    #    methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-    #                          "Median_Ref2": medians["Ref2"],
-    #                          "adjustment_factor": adjustment_factor},
-    #               "Means": {'Ref1': means['Ref1'],
-    #                         'Ref2': means['Ref2']},
-    #               "EMD": True,
-    #               "KDE": {'kernel': KDE_kernel,
-    #                       'bandwidth': bins['width']}
-    #               }
         methods = {method: True for method in pe._ALL_METHODS_}
         res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
 
