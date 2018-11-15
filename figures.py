@@ -1000,6 +1000,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             legend = True
         else:
             legend = False
-        plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, legend=legend, orient='h')
+        # plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, legend=legend, orient='h')
+        plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
     fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
