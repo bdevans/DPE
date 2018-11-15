@@ -550,7 +550,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
 #    plt.tight_layout()
-    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}.png'.format(data_label)))
+    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}_{}.png'.format(selected_mix, data_label)))
 
 
 def plot_compound_figure():
@@ -847,8 +847,10 @@ if __name__ == "__main__":
 
 
         # Plot selected violins
-        plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
-                              out_dir, data_label, ADD_CI=True, alpha=0.05, ci_method=CI_METHOD)
+        for mix in range(n_mixes):
+            plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
+                                  out_dir, data_label, selected_mix=mix,
+                                  ADD_CI=True, alpha=0.05, ci_method=CI_METHOD)
 
 
         # Plot error bars
