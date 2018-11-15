@@ -387,7 +387,8 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
 
             # Select estimates at p_star and size for all methods
             df = df_est[np.isclose(p_star, df_est['p1*']) &
-                        np.isclose(size, df_est['Size'])]
+                        np.isclose(size, df_est['Size']) &
+                        np.isclose(selected_mix, df_est["Mix"])]
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
