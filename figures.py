@@ -605,7 +605,7 @@ sample_size = 1000  # -1
 n_mixes = 5
 selected_mix = 0
 alpha = 0.05
-CI_METHOD = "jeffreys"
+CI_METHOD = "stderr" # "centile" "jeffreys"
 # normal : asymptotic normal approximation
 # agresti_coull : Agresti-Coull interval
 # beta : Clopper-Pearson interval based on Beta distribution
