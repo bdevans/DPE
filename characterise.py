@@ -105,6 +105,9 @@ if __name__ == '__main__':
     for tag, data in datasets.items():
 
         print("Running parameter sweep with {} scores...".format(tag))
+        print("Samples sizes: {:,}; Proportions: {:,}; Mixtures: {:,}; Bootstraps: {:,}"
+              .format(len(sample_sizes), len(proportions), n_samples, n_boot))
+
         t = time.time()  # Start timer
 
         # Unpack data
@@ -116,6 +119,9 @@ if __name__ == '__main__':
         bin_edges = bins['edges']
 
         methods = pe.prepare_methods_(scores, bins)  # Get all methods
+
+        print("Total method applications (of {} methods): {:,}"
+              .format(len(methods), len(sample_sizes)*len(proportions)*n_samples*n_boot))
 
         point_arrays = {}
         boots_arrays = {}
