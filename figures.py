@@ -75,6 +75,7 @@ deviation = np.std
 #    warnings.filterwarnings("ignore", category=DeprecationWarning)
 # warnings.filterwarnings("ignore", message="The 'normed' kwarg is deprecated")
 
+# TODO: Move to __main__
 #    mpl.style.use('seaborn')
 # plt.style.use('seaborn-white')
 mpl.rc('figure', figsize=(10, 8))
@@ -651,360 +652,357 @@ if plot_results:
 # NOTE: KDEs are very expensive when large arrays are passed to score_samples
 # Increasing the tolerance: atol and rtol speeds the process up significantly
 
-#if __name__ == "__main__":
+if __name__ == "__main__":
+
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    if not os.path.exists(fig_dir):
+        os.makedirs(fig_dir)
 
 
+    # Set random seed
+    np.random.seed(seed)
+    # rng = np.random.RandomState(42)
+
+    np.seterr(divide='ignore', invalid='ignore')
 
 
-if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+    for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
+                             ("Renal", load_renal_data())]:
 
-if not os.path.exists(fig_dir):
-    os.makedirs(fig_dir)
+        (scores, bins, means, medians, prop_Ref1) = data
 
-
-# Set random seed
-np.random.seed(seed)
-# rng = np.random.RandomState(42)
-
-np.seterr(divide='ignore', invalid='ignore')
-
-
-for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
-                         ("Renal", load_renal_data())]:
-
-    (scores, bins, means, medians, prop_Ref1) = data
-
-    if adjust_excess:
-        adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
-    else:
-        adjustment_factor = 1.0
-
-#    methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
-#                                      'Ref2': means['Ref2']}),
-#                           ("Excess", {"Median_Ref1": medians["Ref1"],
-#                                       "Median_Ref2": medians["Ref2"],
-#                                       "adjustment_factor": adjustment_factor}),
-#                           ("EMD", True),
-#                           ("KDE", {'kernel': KDE_kernel,
-#                                    'bandwidth': bins['width']})])
-
-#    methods = {"Excess": {"Median_Ref1": medians["Ref1"],
-#                          "Median_Ref2": medians["Ref2"],
-#                          "adjustment_factor": adjustment_factor},
-#               "Means": {'Ref1': means['Ref1'],
-#                         'Ref2': means['Ref2']},
-#               "EMD": True,
-#               "KDE": {'kernel': KDE_kernel,
-#                       'bandwidth': bins['width']}
-#               }
-    methods = {method: True for method in pe._ALL_METHODS_}
-    res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
-
-    if FRESH_DATA:  # or True:
-        print("Running mixture analysis on {} scores...".format(data_label), flush=True)
-        t = time.time()  # Start timer
-
-        df_pe = pe.analyse_mixture(scores, bins, methods,
-                                   n_boot=n_boot, boot_size=-1,  # boot_size=sample_size,
-                                   alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
-                                   logfile="{}/pe_{}.log".format(out_dir, data_label))
-
-        elapsed = time.time() - t
-        print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
-
-        # Save results
-        df_pe.to_pickle(res_file)
-    else:
-        if os.path.isfile(res_file):
-            df_pe = pd.read_pickle(res_file)
+        if adjust_excess:
+            adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
         else:
-            warnings.warn("Missing data file: {}".format(res_file))
-            break
+            adjustment_factor = 1.0
 
-    #if FRESH_DATA:
-    #    exec(open("./bootstrap.py").read())
+    #    methods = OrderedDict([("Means", {'Ref1': means['Ref1'],
+    #                                      'Ref2': means['Ref2']}),
+    #                           ("Excess", {"Median_Ref1": medians["Ref1"],
+    #                                       "Median_Ref2": medians["Ref2"],
+    #                                       "adjustment_factor": adjustment_factor}),
+    #                           ("EMD", True),
+    #                           ("KDE", {'kernel': KDE_kernel,
+    #                                    'bandwidth': bins['width']})])
 
-    sns.set_style("ticks")
+    #    methods = {"Excess": {"Median_Ref1": medians["Ref1"],
+    #                          "Median_Ref2": medians["Ref2"],
+    #                          "adjustment_factor": adjustment_factor},
+    #               "Means": {'Ref1': means['Ref1'],
+    #                         'Ref2': means['Ref2']},
+    #               "EMD": True,
+    #               "KDE": {'kernel': KDE_kernel,
+    #                       'bandwidth': bins['width']}
+    #               }
+        methods = {method: True for method in pe._ALL_METHODS_}
+        res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
 
-    # Load bootstraps of accurarcy data
-    (point_estimates, boots_estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
+        if FRESH_DATA:  # or True:
+            print("Running mixture analysis on {} scores...".format(data_label), flush=True)
+            t = time.time()  # Start timer
 
-    # Plot point estimates of p1
-    if False:
-        fig = plot_characterisation(point_estimates, proportions, sample_sizes)
-        fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
+            df_pe = pe.analyse_mixture(scores, bins, methods,
+                                       n_boot=n_boot, boot_size=-1,  # boot_size=sample_size,
+                                       alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
+                                       logfile="{}/pe_{}.log".format(out_dir, data_label))
 
-    # Plot bootstrapped estimates of p1
-    fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
-    fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
+            elapsed = time.time() - t
+            print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
 
-
-
-    # Plot violins for a set of proportions
-    # p_stars = [0.05, 0.25, 0.50, 0.75, 0.95]
-    # sizes = [100, 500, 1000, 5000, 10000]
-
-    p_stars = [0.25, 0.50, 0.75]
-    sizes = [500, 1000, 5000]
-    # n_boot = 5
-
-    # Generate multiple mixes
-    estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
-    if FRESH_DATA:
-        print("Running mixture analysis with {} scores...".format(data_label), flush=True)
-        t = time.time()  # Start timer
-
-        violin_scores = {}
-        violin_scores['Ref1'] = scores['Ref1']
-        violin_scores['Ref2'] = scores['Ref2']
-        dfs = []
-
-        size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
-        for s, size in enumerate(size_bar):
-            size_bar.set_description("Size = {:6,}".format(size))
-            Mixtures = {mix: {} for mix in range(n_mixes)}
-
-            for mix in tqdm.trange(n_mixes, dynamic_ncols=True, desc=" Mix"):
-                mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
-
-                prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
-                for p, p_star in enumerate(prop_bar):
-                    prop_bar.set_description(" p1* = {:6.2f}".format(p_star))
-
-                    violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
-                    Mixtures[mix][p_star] = violin_scores['Mix']
-                    df_cm = pe.analyse_mixture(violin_scores, bins, methods,
-                                               n_boot=n_boot, boot_size=size,
-                                               alpha=alpha, true_p1=p_star,
-                                               n_jobs=-1, verbose=0)
-                    df_cm['Size'] = size * np.ones(n_boot)
-                    df_cm['p1*'] = p_star * np.ones(n_boot)
-                    df_cm['Mix'] = mix * np.ones(n_boot)
-                    df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
-                    dfs.append(df_cm)
-
-                df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
-                df_size.to_pickle(mix_dist_file)
-
-        df_est = pd.concat(dfs, ignore_index=True)
-        elapsed = time.time() - t
-        print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
-
-        # Save results
-        df_est.to_pickle(estimates_res_file)
-    else:
-        if os.path.isfile(estimates_res_file):
-            df_est = pd.read_pickle(estimates_res_file)
+            # Save results
+            df_pe.to_pickle(res_file)
         else:
-            warnings.warn("Missing data file: {}".format(estimates_res_file))
-            break
+            if os.path.isfile(res_file):
+                df_pe = pd.read_pickle(res_file)
+            else:
+                warnings.warn("Missing data file: {}".format(res_file))
+                break
+
+        #if FRESH_DATA:
+        #    exec(open("./bootstrap.py").read())
+
+        sns.set_style("ticks")
+
+        # Load bootstraps of accurarcy data
+        (point_estimates, boots_estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
+
+        # Plot point estimates of p1
+        if False:
+            fig = plot_characterisation(point_estimates, proportions, sample_sizes)
+            fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
+
+        # Plot bootstrapped estimates of p1
+        fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
+        fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
 
 
 
-    # Plot violins
-    fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
-    # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
-    # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-    ax_vio = fig_vio.add_subplot(111)
+        # Plot violins for a set of proportions
+        # p_stars = [0.05, 0.25, 0.50, 0.75, 0.95]
+        # sizes = [100, 500, 1000, 5000, 10000]
 
-    for p, p_star in enumerate(p_stars):
-        df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(selected_mix, df_est['Mix'])]  # & np.isclose(size, df_vio['Size'])]
-        # df.sort_values(by='Size', ascending=False, inplace=True)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=FutureWarning)
-            g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df,
-                               ax=ax_vio, orient='h', cut=0)
-        g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
-                  # label="Ground Truth: {:3.2}".format(p_star))
-        handles, labels = g.get_legend_handles_labels()
-        g.legend(handles, labels[:len(methods)], title="Method")
-        # g.legend.set_title("Method")
+        p_stars = [0.25, 0.50, 0.75]
+        sizes = [500, 1000, 5000]
+        # n_boot = 5
 
-    # sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
-    sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
-    g.invert_yaxis()
-    fig_vio.savefig(os.path.join(fig_dir, 'violin_bootstraps_{}.png'.format(data_label)))
+        # Generate multiple mixes
+        estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
+        if FRESH_DATA:
+            print("Running mixture analysis with {} scores...".format(data_label), flush=True)
+            t = time.time()  # Start timer
 
+            violin_scores = {}
+            violin_scores['Ref1'] = scores['Ref1']
+            violin_scores['Ref2'] = scores['Ref2']
+            dfs = []
 
+            size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
+            for s, size in enumerate(size_bar):
+                size_bar.set_description("Size = {:6,}".format(size))
+                Mixtures = {mix: {} for mix in range(n_mixes)}
 
-    # Plot violin stack
-    fig_stack = plt.figure(figsize=(16, 2*len(sizes)))
-    # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
-    # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-#    ax_vio = fig_vio.add_subplot(111)
-    gs = plt.GridSpec(nrows=1, ncols=len(methods), hspace=0.2, wspace=0.015)
+                for mix in tqdm.trange(n_mixes, dynamic_ncols=True, desc=" Mix"):
+                    mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
 
-    for m, method in enumerate(methods):
-        ax_stack = fig_stack.add_subplot(gs[m])
-        ax_stack.set_title(method)
+                    prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
+                    for p, p_star in enumerate(prop_bar):
+                        prop_bar.set_description(" p1* = {:6.2f}".format(p_star))
 
-        if m > 0:
-            plt.setp(ax_stack.get_yticklabels(), visible=False)
-            ax_stack.set_ylabel("")
-            sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
+                        violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
+                        Mixtures[mix][p_star] = violin_scores['Mix']
+                        df_cm = pe.analyse_mixture(violin_scores, bins, methods,
+                                                   n_boot=n_boot, boot_size=size,
+                                                   alpha=alpha, true_p1=p_star,
+                                                   n_jobs=-1, verbose=0)
+                        df_cm['Size'] = size * np.ones(n_boot)
+                        df_cm['p1*'] = p_star * np.ones(n_boot)
+                        df_cm['Mix'] = mix * np.ones(n_boot)
+                        df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
+                        dfs.append(df_cm)
+
+                    df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
+                    df_size.to_pickle(mix_dist_file)
+
+            df_est = pd.concat(dfs, ignore_index=True)
+            elapsed = time.time() - t
+            print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
+
+            # Save results
+            df_est.to_pickle(estimates_res_file)
         else:
-            sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+            if os.path.isfile(estimates_res_file):
+                df_est = pd.read_pickle(estimates_res_file)
+            else:
+                warnings.warn("Missing data file: {}".format(estimates_res_file))
+                break
 
-        ax_stack.set_xlim((0, 1))
+
+
+        # Plot violins
+        fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
+        # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
+        # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
+        ax_vio = fig_vio.add_subplot(111)
+
         for p, p_star in enumerate(p_stars):
-            df = df_est[np.isclose(p_star, df_est['p1*'])]  # & np.isclose(size, df_vio['Size'])]
+            df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(selected_mix, df_est['Mix'])]  # & np.isclose(size, df_vio['Size'])]
             # df.sort_values(by='Size', ascending=False, inplace=True)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
-                g = sns.violinplot(x='Estimate', y='Size', hue='Mix', data=df[df['Method'] == method],
-                                   ax=ax_stack, orient='h', cut=0)
+                g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df,
+                                   ax=ax_vio, orient='h', cut=0)
             g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
-                       #label="Ground Truth: {:3.2}".format(p_star))
+                      # label="Ground Truth: {:3.2}".format(p_star))
             handles, labels = g.get_legend_handles_labels()
-            g.legend(handles, labels[:n_mixes], title="Mixture")
+            g.legend(handles, labels[:len(methods)], title="Method")
             # g.legend.set_title("Method")
 
-#        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
-        g.invert_yaxis()
-    fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
-
-
-    # Plot selected violins
-    plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
-                          out_dir, data_label, ADD_CI=True, alpha=0.05, ci_method=CI_METHOD)
-
-
-    # Plot error bars
-    if False:
-        orient = 'h'
-        c = sns.color_palette()[-3]  # 'gray'
-        # fig_err = plt.figure(figsize=(16, 16))
-        # ax_ci = fig_err.add_subplot(111)
-        for s, size in enumerate(sizes):
-            for p, p_star in enumerate(p_stars):
-                # df = df_est[np.isclose(p_star, df_est['p1*'])]
-                df = df_est[np.isclose(df_est.Size, size) & np.isclose(df_est['p1*'], p_star)]
-                df_means = df.groupby('Method').mean()
-                # Add confidence intervals
-                errors = np.zeros(shape=(2, len(methods)))
-                means = []
-                for midx, method in enumerate(methods):
-                    nobs = size  # len(df_est[method])
-                    mean_est = df_means.loc[method, 'Estimate']
-                    means.append(mean_est)
-                    # mean_est = np.mean(df_est[method])
-                    count = int(mean_est*nobs)
-                    ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=CI_METHOD)
-                    # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
-                    errors[0, midx] = mean_est - ci_low1  # y[midx] - ci_low1
-                    errors[1, midx] = ci_upp1 - mean_est  # ci_upp1 - y[midx]
-
-                # Add white border around error bars
-                # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
-                if orient == 'v':
-                    x = ax_vio.get_xticks()
-                    y = means
-                    ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
-                elif orient == 'h':
-                    x = means
-                    y = ax_vio.get_yticks()
-                    ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
-
-
-                g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
-                          # label="Ground Truth: {:3.2}".format(p_star))
-                handles, labels = g.get_legend_handles_labels()
-                g.legend(handles, labels[:len(methods)], title="Method")
-
-    #     sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
+        # sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
         g.invert_yaxis()
-        fig_vio.savefig(os.path.join(fig_dir, 'ci_selection_{}.png'.format(data_label)))
+        fig_vio.savefig(os.path.join(fig_dir, 'violin_bootstraps_{}.png'.format(data_label)))
 
 
-    # Plot mixture distributions - add reference populations?
-    fig_mixes = plt.figure(figsize=(8, 8))
-    gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-    for si, size in enumerate(sizes):
-        mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
-        if os.path.isfile(mix_dist_file):
-            df_mixes = pd.read_pickle(mix_dist_file)
-            if si == 0:
-                ax_mixes = fig_mixes.add_subplot(gs[-(si+1)])
-                ax_base = ax_mixes
+
+        # Plot violin stack
+        fig_stack = plt.figure(figsize=(16, 2*len(sizes)))
+        # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
+        # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
+    #    ax_vio = fig_vio.add_subplot(111)
+        gs = plt.GridSpec(nrows=1, ncols=len(methods), hspace=0.2, wspace=0.015)
+
+        for m, method in enumerate(methods):
+            ax_stack = fig_stack.add_subplot(gs[m])
+            ax_stack.set_title(method)
+
+            if m > 0:
+                plt.setp(ax_stack.get_yticklabels(), visible=False)
+                ax_stack.set_ylabel("")
+                sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
             else:
-                ax_mixes = fig_mixes.add_subplot(gs[-(si+1)], sharex=ax_base)
-                plt.setp(ax_mixes.get_xticklabels(), visible=False)
+                sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=FutureWarning)
-                sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
-                             # label=r"$R_1$", ax=ax_mixes)
+            ax_stack.set_xlim((0, 1))
+            for p, p_star in enumerate(p_stars):
+                df = df_est[np.isclose(p_star, df_est['p1*'])]  # & np.isclose(size, df_vio['Size'])]
+                # df.sort_values(by='Size', ascending=False, inplace=True)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=FutureWarning)
+                    g = sns.violinplot(x='Estimate', y='Size', hue='Mix', data=df[df['Method'] == method],
+                                       ax=ax_stack, orient='h', cut=0)
+                g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
+                           #label="Ground Truth: {:3.2}".format(p_star))
+                handles, labels = g.get_legend_handles_labels()
+                g.legend(handles, labels[:n_mixes], title="Mixture")
+                # g.legend.set_title("Method")
+
+    #        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+            g.invert_yaxis()
+        fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
+
+
+        # Plot selected violins
+        plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
+                              out_dir, data_label, ADD_CI=True, alpha=0.05, ci_method=CI_METHOD)
+
+
+        # Plot error bars
+        if False:
+            orient = 'h'
+            c = sns.color_palette()[-3]  # 'gray'
+            # fig_err = plt.figure(figsize=(16, 16))
+            # ax_ci = fig_err.add_subplot(111)
+            for s, size in enumerate(sizes):
                 for p, p_star in enumerate(p_stars):
-                    sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
-                                 label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
-                sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
-                             # label=r"$R_2$", ax=ax_mixes)
+                    # df = df_est[np.isclose(p_star, df_est['p1*'])]
+                    df = df_est[np.isclose(df_est.Size, size) & np.isclose(df_est['p1*'], p_star)]
+                    df_means = df.groupby('Method').mean()
+                    # Add confidence intervals
+                    errors = np.zeros(shape=(2, len(methods)))
+                    means = []
+                    for midx, method in enumerate(methods):
+                        nobs = size  # len(df_est[method])
+                        mean_est = df_means.loc[method, 'Estimate']
+                        means.append(mean_est)
+                        # mean_est = np.mean(df_est[method])
+                        count = int(mean_est*nobs)
+                        ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=CI_METHOD)
+                        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
+                        errors[0, midx] = mean_est - ci_low1  # y[midx] - ci_low1
+                        errors[1, midx] = ci_upp1 - mean_est  # ci_upp1 - y[midx]
 
-            ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
-            ax_mixes.set_xlabel("")
-            # Remove y axis
-            sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
-            ax_mixes.set_yticks([])
-            ax_mixes.set_yticklabels([])
-            if si == len(p_stars)-1:
-                ax_mixes.legend()  # title=r"$p_1^*$") #, ncol=len(p_stars))
+                    # Add white border around error bars
+                    # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
+                    if orient == 'v':
+                        x = ax_vio.get_xticks()
+                        y = means
+                        ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+                    elif orient == 'h':
+                        x = means
+                        y = ax_vio.get_yticks()
+                        ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+
+
+                    g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
+                              # label="Ground Truth: {:3.2}".format(p_star))
+                    handles, labels = g.get_legend_handles_labels()
+                    g.legend(handles, labels[:len(methods)], title="Method")
+
+        #     sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
+            sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+            g.invert_yaxis()
+            fig_vio.savefig(os.path.join(fig_dir, 'ci_selection_{}.png'.format(data_label)))
+
+
+        # Plot mixture distributions - add reference populations?
+        fig_mixes = plt.figure(figsize=(8, 8))
+        gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
+        for si, size in enumerate(sizes):
+            mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
+            if os.path.isfile(mix_dist_file):
+                df_mixes = pd.read_pickle(mix_dist_file)
+                if si == 0:
+                    ax_mixes = fig_mixes.add_subplot(gs[-(si+1)])
+                    ax_base = ax_mixes
+                else:
+                    ax_mixes = fig_mixes.add_subplot(gs[-(si+1)], sharex=ax_base)
+                    plt.setp(ax_mixes.get_xticklabels(), visible=False)
+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=FutureWarning)
+                    sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
+                                 # label=r"$R_1$", ax=ax_mixes)
+                    for p, p_star in enumerate(p_stars):
+                        sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
+                                     label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
+                    sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
+                                 # label=r"$R_2$", ax=ax_mixes)
+
+                ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
+                ax_mixes.set_xlabel("")
+                # Remove y axis
+                sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
+                ax_mixes.set_yticks([])
+                ax_mixes.set_yticklabels([])
+                if si == len(p_stars)-1:
+                    ax_mixes.legend()  # title=r"$p_1^*$") #, ncol=len(p_stars))
+                else:
+                    ax_mixes.get_legend().set_visible(False)
             else:
-                ax_mixes.get_legend().set_visible(False)
-        else:
-            warnings.warn("Missing data file: {}".format(mix_dist_file))
-            break
-    ax_base.set_xlabel("GRS")
-    fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
+                warnings.warn("Missing data file: {}".format(mix_dist_file))
+                break
+        ax_base.set_xlabel("GRS")
+        fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
 
 
-    # Plot worked examples
-    fig_ex = plt.figure(figsize=(12, 6))
-    gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15)
+        # Plot worked examples
+        fig_ex = plt.figure(figsize=(12, 6))
+        gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15)
 
-    #sns.set_style("whitegrid")
-    ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
-    # with sns.axes_style("whitegrid"):
-        #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
-    plot_bootstraps(df_pe, prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
+        #sns.set_style("whitegrid")
+        ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
+        # with sns.axes_style("whitegrid"):
+            #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
+        plot_bootstraps(df_pe, prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
 
-        #sns.set_style("ticks")
-    ax_dists_ex = fig_ex.add_subplot(gs[0, 1])
-    with sns.axes_style("ticks"):
-        plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+            #sns.set_style("ticks")
+        ax_dists_ex = fig_ex.add_subplot(gs[0, 1])
+        with sns.axes_style("ticks"):
+            plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
 
-    fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
+        fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
 
-    # Plot distributions around the estimated proportion with given sample_size from the characterisation data
-    # if prop_Ref1 is not None:
-    #     errors[]
-    # if prop_Ref1 is None:
-    #     prop_Ref1 = np.mean()
+        # Plot distributions around the estimated proportion with given sample_size from the characterisation data
+        # if prop_Ref1 is not None:
+        #     errors[]
+        # if prop_Ref1 is None:
+        #     prop_Ref1 = np.mean()
 
 
-    # Explore the effect of n_boots
-    n_boots = [0, 1, 10, 100, 1000]
-    # fig_ex = plt.figure(figsize=(6, 2*len(n_boots)))
-    # gs = plt.GridSpec(nrows=len(n_boots), ncols=1, hspace=0.15, wspace=0.15, sharex=True)
-    fig, axes = plt.subplots(len(n_boots), 1, sharex=True, figsize=(9, 2*len(n_boots)))
+        # Explore the effect of n_boots
+        n_boots = [0, 1, 10, 100, 1000]
+        # fig_ex = plt.figure(figsize=(6, 2*len(n_boots)))
+        # gs = plt.GridSpec(nrows=len(n_boots), ncols=1, hspace=0.15, wspace=0.15, sharex=True)
+        fig, axes = plt.subplots(len(n_boots), 1, sharex=True, figsize=(9, 2*len(n_boots)))
 
-    for b, n_boots in enumerate(n_boots):
-        # ax_ci_ex = fig_ex.add_subplot(gs[b, 0])
-        if n_boots == 0:
-            df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
-                                    boot_size=-1, alpha=alpha,
-                                    true_p1=prop_Ref1, n_jobs=-1,
-                                    logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
-        else:
-            df = df_pe.loc[:n_boots, :]
-        # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys")
-        if b == 0:
-            legend = True
-        else:
-            legend = False
-        # plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, legend=legend, orient='h')
-        plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
+        for b, n_boots in enumerate(n_boots):
+            # ax_ci_ex = fig_ex.add_subplot(gs[b, 0])
+            if n_boots == 0:
+                df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
+                                        boot_size=-1, alpha=alpha,
+                                        true_p1=prop_Ref1, n_jobs=-1,
+                                        logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
+            else:
+                df = df_pe.loc[:n_boots, :]
+            # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys")
+            if b == 0:
+                legend = True
+            else:
+                legend = False
+            # plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, legend=legend, orient='h')
+            plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
-    fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
+        fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
