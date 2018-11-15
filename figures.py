@@ -203,7 +203,7 @@ def plot_distributions(scores, bins, data_label, ax=None):
                      # label="$R_1: n={:,}$".format(len(scores['Ref1'])),
                      ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
-                     label="$R_H: n={:,}$".format(len(scores['Ref2'])),
+                     label="$R_C: n={:,}$".format(len(scores['Ref2'])),
                      # label="$R_2: n={:,}$".format(len(scores['Ref2'])),
                      ax=ax, kde_kws={'bw': bins['width']})
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=False,
@@ -362,7 +362,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
             warnings.simplefilter("ignore", category=FutureWarning)
             sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True}, # hist=True, norm_hist=True, kde=False)#,
-                         label=r"$p_D^*=0.0\ (R_H)$", ax=ax_mix, color=palette[0])
+                         label=r"$p_D^*=0.0\ (R_C)$", ax=ax_mix, color=palette[0])
                          # label=r"$p_1^*=0.0\ (R_2)$", ax=ax_mix, color=palette[0])
             for p, p_star in enumerate(p_stars):
                 sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
