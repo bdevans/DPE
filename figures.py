@@ -863,7 +863,8 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
 
 
     # Plot selected violins
-    plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys")
+    plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
+                          out_dir, data_label, ADD_CI=True, alpha=0.05, ci_method=CI_METHOD)
 
 
     # Plot error bars
