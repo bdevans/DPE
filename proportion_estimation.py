@@ -304,16 +304,16 @@ def calc_conf_intervals(values, average=np.mean, alpha=0.05, ci_method="stderr")
 
 def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
     n_boot = len(df_pe)
-    line_width = 62
+    line_width = 54
     report = []
-    report.append("{:20} | {:^17s} | {:^17s} ".format("Proportion Estimates",
-                                                      "Reference 1",
-                                                      "Reference 2"))
+    report.append(" {:^12} | {:^17s} | {:^17s} ".format("Method",
+                                                        "Estimated pD",   # Reference 1
+                                                        "Estimated pC"))  # Reference 2
     report.append("="*line_width)
     for method in df_pe:  # loop over columns (i.e. methods)
         values = df_pe[method]
 #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        report.append(" {:6} (µ±σ)         | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
+        report.append(" {:6} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
         if n_boot > 1:
@@ -324,13 +324,14 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
             #nobs = len(values)
             #count = int(np.mean(values)*nobs)
             # TODO: Multiply the numbers by 10 for more accuracy 45/100 --> 457/1000 ?
-            report.append(" C.I. (level={:3.1%})  | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
             #ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
             #ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
+
+            report.append(" C.I. ({:3.1%}) | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
         report.append("-"*line_width)
     if true_p1:
-        report.append(" {:20} | {:<17.5f} | {:<17.5f} "
+        report.append(" {:12} | {:<17.5f} | {:<17.5f} "
                       .format("Ground Truth", true_p1, 1-true_p1))
         report.append("="*line_width)
     # report.append("\n")
