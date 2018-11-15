@@ -704,7 +704,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
         df_pe = pe.analyse_mixture(scores, bins, methods,
                                    n_boot=n_boot, boot_size=-1,  # boot_size=sample_size,
                                    alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
-                                   logfile="results/pe_{}.log".format(data_label))
+                                   logfile="{}/pe_{}.log".format(out_dir, data_label))
 
         elapsed = time.time() - t
         print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
@@ -991,7 +991,7 @@ for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
             df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
                                     boot_size=-1, alpha=alpha,
                                     true_p1=prop_Ref1, n_jobs=-1,
-                                    logfile="results/pe_{}_{}.log".format(n_boots, data_label))
+                                    logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
         else:
             df = df_pe.loc[:n_boots, :]
         # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys")
