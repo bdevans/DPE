@@ -783,29 +783,29 @@ if __name__ == "__main__":
 
 
 
-        # Plot violins
-        fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
-        # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
-        # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-        ax_vio = fig_vio.add_subplot(111)
+        # Plot selected violins
+        if False:
+            #for mix in range(n_mixes):
+            mix = selected_mix
+            fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
+            ax_vio = fig_vio.add_subplot(111)
 
-        for p, p_star in enumerate(p_stars):
-            df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(selected_mix, df_est['Mix'])]  # & np.isclose(size, df_vio['Size'])]
-            # df.sort_values(by='Size', ascending=False, inplace=True)
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=FutureWarning)
-                g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df,
-                                   ax=ax_vio, orient='h', cut=0)
-            g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
-                      # label="Ground Truth: {:3.2}".format(p_star))
-            handles, labels = g.get_legend_handles_labels()
-            g.legend(handles, labels[:len(methods)], title="Method")
-            # g.legend.set_title("Method")
+            for p, p_star in enumerate(p_stars):
+                df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(mix, df_est['Mix'])]
+                # df.sort_values(by='Size', ascending=False, inplace=True)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=FutureWarning)
+                    g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df,
+                                       ax=ax_vio, orient='h', cut=0)
+                g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
+                          # label="Ground Truth: {:3.2}".format(p_star))
+                handles, labels = g.get_legend_handles_labels()
+                g.legend(handles, labels[:len(methods)], title="Method")
+                # g.legend.set_title("Method")
 
-        # sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
-        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
-        g.invert_yaxis()
-        fig_vio.savefig(os.path.join(fig_dir, 'violin_bootstraps_{}.png'.format(data_label)))
+            sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+            g.invert_yaxis()
+            fig_vio.savefig(os.path.join(fig_dir, 'violin_bootstraps_{}_{}.png'.format(mix, data_label)))
 
 
 
