@@ -222,8 +222,8 @@ def plot_distributions(scores, bins, data_label, ax=None):
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None,
-                    ci_method='normal', legend=True, orient='v'):
+def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
+                    ci_method='jeffreys', legend=True, orient='v'):
 
     c = sns.color_palette()[-3]  # 'gray'
 
