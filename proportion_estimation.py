@@ -553,7 +553,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
     # ----------- Summarise proportions for the whole distribution ------------
     report = generate_report(df_pe, true_p1=true_p1, alpha=alpha)
     if verbose > 0:
-        print("\n", report, "\n")
+        print("\n" + report + "\n")
 
     if logfile is not None:
         if logfile == '':
