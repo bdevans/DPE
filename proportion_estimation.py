@@ -14,6 +14,7 @@ from pprint import pprint
 # import warnings
 
 import numpy as np
+import scipy as sp
 import pandas as pd
 import lmfit
 from joblib import Parallel, delayed, cpu_count
@@ -282,7 +283,26 @@ def prepare_methods(methods, scores, bins, verbose=1):
     return kwargs
 
 
-def generate_report(df_pe, true_p1=None, alpha=0.05):
+def calc_conf_intervals(values, average=np.mean, alpha=0.05, ci_method="stderr"):
+
+    n_obs = len(values)
+    average_value = average(values)
+
+    if ci_method == 'centile':
+        ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
+    elif ci_method == 'stderr':
+        p = average_value
+        err = np.sqrt(p*(1-p)/n_obs) * sp.stats.norm.ppf(1-alpha/2)
+        ci_low, ci_upp = p - err, p + err
+    else:  # Assumes a binomial distribution
+        count = int(average_value*n_obs)
+        ci_low, ci_upp = proportion_confint(count, n_obs, alpha=alpha,
+                                            method=ci_method)
+
+    return ci_low, ci_upp
+
+
+def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
     n_boot = len(df_pe)
     line_width = 62
     report = []
@@ -297,12 +317,16 @@ def generate_report(df_pe, true_p1=None, alpha=0.05):
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
         if n_boot > 1:
-            nobs = len(values)
-            count = int(np.mean(values)*nobs)
+
+            ci_low1, ci_upp1 = calc_conf_intervals(values, average=np.mean, alpha=alpha, ci_method=ci_method)
+            ci_low2, ci_upp2 = 1-ci_upp1, 1-ci_low1
+
+            #nobs = len(values)
+            #count = int(np.mean(values)*nobs)
             # TODO: Multiply the numbers by 10 for more accuracy 45/100 --> 457/1000 ?
-            ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
-            ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
             report.append(" C.I. (level={:3.1%})  | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
+            #ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
+            #ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
         report.append("-"*line_width)
     if true_p1:
