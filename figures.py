@@ -293,7 +293,7 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
 
     c = sns.color_palette()[-3]  # 'gray'
 
-    df_bs = df_bs[pe._ALL_METHODS_]
+    # df_bs = df_bs[pe._ALL_METHODS_]
 
     if not ax:
         f, ax = plt.subplots()
@@ -329,11 +329,11 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
         means = x
     errors = np.zeros(shape=(2, len(methods)))
 
-    for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
         nobs = len(df_bs[method])
         count = int(np.mean(df_bs[method])*nobs)
         ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
                                             method=ci_method)
+    for midx, method in enumerate(df_bs):  # enumerate(methods):
         errors[0, midx] = means[midx] - ci_low
         errors[1, midx] = ci_upp - means[midx]
 
