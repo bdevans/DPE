@@ -96,6 +96,13 @@ if __name__ == '__main__':
     nprocs = cpu_count()
     print('Running with {} processors...'.format(nprocs))
 
+    with open(os.path.join(out_dir, "run.log"), "w") as runlog:
+        runlog.write(time.strftime("%Y-%m-%d (%a) %H:%M:%S\n", time.gmtime()))
+        runlog.write("=========================\n\n")
+        runlog.write("Random seed: {}\n".format(seed))
+        runlog.write("Saving results to: {}\n".format(out_dir))
+        runlog.write("Running with {} processors...\n\n".format(nprocs))
+
     # Set random seed
     np.random.seed(seed)
 
@@ -125,6 +132,13 @@ if __name__ == '__main__':
 
         print("Total method applications (of {} methods): {:,}"
               .format(len(methods), len(sample_sizes)*len(proportions)*n_samples*n_boot))
+
+        with open(os.path.join(out_dir, "run.log"), "a") as runlog:
+            runlog.write("Running parameter sweep with {} scores...\n".format(tag))
+            runlog.write("Samples sizes: {:,}; Proportions: {:,}; Mixtures: {:,}; Bootstraps: {:,}\n"
+                         .format(len(sample_sizes), len(proportions), n_samples, n_boot))
+            runlog.write("Total method applications (of {} methods): {:,}\n"
+                         .format(len(methods), len(sample_sizes)*len(proportions)*n_samples*n_boot))
 
         point_arrays = {}
         boots_arrays = {}
@@ -168,6 +182,9 @@ if __name__ == '__main__':
 
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
+        with open(os.path.join(out_dir, "run.log"), "a") as runlog:
+            runlog.write('Elapsed time = {}\n'.format(SecToStr(elapsed)))
+            runlog.write("=======================\n\n")
 
         # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
 #        if run_EMD:
@@ -188,3 +205,6 @@ if __name__ == '__main__':
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
 
     print("Analysis of methods on datasets: {} complete!".format(list(datasets)))
+    with open(os.path.join(out_dir, "run.log"), "a") as runlog:
+        runlog.write("Analysis of methods on datasets: {} complete!\n".format(list(datasets)))
+        runlog.write(time.strftime("%Y-%m-%d (%a) %H:%M:%S\n", time.gmtime()))
