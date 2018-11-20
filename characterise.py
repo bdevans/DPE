@@ -40,10 +40,10 @@ sample_sizes = np.arange(100, 2501, 100)  # 3100
 proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 
 # Very quick testing run
-n_samples = 4  # 1000
-n_boot = 4
-sample_sizes = np.arange(100, 201, 100)
-proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
+# n_samples = 4  # 1000
+# n_boot = 4
+# sample_sizes = np.arange(100, 201, 100)
+# proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
 
 # KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
