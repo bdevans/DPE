@@ -79,11 +79,14 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
                                true_p1=prop_Ref1, n_jobs=1, seed=seed,
                                verbose=0, logfile=None)
 
-    logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
-    boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                               boot_size=-1, alpha=0.05,
-                               true_p1=prop_Ref1, n_jobs=1, seed=seed,
-                               verbose=0, logfile=logfile)
+    if n_boot:
+        logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
+        boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
+                                   boot_size=-1, alpha=0.05,
+                                   true_p1=prop_Ref1, n_jobs=1, seed=seed,
+                                   verbose=0, logfile=logfile)
+    else:
+        boots = {method: None for method in methods}
 
     return (point, boots)
 
@@ -160,7 +163,8 @@ if __name__ == '__main__':
                         point, boots = results[m]
                         for method in methods:
                             point_arrays[method][s, p, m] = point[method]
-                            boots_arrays[method][s, p, m, :] = boots[method]
+                            if n_boot:
+                                boots_arrays[method][s, p, m, :] = boots[method]
 
         elapsed = time.time() - t
         print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
@@ -177,7 +181,8 @@ if __name__ == '__main__':
 
         for method in methods:
             np.save('{}/point_{}_{}'.format(out_dir, method, tag), point_arrays[method])
-            np.save('{}/boots_{}_{}'.format(out_dir, method, tag), boots_arrays[method])
+            if n_boot:
+                np.save('{}/boots_{}_{}'.format(out_dir, method, tag), boots_arrays[method])
         # TODO: Save the arrays in the dictionary as a pickle file
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
