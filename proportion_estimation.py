@@ -292,6 +292,7 @@ def calc_conf_intervals(values, average=np.mean, alpha=0.05, ci_method="stderr")
         ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
     elif ci_method == 'stderr':
         p = average_value
+        # NOTE: This currently allows CIs outside [0, 1]
         err = np.sqrt(p*(1-p)/n_obs) * sp.stats.norm.ppf(1-alpha/2)
         ci_low, ci_upp = p - err, p + err
     else:  # Assumes a binomial distribution
