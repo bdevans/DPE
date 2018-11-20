@@ -34,6 +34,8 @@ COPY data /usr/dpe/data/
 COPY *.py /usr/dpe/
 VOLUME /usr/dpe/results
 
+# ENV PYTHONWARNINGS=ignore
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
 CMD [ "source activate dpe && exec python characterise.py" ]
+# -Wignore::DeprecationWarning
