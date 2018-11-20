@@ -82,7 +82,8 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
                                verbose=0, logfile=None)
 
     if n_boot:
-        logfile = 'pe_s{}_p{}.log'.format(sample_size, prop_Ref1)
+        logfile = os.path.join(out_dir, 'pe_s{}_p{:.2}.log'
+                                        .format(sample_size, prop_Ref1))
         boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
                                    boot_size=-1, alpha=0.05,
                                    true_p1=prop_Ref1, n_jobs=1, seed=seed,
