@@ -28,7 +28,7 @@ import datasets as ds
 
 # ---------------------------- Define constants ------------------------------
 
-out_dir = "results"
+# out_dir = "results"
 verbose = False
 seed = 42
 
@@ -48,7 +48,7 @@ proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
-# out_dir = "results_m{}_b{}".format(n_samples, n_boot)
+out_dir = os.path.join("results", "m{}_b{}".format(n_samples, n_boot))
 
 # ----------------------------------------------------------------------------
 
