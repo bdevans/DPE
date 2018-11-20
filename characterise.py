@@ -48,6 +48,8 @@ proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
+# out_dir = "results_m{}_b{}".format(n_samples, n_boot)
+
 # ----------------------------------------------------------------------------
 
 if not os.path.exists(out_dir):
