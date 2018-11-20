@@ -45,7 +45,7 @@ n_boot = 4
 sample_sizes = np.arange(100, 201, 100)
 proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
 
-KDE_kernel = 'gaussian'
+# KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
 out_dir = os.path.join("results", "m{}_b{}".format(n_samples, n_boot))
