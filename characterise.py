@@ -133,15 +133,17 @@ if __name__ == '__main__':
 
         methods = pe.prepare_methods_(scores, bins)  # Get all methods
 
+        # NOTE: There is always a point estimate in addition to any bootstraps
+        n_applications = len(sample_sizes) * len(proportions) * n_samples * (1+n_boot)
         print("Total method applications (of {} methods): {:,}"
-              .format(len(methods), len(sample_sizes)*len(proportions)*n_samples*n_boot))
+              .format(len(methods), n_applications))
 
         with open(os.path.join(out_dir, "run.log"), "a") as runlog:
             runlog.write("Running parameter sweep with {} scores...\n".format(tag))
             runlog.write("Samples sizes: {:,}; Proportions: {:,}; Mixtures: {:,}; Bootstraps: {:,}\n"
                          .format(len(sample_sizes), len(proportions), n_samples, n_boot))
             runlog.write("Total method applications (of {} methods): {:,}\n"
-                         .format(len(methods), len(sample_sizes)*len(proportions)*n_samples*n_boot))
+                         .format(len(methods), n_applications))
 
         point_arrays = {}
         boots_arrays = {}
