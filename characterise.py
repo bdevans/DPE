@@ -83,8 +83,8 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
 
     if n_boot:
         if verbose:
-            logfile = os.path.join(out_dir, 'pe_s{}_p{:.2f}_{}.log'
-                                            .format(sample_size, prop_Ref1, seed))
+            logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
+                                                    .format(sample_size, prop_Ref1, seed))
         else:
             logfile = None
         boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
