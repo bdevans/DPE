@@ -14,7 +14,8 @@ Execution
 2. Collect results and run `plots.py`.
     0. Use `screen -r` to list the detached sessions
     1. `screen -r 10654.pts-8.thuemorse`
-    2. Copy the data for processing:
+    2. `docker cp dpe:/usr/dpe/results .`
+    3. Copy the data for processing:
         - From the client: `scp -r bde201-admin@144.173.106.18:/home/bde201-admin/results results`
         - From the server: `scp -r results ben@144.173.111.1:/Users/ben/EXE/repos/DPE/results`
 
