@@ -9,8 +9,8 @@ dependencies:
   - scipy
   - pandas
   - scikit-learn
-  - matplotlib
-  - seaborn
+  #- matplotlib
+  #- seaborn
   - lmfit
   - emcee
   - corner
