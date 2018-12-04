@@ -57,6 +57,9 @@ out_dir = os.path.join("results", "m{}_b{}".format(n_samples, n_boot))
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
+if verbose and not os.path.exists(os.path.join(out_dir, "logs")):
+    os.makedirs(os.path.join(out_dir, "logs"))
+
 
 def SecToStr(sec):
     m, s = divmod(sec, 60)
