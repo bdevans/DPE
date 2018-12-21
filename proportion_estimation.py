@@ -71,7 +71,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
     return np.interp(x_i, iv, y[ii])
 
 
-def prepare_methods_(scores, bins, methods=None, verbose=1):
+def prepare_methods(scores, bins, methods=None, verbose=1):
 
     if methods is None:
         methods = {method: True for method in _ALL_METHODS_}
@@ -210,13 +210,13 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
     # if kwargs is None:
     #     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
-    methods = prepare_methods_(scores, bins, methods=methods, verbose=verbose)
+    methods = prepare_methods(scores, bins, methods=methods, verbose=verbose)
 
-    def estimate_Ref1_(RM, Ref1, Ref2, bins, methods=None):
+    def point_estimate(RM, Ref1, Ref2, bins, methods=None):
         '''Estimate the proportion of two reference populations comprising
         an unknown mixture.
 
-        The returned proportions are with respect to Ref_1.
+        The returned proportions are with respect to Ref_1, the disease group.
         The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
         '''
 
@@ -277,13 +277,13 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         else:
             bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
 
-        return estimate_Ref1_(bs, Ref1, Ref2, bins, methods)  #, kwargs)
+        return point_estimate(bs, Ref1, Ref2, bins, methods)  #, kwargs)
 
     columns = [method for method in _ALL_METHODS_ if method in methods]
 
     if n_boot <= 0:
         # Get initial estimate of proportions
-        initial_results = estimate_Ref1_(Mix, Ref1, Ref2, bins, methods)  #, kwargs)
+        initial_results = point_estimate(Mix, Ref1, Ref2, bins, methods)  #, kwargs)
         if verbose > 1:
             pprint(initial_results)
         if true_p1:
