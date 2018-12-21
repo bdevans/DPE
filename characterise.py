@@ -139,7 +139,7 @@ if __name__ == '__main__':
         bin_width = bins['width']
         bin_edges = bins['edges']
 
-        methods = pe.prepare_methods_(scores, bins)  # Get all methods
+        methods = pe.prepare_methods(scores, bins)  # Get all methods
 
         # NOTE: There is always a point estimate in addition to any bootstraps
         n_applications = len(sample_sizes) * len(proportions) * n_samples * (1+n_boot)
