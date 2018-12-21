@@ -9,6 +9,7 @@ Module to analyse an unknown mixture population.
 """
 
 # TODO: Rename {Ref1: R_D, Ref2: R_N}
+# TODO: Move point_estimate and bootstrap_mixture to top level and hide other functions
 
 from pprint import pprint
 # import warnings
@@ -266,7 +267,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
         return results
 
-
     def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):  #, kwargs=None):
 
         if boot_size == -1:
@@ -289,7 +289,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         if true_p1:
             if verbose > 1:
                 print("Ground truth: {:.5f}".format(true_p1))
-
         df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
 
     else:  # if n_boot > 0:
@@ -319,7 +318,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
             with Parallel(n_jobs=n_jobs) as parallel:
                 results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)  #, kwargs=kwargs)
                                    for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
-
         # Put into dataframe
         df_pe = pd.DataFrame.from_records(results, columns=columns)
 
