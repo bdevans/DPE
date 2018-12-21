@@ -185,3 +185,23 @@ Display Items
 1. Bootstraps (as for Fig. 3) for e.g. Depression, Menieres, Renal.
 2. Mixture histograms with estimates and confidence intervals for each method
 3. Distributions of Ref1, Ref2 and Mix for each dataset
+
+Links
+-----
+
+- https://joblib.readthedocs.io/en/latest/parallel.html
+- https://lmfit.github.io/lmfit-py/fitting.html
+- https://github.com/tqdm/tqdm#parameters
+- KDEs
+    * https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
+    * https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
+    * https://jakevdp.github.io/PythonDataScienceHandbook/05.13-kernel-density-estimation.html
+    * https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
+    * https://mglerner.github.io/posts/histograms-and-kernel-density-estimation-kde-2.html?p=28
+    * https://github.com/Daniel-B-Smith/KDE-for-SciPy
+- Curve fitting
+    * https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
+- Confidence Intervals
+    * http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
+    * https://www.statisticshowto.datasciencecentral.com/probability-and-statistics/confidence-interval/#CIpopprop
+    * https://onlinecourses.science.psu.edu/stat100/node/56/
