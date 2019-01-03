@@ -74,7 +74,7 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
 
 def prepare_methods(scores, bins, methods=None, verbose=1):
 
-    if methods is None:
+    if methods is None:  # Run all methods
         methods = {method: True for method in _ALL_METHODS_}
 
     if "Excess" in methods:
@@ -200,7 +200,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
 
 def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
                     alpha=0.05, true_p1=None, n_jobs=1, seed=None,
-                    verbose=1, logfile=''):  #, kwargs=None):
+                    verbose=1, logfile=''):
 
     if seed is not None:
         np.random.seed(seed)
@@ -267,7 +267,7 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
 
         return results
 
-    def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):  #, kwargs=None):
+    def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
 
         if boot_size == -1:
             boot_size = len(Mix)
@@ -277,13 +277,13 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         else:
             bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
 
-        return point_estimate(bs, Ref1, Ref2, bins, methods)  #, kwargs)
+        return point_estimate(bs, Ref1, Ref2, bins, methods)
 
     columns = [method for method in _ALL_METHODS_ if method in methods]
 
     if n_boot <= 0:
         # Get initial estimate of proportions
-        initial_results = point_estimate(Mix, Ref1, Ref2, bins, methods)  #, kwargs)
+        initial_results = point_estimate(Mix, Ref1, Ref2, bins, methods)
         if verbose > 1:
             pprint(initial_results)
         if true_p1:
