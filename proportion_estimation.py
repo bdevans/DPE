@@ -12,6 +12,7 @@ Module to analyse an unknown mixture population.
 # TODO: Move point_estimate and bootstrap_mixture to top level and hide other functions
 
 from pprint import pprint
+import itertools
 # import warnings
 
 import numpy as np
@@ -198,7 +199,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
     return "\n".join(report)
 
 
-def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
+def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
                     alpha=0.05, true_p1=None, n_jobs=1, seed=None,
                     verbose=1, logfile=''):
 
@@ -309,17 +310,65 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1,
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
 
-        # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1
-        if n_jobs == 1 or n_jobs is None:
-            # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
-            results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None)  #, kwargs=kwargs)
-                       for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
-        else:
-            with Parallel(n_jobs=n_jobs) as parallel:
-                results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)  #, kwargs=kwargs)
-                                   for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
-        # Put into dataframe
-        df_pe = pd.DataFrame.from_records(results, columns=columns)
+        if n_mix <= 0:
+            # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1
+            if n_jobs == 1 or n_jobs is None:
+                # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
+                results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None)  #, kwargs=kwargs)
+                           for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+            else:
+                with Parallel(n_jobs=n_jobs) as parallel:
+                    results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)  #, kwargs=kwargs)
+                                       for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
+            # Put into dataframe
+            df_pe = pd.DataFrame.from_records(results, columns=columns)
+
+        else:  # Extended mixture & bootstrap routine to calculate CIs
+            # TODO: Refactor for efficiency
+            sample_size = len(Mix)
+            results = {}
+            initial_results = point_estimate(Mix, Ref1, Ref2, bins, methods)
+
+            for method, prop_Ref1 in tqdm(initial_results.items(), desc="Method", dynamic_ncols=True, disable=disable):
+                single_method = {}
+                single_method[method] = methods[method]
+                mix_results = []
+
+                for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=disable):
+
+                    assert(0.0 <= prop_Ref1 <= 1.0)
+                    n_Ref1 = int(round(sample_size * prop_Ref1))
+                    n_Ref2 = sample_size - n_Ref1
+
+                    # Construct mixture
+                    mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
+                                              np.random.choice(Ref2, n_Ref2, replace=True)))
+
+                    # Spawn threads
+                    with Parallel(n_jobs=nprocs) as parallel:
+                        # Parallelise over mixtures
+                        boot_list = parallel(delayed(bootstrap_mixture)(mixture, Ref1, Ref2, bins, single_method, boot_size, seed=b_seed)
+                                             for b_seed in tqdm(boot_seeds,
+                                                                desc="Bootstraps",
+                                                                dynamic_ncols=True,
+                                                                disable=disable))
+
+                    mix_results.append(boot_list)
+
+                # Concatenate each mixtures' bootstrap estimates
+                # results[method] = [boot[method] for boot in boot_results
+                #                    for boot_results in mix_results]
+                results[method] = []
+                for boot_results in mix_results:
+                    for boot in boot_results:
+                        results[method].append(boot[method])
+
+            # Put into dataframe
+            df_pe = pd.concat([pd.DataFrame(initial_results, index=[0], columns=columns),
+                               pd.DataFrame.from_records(results, columns=columns)], ignore_index=True)
+            index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
+            index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
+            df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Mix", "Bootstrap"])
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
