@@ -257,6 +257,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
     gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
 
     for m, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
+
         # Plot average accuracy across mixtures
         ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
         if m == 0:
