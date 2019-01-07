@@ -763,13 +763,14 @@ if __name__ == "__main__":
         (point_estimates, boots_estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
 
         # Plot point estimates of p1
-        if False:
+        if bool(point_estimates):
             fig = plot_characterisation(point_estimates, proportions, sample_sizes)
             fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
 
         # Plot bootstrapped estimates of p1
-        fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
-        fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
+        if bool(boots_estimates):
+            fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
+            fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
 
 
 
