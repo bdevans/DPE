@@ -1042,3 +1042,35 @@ if __name__ == "__main__":
             plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
         fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
+
+        for mix in range(n_mixes):
+            df_mix = df_est[np.isclose(mix, df_est['Mix'])]
+            frames = []
+
+            for b in [1000, 100, 10, 1]:
+                for s, size in enumerate(sizes):
+                    for p, p_star in enumerate(p_stars):
+                        df_ps = df_mix[np.isclose(p_star, df_mix['p1*']) & np.isclose(size, df_mix['Size'])]
+
+                        for m, method in enumerate(methods):
+                            df_meth = df_ps[df_ps["Method"] == method]
+                            df_tmp = df_meth[:b]
+                            df_tmp["Error"] = df_tmp["Estimate"] - p_star
+                            df_tmp["Bootstraps"] = b
+        #                    df = df.append(df_tmp, ignore_index=True)
+                            frames.append(df_tmp)
+
+                            print("Bootstraps = {}; Method: {}; p_D = {}; size = {}; Mean = {}; SD = {}"
+                                  .format(b, method, p_star, size, np.mean(df_tmp["Estimate"] - p_star), np.std(df_tmp["Estimate"] - p_star)))
+                            #.sample(n=100, replace=False)
+
+            df = pd.concat(frames, ignore_index=True)
+
+            with sns.axes_style("whitegrid"):
+                g = sns.catplot(x="Bootstraps", y="Error", hue="Method", col="p1*", row="Size", row_order=sizes[::-1], data=df, kind="violin") #, margin_titles=True) #, ax=ax_err)
+                g.set(ylim=(-0.5, 0.5)).despine(left="True")
+
+        #        g = sns.catplot(x="Estimate", y="Bootstraps", hue="Method", col="p1*", row="Size", row_order=sizes[::-1], data=df, kind="violin", margin_titles=True) #, ax=ax_err)
+                #g.despine(left="True")
+
+            plt.savefig(os.path.join(fig_dir, "bootstraps_{}_{}.png".format(mix, data_label)))
