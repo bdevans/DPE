@@ -134,6 +134,25 @@ def load_accuracy(out_dir, label):
     return point_estimates, boots_estimates, PROPORTIONS, SAMPLE_SIZES
 
 
+def get_error_bars(df, average=np.mean, alpha=0.05, ci_method="stderr"):
+    """df: columns are method names"""
+
+    #methods = list(df.columns)
+    #n_est, n_methods = df.shape
+    n_methods = len(df.columns)
+    errors = np.zeros(shape=(2, n_methods))
+
+    for m, method in enumerate(df):  # enumerate(methods):
+
+        ci_low, ci_upp = pe.calc_conf_intervals(df[method].values,
+                                                average=average, alpha=alpha,
+                                                ci_method=ci_method)
+        errors[0, m] = means[m] - ci_low
+        errors[1, m] = ci_upp - means[m]
+
+    return errors
+
+
 # TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
 def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
                   shading_levels=None, contour_levels=[0.02], title=True):
