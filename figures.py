@@ -31,7 +31,9 @@ from datasets import (load_diabetes_data, load_renal_data)
 # METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 FRESH_DATA = False  # CAUTION!
 #out_dir = "results_test"
-out_dir = "results_100_100"
+# out_dir = "results_100_100"
+# out_dir = "results/m1000_b0"
+out_dir = "results/m1000_b10"
 fig_dir = os.path.join(out_dir, "figs")
 
 verbose = False
