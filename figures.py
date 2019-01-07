@@ -183,14 +183,13 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
                 # ['-0.05', '-0.04', '-0.03', '-0.02', '-0.01', '0.00', '0.01', '0.02', '0.03', '0.04', '0.05']
                 SHADING_TICKS = np.linspace(-0.05, 0.05, 11)
 
-
         else:
             SHADING_LEVELS = np.logspace(-4, -1, num=19)
             np.logspace(-4, -1, num=4)
     else:
         SHADING_LEVELS = shading_levels
         SHADING_TICKS = ["{:.2f}".format(tick) for tick in SHADING_LEVELS[::2]]
-    SHADING_LABELS = ["{:.2f}".format(tick) for tick in SHADING_TICKS]
+    # SHADING_LABELS = ["{:.2f}".format(tick) for tick in SHADING_TICKS]
 
     if ABSOLUTE_ERROR:
         cmap = 'viridis_r'
