@@ -417,7 +417,7 @@ def construct_mixture(Ref1, Ref2, p1, size):
     return mix
 
 
-def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys"):
+def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, add_ci=True, alpha=0.05, ci_method="jeffreys"):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
@@ -506,7 +506,7 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
 #            ax_vio.get_yticklabels().set_visible(False)
             ax_vio.set(xlim=(0, 1))
 
-            if ADD_CI:  # Add confidence intervals
+            if add_ci:  # Add confidence intervals
                 # The true value will be within these bars for 95% of samples (not measures)
                 # For alpha = 0.05, the CI bounds are +/- 1.96*SEM
                 df_means = df.groupby('Method').mean()
@@ -901,7 +901,7 @@ if __name__ == "__main__":
         for mix in range(n_mixes):
             plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
                                   out_dir, data_label, selected_mix=mix,
-                                  ADD_CI=True, alpha=0.05, ci_method=CI_METHOD)
+                                  add_ci=True, alpha=0.05, ci_method=CI_METHOD)
 
 
         # Plot error bars
@@ -1033,7 +1033,7 @@ if __name__ == "__main__":
                                         logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
             else:
                 df = df_pe.loc[:n_boots, :]
-            # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, ADD_CI=True, alpha=0.05, CI_METHOD="jeffreys")
+            # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, add_ci=True, alpha=0.05, ci_method="jeffreys")
             if b == 0:
                 legend = True
             else:
