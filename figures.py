@@ -15,6 +15,7 @@ import warnings
 
 import pandas as pd
 import numpy as np
+import scipy as sp
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -339,20 +340,33 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
             ax.axvline(x=prop_Ref1, ymin=0, ymax=1, ls='--',
                        label="Ground Truth: {:4.3}".format(prop_Ref1))
 
-    # Add confidence intervals
+    # Add confidence intervals # TODO: Refactor
     if orient == 'v':
         x, y = ax.get_xticks(), df_bs.mean().values
         means = y
     elif orient =='h':
         x, y = df_bs.mean().values, ax.get_yticks()
         means = x
+
+    # TODO: Think about means
+    # get_error_bars(df, average=np.mean, alpha=0.05, ci_method="stderr")
     errors = np.zeros(shape=(2, len(methods)))
 
-        nobs = len(df_bs[method])
-        count = int(np.mean(df_bs[method])*nobs)
-        ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
-                                            method=ci_method)
     for midx, method in enumerate(df_bs):  # enumerate(methods):
+
+        if ci_method == 'centile':
+            ci_low, ci_upp = np.percentile(df_bs[method], [100*alpha/2, 100-(100*alpha/2)])
+        elif ci_method == 'stderr':
+            p = np.mean(df_bs[method])
+            nobs = len(df_bs[method])
+            # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Lookup this value for a given alpha
+            err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
+            ci_low, ci_upp = p - err, p + err
+        else:
+            nobs = len(df_bs[method])
+            count = int(np.mean(df_bs[method])*nobs)
+            ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
+                                                method=ci_method)
         errors[0, midx] = means[midx] - ci_low
         errors[1, midx] = ci_upp - means[midx]
 
@@ -499,15 +513,33 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
                 errors = np.zeros(shape=(2, len(methods)))
                 means = []
                 for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
-                    nobs = size  # len(df_est[method])
+
                     mean_est = df_means.loc[method, 'Estimate']
+
+                    if ci_method == 'centile':
+                        df_pc = df[df["Method"] == method].loc[:, "Estimate"]
+                        ci_low, ci_upp = np.percentile(df_pc, [100*alpha/2, 100-(100*alpha/2)])
+                    elif ci_method == 'stderr':
+                        # p = np.mean(df_pc)
+                        # nobs = len(df_pc)
+                        p = mean_est
+                        nobs = size
+                        # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Look up correct value for alpha
+                        err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
+                        ci_low, ci_upp = p - err, p + err
+                    else:  # Assumes Binomial Distribution
+                        nobs = size  # len(df_est[method])
+
+                        # mean_est = np.mean(df_est[method])
+                        count = int(mean_est*nobs)
+                        ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
+                        # ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
+                        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
+
                     means.append(mean_est)
-                    # mean_est = np.mean(df_est[method])
-                    count = int(mean_est*nobs)
-                    ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=CI_METHOD)
-                    # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
-                    errors[0, midx] = mean_est - ci_low1  # y[midx] - ci_low1
-                    errors[1, midx] = ci_upp1 - mean_est  # ci_upp1 - y[midx]
+                    errors[0, midx] = mean_est - ci_low  # y[midx] - ci_low1
+                    errors[1, midx] = ci_upp - mean_est  # ci_upp1 - y[midx]
+                # print(errors)
 
                 # Add white border around error bars
                 # ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
