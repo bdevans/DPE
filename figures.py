@@ -225,6 +225,8 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
         cb = fig.colorbar(CS, ax=ax, ticks=SHADING_TICKS)  # , norm=mpl.colors.LogNorm())
         # cb.ax.set_yticklabels(SHADING_LABELS)
 
+    return CS
+
 
 def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
                    shading_levels=np.arange(0.01, 0.1001, 0.005),
@@ -249,6 +251,8 @@ def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
                colors=colour, linewidths=mpl.rcParams['lines.linewidth']+1)
     if cbar:
         fig.colorbar(CS, ax=ax)
+
+    return CS
 
 
 def plot_characterisation(estimates, proportions, sample_sizes,
