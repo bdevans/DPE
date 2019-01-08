@@ -158,7 +158,8 @@ def get_error_bars(df, average=np.mean, alpha=0.05, ci_method="stderr"):
 
 # TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
 def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
-                  shading_levels=None, contour_levels=[0.02], title=True):
+                  shading_levels=None, contour_levels=[0.02],
+                  title=True, cbar=True):
 
     if not ax:
         fig, ax = plt.subplots()
@@ -219,13 +220,15 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
 
     if title:
         ax.set_title(label)
-    cbar = fig.colorbar(CS, ax=ax, ticks=SHADING_TICKS)  # , norm=mpl.colors.LogNorm())
-    # cbar.ax.set_yticklabels(SHADING_LABELS)
+
+    if cbar:
+        cb = fig.colorbar(CS, ax=ax, ticks=SHADING_TICKS)  # , norm=mpl.colors.LogNorm())
+        # cb.ax.set_yticklabels(SHADING_LABELS)
 
 
 def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
                    shading_levels=np.arange(0.01, 0.1001, 0.005),
-                   contour_levels=[0.05], title=True):
+                   contour_levels=[0.05], title=True, cbar=True):
 
     # np.arange(0.005, 0.1001, 0.005)
     if not ax:
@@ -244,7 +247,8 @@ def plot_deviation(estimates, proportions, sample_sizes, label, fig, ax,
 
     ax.contour(proportions, sample_sizes, bs_dev, contour_levels,
                colors=colour, linewidths=mpl.rcParams['lines.linewidth']+1)
-    fig.colorbar(CS, ax=ax)
+    if cbar:
+        fig.colorbar(CS, ax=ax)
 
 
 def plot_characterisation(estimates, proportions, sample_sizes,
