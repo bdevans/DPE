@@ -874,41 +874,42 @@ if __name__ == "__main__":
 
 
         # Plot violin stack
-        print("Plotting violin stacks with {} scores...".format(data_label), flush=True)
-        fig_stack = plt.figure(figsize=(16, 2*len(sizes)))
-        # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
-        # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-    #    ax_vio = fig_vio.add_subplot(111)
-        gs = plt.GridSpec(nrows=1, ncols=len(methods), hspace=0.2, wspace=0.015)
+        if False:
+            print("Plotting violin stacks with {} scores...".format(data_label), flush=True)
+            fig_stack = plt.figure(figsize=(16, 2*len(sizes)))
+            # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
+            # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
+        #    ax_vio = fig_vio.add_subplot(111)
+            gs = plt.GridSpec(nrows=1, ncols=len(methods), hspace=0.2, wspace=0.015)
 
-        for m, method in enumerate(methods):
-            ax_stack = fig_stack.add_subplot(gs[m])
-            ax_stack.set_title(method)
+            for m, method in enumerate(methods):
+                ax_stack = fig_stack.add_subplot(gs[m])
+                ax_stack.set_title(method)
 
-            if m > 0:
-                plt.setp(ax_stack.get_yticklabels(), visible=False)
-                ax_stack.set_ylabel("")
-                sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
-            else:
-                sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+                if m > 0:
+                    plt.setp(ax_stack.get_yticklabels(), visible=False)
+                    ax_stack.set_ylabel("")
+                    sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
+                else:
+                    sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
-            ax_stack.set_xlim((0, 1))
-            for p, p_star in enumerate(p_stars):
-                df = df_est[np.isclose(p_star, df_est['p1*'])]  # & np.isclose(size, df_vio['Size'])]
-                # df.sort_values(by='Size', ascending=False, inplace=True)
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=FutureWarning)
-                    g = sns.violinplot(x='Estimate', y='Size', hue='Mix', data=df[df['Method'] == method],
-                                       ax=ax_stack, orient='h', cut=0)
-                g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
-                           #label="Ground Truth: {:3.2}".format(p_star))
-                handles, labels = g.get_legend_handles_labels()
-                g.legend(handles, labels[:n_mixes], title="Mixture")
-                # g.legend.set_title("Method")
+                ax_stack.set_xlim((0, 1))
+                for p, p_star in enumerate(p_stars):
+                    df = df_est[np.isclose(p_star, df_est['p1*'])]  # & np.isclose(size, df_vio['Size'])]
+                    # df.sort_values(by='Size', ascending=False, inplace=True)
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", category=FutureWarning)
+                        g = sns.violinplot(x='Estimate', y='Size', hue='Mix', data=df[df['Method'] == method],
+                                           ax=ax_stack, orient='h', cut=0)
+                    g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
+                               #label="Ground Truth: {:3.2}".format(p_star))
+                    handles, labels = g.get_legend_handles_labels()
+                    g.legend(handles, labels[:n_mixes], title="Mixture")
+                    # g.legend.set_title("Method")
 
-    #        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
-            g.invert_yaxis()
-        fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
+        #        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+                g.invert_yaxis()
+            fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
 
 
         # Plot selected violins
