@@ -969,45 +969,46 @@ if __name__ == "__main__":
 
 
         # Plot mixture distributions - add reference populations?
-        print("Plotting constructed mixtures from {} scores...".format(data_label), flush=True)
-        fig_mixes = plt.figure(figsize=(8, 8))
-        gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-        for si, size in enumerate(sizes):
-            mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
-            if os.path.isfile(mix_dist_file):
-                df_mixes = pd.read_pickle(mix_dist_file)
-                if si == 0:
-                    ax_mixes = fig_mixes.add_subplot(gs[-(si+1)])
-                    ax_base = ax_mixes
-                else:
-                    ax_mixes = fig_mixes.add_subplot(gs[-(si+1)], sharex=ax_base)
-                    plt.setp(ax_mixes.get_xticklabels(), visible=False)
+        if False:
+            print("Plotting constructed mixtures from {} scores...".format(data_label), flush=True)
+            fig_mixes = plt.figure(figsize=(8, 8))
+            gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
+            for si, size in enumerate(sizes):
+                mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
+                if os.path.isfile(mix_dist_file):
+                    df_mixes = pd.read_pickle(mix_dist_file)
+                    if si == 0:
+                        ax_mixes = fig_mixes.add_subplot(gs[-(si+1)])
+                        ax_base = ax_mixes
+                    else:
+                        ax_mixes = fig_mixes.add_subplot(gs[-(si+1)], sharex=ax_base)
+                        plt.setp(ax_mixes.get_xticklabels(), visible=False)
 
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=FutureWarning)
-                    sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
-                                 # label=r"$R_1$", ax=ax_mixes)
-                    for p, p_star in enumerate(p_stars):
-                        sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
-                                     label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
-                    sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
-                                 # label=r"$R_2$", ax=ax_mixes)
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", category=FutureWarning)
+                        sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
+                                     # label=r"$R_1$", ax=ax_mixes)
+                        for p, p_star in enumerate(p_stars):
+                            sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
+                                         label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
+                        sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
+                                     # label=r"$R_2$", ax=ax_mixes)
 
-                ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
-                ax_mixes.set_xlabel("")
-                # Remove y axis
-                sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
-                ax_mixes.set_yticks([])
-                ax_mixes.set_yticklabels([])
-                if si == len(p_stars)-1:
-                    ax_mixes.legend()  # title=r"$p_1^*$") #, ncol=len(p_stars))
+                    ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
+                    ax_mixes.set_xlabel("")
+                    # Remove y axis
+                    sns.despine(top=True, bottom=False, left=True, right=True, trim=True)
+                    ax_mixes.set_yticks([])
+                    ax_mixes.set_yticklabels([])
+                    if si == len(p_stars)-1:
+                        ax_mixes.legend()  # title=r"$p_1^*$") #, ncol=len(p_stars))
+                    else:
+                        ax_mixes.get_legend().set_visible(False)
                 else:
-                    ax_mixes.get_legend().set_visible(False)
-            else:
-                warnings.warn("Missing data file: {}".format(mix_dist_file))
-                break
-        ax_base.set_xlabel("GRS")
-        fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
+                    warnings.warn("Missing data file: {}".format(mix_dist_file))
+                    break
+            ax_base.set_xlabel("GRS")
+            fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
 
 
