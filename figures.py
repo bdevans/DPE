@@ -914,7 +914,8 @@ if __name__ == "__main__":
 
         # Plot selected violins
         print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
-        for mix in range(n_mixes):
+        plot_mixes = [0]
+        for mix in plot_mixes:  #range(n_mixes):
             plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
                                   out_dir, data_label, selected_mix=mix,
                                   add_ci=True, alpha=0.05, ci_method=CI_METHOD)
