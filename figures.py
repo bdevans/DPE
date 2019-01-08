@@ -758,6 +758,7 @@ if __name__ == "__main__":
             # Save results
             df_pe.to_pickle(res_file)
         else:
+            print("Loading {} analysis...".format(data_label), flush=True)
             if os.path.isfile(res_file):
                 df_pe = pd.read_pickle(res_file)
             else:
@@ -774,15 +775,15 @@ if __name__ == "__main__":
 
         # Plot point estimates of p1
         if bool(point_estimates):
+            print("Plotting characterisation of {} scores...".format(data_label), flush=True)
             fig = plot_characterisation(point_estimates, proportions, sample_sizes)
             fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
 
         # Plot bootstrapped estimates of p1
         if bool(boots_estimates):
+            print("Plotting bootstrapped characterisation of {} scores...".format(data_label), flush=True)
             fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
             fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
-
-
 
         # Plot violins for a set of proportions
         # p_stars = [0.05, 0.25, 0.50, 0.75, 0.95]
@@ -837,6 +838,7 @@ if __name__ == "__main__":
             # Save results
             df_est.to_pickle(estimates_res_file)
         else:
+            print("Loading mixture analysis with {} scores...".format(data_label), flush=True)
             if os.path.isfile(estimates_res_file):
                 df_est = pd.read_pickle(estimates_res_file)
             else:
@@ -872,6 +874,7 @@ if __name__ == "__main__":
 
 
         # Plot violin stack
+        print("Plotting violin stacks with {} scores...".format(data_label), flush=True)
         fig_stack = plt.figure(figsize=(16, 2*len(sizes)))
         # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
         # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
@@ -909,6 +912,7 @@ if __name__ == "__main__":
 
 
         # Plot selected violins
+        print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
         for mix in range(n_mixes):
             plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
                                   out_dir, data_label, selected_mix=mix,
@@ -964,6 +968,7 @@ if __name__ == "__main__":
 
 
         # Plot mixture distributions - add reference populations?
+        print("Plotting constructed mixtures from {} scores...".format(data_label), flush=True)
         fig_mixes = plt.figure(figsize=(8, 8))
         gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
         for si, size in enumerate(sizes):
@@ -1006,6 +1011,7 @@ if __name__ == "__main__":
 
 
         # Plot worked examples
+        print("Plotting application with {} scores...".format(data_label), flush=True)
         fig_ex = plt.figure(figsize=(12, 6))
         gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15)
 
@@ -1030,6 +1036,7 @@ if __name__ == "__main__":
 
         test_bootstrap_convergence = False
         if test_bootstrap_convergence:
+            print("Plotting bootstrap convergence with {} scores...".format(data_label), flush=True)
             # Explore the effect of n_boots
             n_boots = [0, 1, 10, 100, 1000]
             # fig_ex = plt.figure(figsize=(6, 2*len(n_boots)))
