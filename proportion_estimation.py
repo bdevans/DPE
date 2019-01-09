@@ -164,7 +164,10 @@ def calc_conf_intervals(values, average=np.mean, alpha=0.05, ci_method="stderr")
 
 
 def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
-    n_boot = len(df_pe)
+    # TODO: Incorporate ipoint estimates in report
+    pe_point = df_pe.iloc[0, :]
+    pe_boot = df_pe.iloc[1:, :]
+    n_boot = len(pe_boot)  # len(df_pe)
     line_width = 54
     report = []
     report.append(" {:^12} | {:^17s} | {:^17s} ".format("Method",
@@ -172,16 +175,16 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
                                                         "Estimated pC"))  # Reference 2
     report.append("="*line_width)
     for method in df_pe:  # loop over columns (i.e. methods)
-        values = df_pe[method]
+        values = pe_boot[method]
+        point_est = pe_point[method]
 #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
         report.append(" {:6} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
         if n_boot > 1:
 
-            ci_low1, ci_upp1 = calc_conf_intervals(values, average=np.mean, alpha=alpha, ci_method=ci_method)
+            ci_low1, ci_upp1 = calc_conf_intervals(values, initial=point_est, average=np.mean, alpha=alpha, ci_method=ci_method)
             ci_low2, ci_upp2 = 1-ci_upp1, 1-ci_low1
-
             #nobs = len(values)
             #count = int(np.mean(values)*nobs)
             # TODO: Multiply the numbers by 10 for more accuracy 45/100 --> 457/1000 ?
@@ -282,17 +285,18 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
 
     columns = [method for method in _ALL_METHODS_ if method in methods]
 
-    if n_boot <= 0:
-        # Get initial estimate of proportions
-        initial_results = point_estimate(Mix, Ref1, Ref2, bins, methods)
+    # if n_boot <= 0:
+    # Get initial estimate of proportions
+    pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods)
+    if verbose > 1:
+        pprint(pe_initial)
+    if true_p1:
         if verbose > 1:
-            pprint(initial_results)
-        if true_p1:
-            if verbose > 1:
-                print("Ground truth: {:.5f}".format(true_p1))
-        df_pe = pd.DataFrame(initial_results, index=[0], columns=columns)
+            print("Ground truth: {:.5f}".format(true_p1))
+    # pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
 
-    else:  # if n_boot > 0:
+    # else:  #
+    if n_boot > 0:
         if verbose > 0:
             if n_jobs == -1:
                 nprocs = cpu_count()
@@ -321,15 +325,16 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
                     results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)  #, kwargs=kwargs)
                                        for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
             # Put into dataframe
-            df_pe = pd.DataFrame.from_records(results, columns=columns)
+            pe_boot = pd.DataFrame.from_records(results, columns=columns)
 
         else:  # Extended mixture & bootstrap routine to calculate CIs
             # TODO: Refactor for efficiency
             sample_size = len(Mix)
             results = {}
-            initial_results = point_estimate(Mix, Ref1, Ref2, bins, methods)
+            # pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods)
 
-            for method, prop_Ref1 in tqdm(initial_results.items(), desc="Method", dynamic_ncols=True, disable=disable):
+            for method, prop_Ref1 in tqdm(pe_initial.items(), desc="Method",
+                                          dynamic_ncols=True, disable=disable):
                 single_method = {}
                 single_method[method] = methods[method]
                 mix_results = []
@@ -363,15 +368,26 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
                     for boot in boot_results:
                         results[method].append(boot[method])
 
-            # Put into dataframe
-            df_pe = pd.concat([pd.DataFrame(initial_results, index=[0], columns=columns),
-                               pd.DataFrame.from_records(results, columns=columns)], ignore_index=True)
+            pe_boot = pd.DataFrame.from_records(results, columns=columns)
+
+            # # Put into dataframe
+            # df_pe = pd.concat([pd.DataFrame(pe_initial, index=[0], columns=columns),
+            #                    pd.DataFrame.from_records(results, columns=columns)], ignore_index=True)
+            # index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
+            # index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
+            # df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Mix", "Bootstrap"])
+
+        # Put into dataframe
+        pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
+        df_pe = pd.concat([pe_initial, pe_boot], ignore_index=True)
+        if n_mix > 0:
             index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
             index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
-            df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Mix", "Bootstrap"])
+            df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
+        # TODO: Refactor
         report = generate_report(df_pe, true_p1=true_p1, alpha=alpha)
 
     if verbose > 0:
