@@ -143,12 +143,16 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
     return methods
 
 
-def calc_conf_intervals(values, average=np.mean, alpha=0.05, ci_method="stderr"):
+def calc_conf_intervals(values, initial=None, average=np.mean, alpha=0.05, ci_method="experimental"):
 
     n_obs = len(values)
     average_value = average(values)
 
-    if ci_method == 'centile':
+    if ci_method == 'experimental':
+        assert initial is not None and 0.0 <= initial <= 1.0
+        err_low, err_upp = np.percentile(values-initial, [100*alpha/2, 100*(1-alpha/2)])
+        ci_low, ci_upp = initial-err_upp, initial-err_low
+    elif ci_method == 'centile':
         ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
     elif ci_method == 'stderr':
         p = average_value
@@ -163,7 +167,7 @@ def calc_conf_intervals(values, average=np.mean, alpha=0.05, ci_method="stderr")
     return ci_low, ci_upp
 
 
-def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="stderr"):
+def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
     # TODO: Incorporate ipoint estimates in report
     pe_point = df_pe.iloc[0, :]
     pe_boot = df_pe.iloc[1:, :]
