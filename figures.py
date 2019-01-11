@@ -586,14 +586,17 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
                     errors[1, midx] = ci_upp - initial  # ci_upp1 - y[midx]
                 # print(errors)
 
-                # Add white border around error bars
-                # ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
 #                x = means
                 x = initials
                 y = ax_vio.get_yticks()
-                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7,
-                                c=c, lw=5, capsize=12, capthick=3,
-                                label="Confidence Intervals ({:3.1%})".format(1-alpha))
+
+                # Add white border around error bars
+                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
+
+                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=18 ,
+                                c=palette[p+1], lw=2, capsize=12, capthick=2,
+                                label="Confidence Intervals ({:3.1%})".format(1-alpha),
+                                markeredgecolor=(0.45, 0.45, 0.45))
 
         # sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
 #        if si == 0:
