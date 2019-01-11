@@ -366,31 +366,36 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
 
     for midx, method in enumerate(df_bs):  # enumerate(methods):
 
-        if ci_method == 'centile':
-            ci_low, ci_upp = np.percentile(df_bs[method], [100*alpha/2, 100-(100*alpha/2)])
-        elif ci_method == 'stderr':
-            p = np.mean(df_bs[method])
-            nobs = len(df_bs[method])
-            # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Lookup this value for a given alpha
-            err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
-            ci_low, ci_upp = p - err, p + err
-        else:
-            nobs = len(df_bs[method])
-            count = int(np.mean(df_bs[method])*nobs)
-            ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
-                                                method=ci_method)
+        initial = df_point.iloc[0][method]
+
+        ci_low, ci_upp = pe.calc_conf_intervals(df_bs[method], initial=initial, average=np.mean, alpha=alpha, ci_method=ci_method)
+
+#        if ci_method == 'centile':
+#            ci_low, ci_upp = np.percentile(df_bs[method], [100*alpha/2, 100-(100*alpha/2)])
+#        elif ci_method == 'stderr':
+#            p = np.mean(df_bs[method])
+#            nobs = len(df_bs[method])
+#            # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Lookup this value for a given alpha
+#            err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
+#            ci_low, ci_upp = p - err, p + err
+#        else:
+#            nobs = len(df_bs[method])
+#            count = int(np.mean(df_bs[method])*nobs)
+#            ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
+#                                                method=ci_method)
         errors[0, midx] = means[midx] - ci_low
         errors[1, midx] = ci_upp - means[midx]
 
     # Add white border around error bars
     # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
 
-    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
+#    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
+    error_label = "{:3.1%} CI".format(1-alpha)
     if orient == 'v':
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=5,
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='*', markersize=9, c=c, lw=5,
                     capsize=12, capthick=3, label=error_label)
     elif orient == 'h':
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=5,
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=9, c=c, lw=5,
                     capsize=12, capthick=3, label=error_label)
 
     if orient == 'v':
@@ -538,26 +543,32 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
 
 #                    print(df_p, flush=True)
 #                    print(df_point, flush=True)
+                    ci_low, ci_upp = pe.calc_conf_intervals(df_p[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
+#                    print(df_point.iloc[0][method])
+#                    print(ci_low, ci_upp, flush=True)
 
-                    if ci_method == 'centile':
-                        df_pc = df[df["Method"] == method].loc[:, "Estimate"]
-                        ci_low, ci_upp = np.percentile(df_pc, [100*alpha/2, 100-(100*alpha/2)])
-                    elif ci_method == 'stderr':
-                        # p = np.mean(df_pc)
-                        # nobs = len(df_pc)
-                        p = mean_est
-                        nobs = size
-                        # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Look up correct value for alpha
-                        err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
-                        ci_low, ci_upp = p - err, p + err
-                    else:  # Assumes Binomial Distribution
-                        nobs = size  # len(df_est[method])
+                    ### PREVIOUS CI METHOD ###
 
-                        # mean_est = np.mean(df_est[method])
-                        count = int(mean_est*nobs)
-                        ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
-                        # ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
-                        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
+#                    if ci_method == 'centile':
+#                        df_pc = df[df["Method"] == method].loc[:, "Estimate"]
+#                        ci_low, ci_upp = np.percentile(df_pc, [100*alpha/2, 100-(100*alpha/2)])
+#                    elif ci_method == 'stderr':
+#                        # p = np.mean(df_pc)
+#                        # nobs = len(df_pc)
+#                        p = mean_est
+#                        nobs = size
+#                        # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Look up correct value for alpha
+#                        err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
+#                        ci_low, ci_upp = p - err, p + err
+#                    else:  # Assumes Binomial Distribution
+#                        nobs = size  # len(df_est[method])
+#
+#                        # mean_est = np.mean(df_est[method])
+#                        count = int(mean_est*nobs)
+#                        ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
+#                        # ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
+#                        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
+
 
                     means.append(mean_est)
                     initials.append(initial)
