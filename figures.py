@@ -505,8 +505,9 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
                        #label="Ground Truth: {:3.2}".format(p_star))
 
             # Add shading around the true values
-            shade_span = 0.02
-            ax_vio.axvspan(p_star-shade_span, p_star+shade_span, alpha=0.5, zorder=0, color=palette[p+1])
+            if False:
+                shade_span = 0.02
+                ax_vio.axvspan(p_star-shade_span, p_star+shade_span, alpha=0.5, zorder=0, color=palette[p+1])
 
 
             # Select estimates at p_star and size for all methods
