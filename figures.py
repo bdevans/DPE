@@ -290,6 +290,7 @@ def plot_distributions(scores, bins, data_label, ax=None):
     if not ax:
         f, ax = plt.subplots()
 
+    palette = ['#6f92f3', '#aac7fd', '#bbbbbb', '#f7b89c', '#e7745b']
     # TODO: Melt data together so the y-axis is normalised properly?
 
     with sns.axes_style("ticks") and warnings.catch_warnings():
@@ -297,14 +298,14 @@ def plot_distributions(scores, bins, data_label, ax=None):
         sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
                      label="$R_C: n={:,}$".format(len(scores['Ref1'])),
                      # label="$R_1: n={:,}$".format(len(scores['Ref1'])),
-                     ax=ax, kde_kws={'bw': bins['width']})
+                     ax=ax, kde_kws={'bw': bins['width']}, color=palette[-1])
         sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
                      label="$R_N: n={:,}$".format(len(scores['Ref2'])),
                      # label="$R_2: n={:,}$".format(len(scores['Ref2'])),
-                     ax=ax, kde_kws={'bw': bins['width']})
+                     ax=ax, kde_kws={'bw': bins['width']}, color=palette[0])
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=False,
                      label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])),
-                     ax=ax, kde_kws={'bw': bins['width']})
+                     ax=ax, kde_kws={'bw': bins['width']}, color=palette[2])
 
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
@@ -343,12 +344,13 @@ def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
         sns.despine(ax=ax, top=True, bottom=False, left=False, right=True, trim=True)
 
     if prop_Ref1:  # Add ground truth
+        truth_label = r"$\tilde{{p}}_C: {:4.3}$".format(prop_Ref1)
         if orient == 'v':
             ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--',
-                       label="Ground Truth: {:4.3}".format(prop_Ref1))
+                       label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
         elif orient == 'h':
             ax.axvline(x=prop_Ref1, ymin=0, ymax=1, ls='--',
-                       label="Ground Truth: {:4.3}".format(prop_Ref1))
+                       label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
 
     # Add confidence intervals # TODO: Refactor
     if orient == 'v':
