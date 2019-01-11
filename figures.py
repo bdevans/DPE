@@ -898,7 +898,8 @@ if __name__ == "__main__":
             ax_vio = fig_vio.add_subplot(111)
 
             for p, p_star in enumerate(p_stars):
-                df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(mix, df_est['Mix'])]
+#                df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(mix, df_est['Mix'])]
+                df = df_est[np.isclose(p_star, df_est['p1*']) & (df_est['Mix'] == mix)]
                 # df.sort_values(by='Size', ascending=False, inplace=True)
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=FutureWarning)
@@ -973,7 +974,8 @@ if __name__ == "__main__":
             for s, size in enumerate(sizes):
                 for p, p_star in enumerate(p_stars):
                     # df = df_est[np.isclose(p_star, df_est['p1*'])]
-                    df = df_est[np.isclose(df_est.Size, size) & np.isclose(df_est['p1*'], p_star)]
+#                    df = df_est[np.isclose(df_est.Size, size) & np.isclose(df_est['p1*'], p_star)]
+                    df = df_est[(df_est.Size == size) & np.isclose(df_est['p1*'], p_star)]
                     df_means = df.groupby('Method').mean()
                     # Add confidence intervals
                     errors = np.zeros(shape=(2, len(methods)))
@@ -1113,13 +1115,15 @@ if __name__ == "__main__":
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 
             for mix in range(n_mixes):
-                df_mix = df_est[np.isclose(mix, df_est['Mix'])]
+#                df_mix = df_est[np.isclose(mix, df_est['Mix'])]
+                df_mix = df_est[(df_est['Mix'] == mix)]
                 frames = []
 
                 for b in [1000, 100, 10, 1]:
                     for s, size in enumerate(sizes):
                         for p, p_star in enumerate(p_stars):
-                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*']) & np.isclose(size, df_mix['Size'])]
+#                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*']) & np.isclose(size, df_mix['Size'])]
+                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*']) & (df_mix['Size'] == size)]
 
                             for m, method in enumerate(methods):
                                 df_meth = df_ps[df_ps["Method"] == method]
