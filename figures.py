@@ -41,6 +41,7 @@ verbose = False
 
 seed = 42
 n_boot = 1000
+n_mix = 5 #100
 sample_size = 1000  # -1
 n_mixes = 5
 selected_mix = 0
@@ -776,7 +777,7 @@ if __name__ == "__main__":
             t = time.time()  # Start timer
 
             df_pe = pe.analyse_mixture(scores, bins, methods,
-                                       n_boot=n_boot, boot_size=-1,  # boot_size=sample_size,
+                                       n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
                                        alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
                                        logfile="{}/pe_{}.log".format(out_dir, data_label))
 
@@ -850,6 +851,7 @@ if __name__ == "__main__":
                         Mixtures[mix][p_star] = violin_scores['Mix']
                         df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                    n_boot=n_boot, boot_size=size,
+                                                   n_mix=n_mix,
                                                    alpha=alpha, true_p1=p_star,
                                                    n_jobs=-1, verbose=0)
                         df_point = df_cm.iloc[[0]]
