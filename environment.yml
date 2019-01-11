@@ -12,6 +12,7 @@ dependencies:
   #- matplotlib
   #- seaborn
   - lmfit
+  - statsmodels
   - emcee
   - corner
   - dill
