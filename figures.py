@@ -354,11 +354,18 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
                        label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
 
     # Add confidence intervals # TODO: Refactor
+#    if orient == 'v':
+#        x, y = ax.get_xticks(), df_bs.mean().values
+#        means = y
+#    elif orient =='h':
+#        x, y = df_bs.mean().values, ax.get_yticks()
+#        means = x
+
     if orient == 'v':
-        x, y = ax.get_xticks(), df_bs.mean().values
+        x, y = ax.get_xticks(), df_point.iloc[0].values
         means = y
     elif orient =='h':
-        x, y = df_bs.mean().values, ax.get_yticks()
+        x, y = df_point.iloc[0].values, ax.get_yticks()
         means = x
 
     # TODO: Think about means
