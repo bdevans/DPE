@@ -43,7 +43,7 @@ seed = 42
 n_boot = 1000
 n_mix = 5 #100
 sample_size = 1000  # -1
-n_mixes = 5
+n_seeds = 5
 selected_mix = 0
 alpha = 0.05
 CI_METHOD = "experimental"  # "stderr" # "centile" "jeffreys"
@@ -691,9 +691,9 @@ if __name__ == "__main__":
             size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
             for s, size in enumerate(size_bar):
                 size_bar.set_description("Size = {:6,}".format(size))
-                Mixtures = {mix: {} for mix in range(n_mixes)}
+                Mixtures = {mix: {} for mix in range(n_seeds)}
 
-                for mix in tqdm.trange(n_mixes, dynamic_ncols=True, desc=" Mix"):
+                for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):
                     mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
 
                     prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
@@ -754,7 +754,7 @@ if __name__ == "__main__":
 
         # Plot selected violins
         if False:
-            #for mix in range(n_mixes):
+            #for mix in range(n_seeds):
             mix = selected_mix
             fig_vio = plt.figure(figsize=(8, 2*len(sizes)))
             ax_vio = fig_vio.add_subplot(111)
@@ -805,7 +805,7 @@ if __name__ == "__main__":
                     g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
                                #label="Ground Truth: {:3.2}".format(p_star))
                     handles, labels = g.get_legend_handles_labels()
-                    g.legend(handles, labels[:n_mixes], title="Mixture")
+                    g.legend(handles, labels[:n_seeds], title="Mixture")
                     # g.legend.set_title("Method")
 
                 g.invert_yaxis()
@@ -814,7 +814,7 @@ if __name__ == "__main__":
         # Plot selected violins
         print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
         plot_mixes = [0]
-        for mix in plot_mixes:  #range(n_mixes):
+        for mix in plot_mixes:  #range(n_seeds):
             plot_selected_violins(scores, bins, df_point, df_est, methods, p_stars, sizes,
                                   out_dir, data_label, selected_mix=mix,
                                   add_ci=True, alpha=0.05, ci_method=CI_METHOD)
@@ -954,7 +954,7 @@ if __name__ == "__main__":
 
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 
-            for mix in range(n_mixes):
+            for mix in range(n_seeds):
                 df_mix = df_est[(df_est['Mix'] == mix)]
                 frames = []
 
