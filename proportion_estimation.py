@@ -298,14 +298,15 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
         if verbose > 1:
             print("Ground truth: {:.5f}".format(true_p1))
     # pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
+    # pe_initial.to_dict(orient='records')  # Back to dictionary
 
     # else:  #
     if n_boot > 0:
+        if n_jobs == -1:
+            nprocs = cpu_count()
+        else:
+            nprocs = n_jobs
         if verbose > 0:
-            if n_jobs == -1:
-                nprocs = cpu_count()
-            else:
-                nprocs = n_jobs
             print('Running {} bootstraps with {} processors...'
                   .format(n_boot, nprocs), flush=True)
             disable = False
