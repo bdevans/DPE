@@ -319,7 +319,7 @@ def plot_distributions(scores, bins, data_label, ax=None):
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_bs, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
+def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
                     ci_method='jeffreys', legend=True, orient='v'):
 
     c = sns.color_palette()[-3]  # 'gray'
@@ -429,7 +429,7 @@ def construct_mixture(Ref1, Ref2, p1, size):
     return mix
 
 
-def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, add_ci=True, alpha=0.05, ci_method="jeffreys"):
+def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, add_ci=True, alpha=0.05, ci_method="jeffreys"):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
@@ -497,9 +497,11 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
 
 
             # Select estimates at p_star and size for all methods
-            df = df_est[np.isclose(p_star, df_est['p1*']) &
-                        np.isclose(size, df_est['Size']) &
-                        np.isclose(selected_mix, df_est["Mix"])]
+            df = df_boots[np.isclose(p_star, df_est['p1*']) &
+                          (df_est['Size'] == size) &
+                          (df_est["Mix"] == selected_mix)]
+#                          np.isclose(size, df_est['Size']) &
+#                          np.isclose(selected_mix, df_est["Mix"])]
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
@@ -524,9 +526,18 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
                 df_means = df.groupby('Method').mean()
                 errors = np.zeros(shape=(2, len(methods)))
                 means = []
+                initials = []
                 for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
 
                     mean_est = df_means.loc[method, 'Estimate']
+#                    print(df_point)
+#                    initial = df_point.iloc[0][method]
+                    initial = df_point[np.isclose(p_star, df_point['p1*']) & (df_point['Size'] == size) & (df_point["Mix"] == selected_mix)][method].values[0]
+
+                    df_p = df.pivot_table(values="Estimate", index=["p1*", "Size", "Mix", "Boot"], columns="Method")
+
+#                    print(df_p, flush=True)
+#                    print(df_point, flush=True)
 
                     if ci_method == 'centile':
                         df_pc = df[df["Method"] == method].loc[:, "Estimate"]
@@ -549,13 +560,17 @@ def plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes, out_dir
                         # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
 
                     means.append(mean_est)
-                    errors[0, midx] = mean_est - ci_low  # y[midx] - ci_low1
-                    errors[1, midx] = ci_upp - mean_est  # ci_upp1 - y[midx]
+                    initials.append(initial)
+#                    errors[0, midx] = mean_est - ci_low  # y[midx] - ci_low1
+#                    errors[1, midx] = ci_upp - mean_est  # ci_upp1 - y[midx]
+                    errors[0, midx] = initial - ci_low  # y[midx] - ci_low1
+                    errors[1, midx] = ci_upp - initial  # ci_upp1 - y[midx]
                 # print(errors)
 
                 # Add white border around error bars
                 # ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
-                x = means
+#                x = means
+                x = initials
                 y = ax_vio.get_yticks()
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7,
                                 c=c, lw=5, capsize=12, capthick=3,
@@ -796,7 +811,8 @@ if __name__ == "__main__":
         # n_boot = 5
 
         # Generate multiple mixes
-        estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
+        point_estimates_res_file = '{}/pe_stack_analysis_point_{}.pkl'.format(out_dir, data_label)
+        boot_estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
         if FRESH_DATA:
             print("Running mixture analysis with {} scores...".format(data_label), flush=True)
             t = time.time()  # Start timer
@@ -804,7 +820,8 @@ if __name__ == "__main__":
             violin_scores = {}
             violin_scores['Ref1'] = scores['Ref1']
             violin_scores['Ref2'] = scores['Ref2']
-            dfs = []
+            dfs_point = []
+            dfs_boot = []
 
             size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
             for s, size in enumerate(size_bar):
@@ -824,27 +841,51 @@ if __name__ == "__main__":
                                                    n_boot=n_boot, boot_size=size,
                                                    alpha=alpha, true_p1=p_star,
                                                    n_jobs=-1, verbose=0)
-                        df_cm['Size'] = size * np.ones(n_boot)
-                        df_cm['p1*'] = p_star * np.ones(n_boot)
-                        df_cm['Mix'] = mix * np.ones(n_boot)
-                        df_cm = df_cm.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
-                        dfs.append(df_cm)
+                        df_point = df_cm.iloc[[0]]
+#                        print(type(df_point), flush=True)
+#                        print(df_point, flush=True)
+                        df_point['Size'] = size
+                        df_point['p1*'] = p_star
+                        df_point['Mix'] = mix
+#                        df_point = df_point.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
+                        dfs_point.append(df_point)
+#                        print(type(df_point), flush=True)
+#                        print(df_point, flush=True)
+
+                        df_boots = df_cm.iloc[1:, :]
+                        if n_mix > 0:
+                            n_bootstraps = n_mix * n_boot
+                        else:
+                            n_bootstraps = n_boot
+                        df_boots['Size'] = size * np.ones(n_bootstraps, dtype=int)
+                        df_boots['p1*'] = p_star * np.ones(n_bootstraps)
+                        df_boots['Mix'] = mix * np.ones(n_bootstraps, dtype=int)
+                        df_boots["Boot"] = list(range(n_bootstraps))
+                        df_boots = df_boots.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix', "Boot"], value_name='Estimate')
+                        dfs_boot.append(df_boots)
 
                     df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
                     df_size.to_pickle(mix_dist_file)
 
-            df_est = pd.concat(dfs, ignore_index=True)
+            df_point = pd.concat(dfs_point, ignore_index=True)
+            df_est = pd.concat(dfs_boot, ignore_index=True)
             elapsed = time.time() - t
             print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
 
             # Save results
-            df_est.to_pickle(estimates_res_file)
+            df_point.to_pickle(point_estimates_res_file)
+            df_est.to_pickle(boot_estimates_res_file)
         else:
             print("Loading mixture analysis with {} scores...".format(data_label), flush=True)
-            if os.path.isfile(estimates_res_file):
-                df_est = pd.read_pickle(estimates_res_file)
+            if os.path.isfile(point_estimates_res_file):
+                df_point = pd.read_pickle(point_estimates_res_file)
             else:
-                warnings.warn("Missing data file: {}".format(estimates_res_file))
+                warnings.warn("Missing data file: {}".format(point_estimates_res_file))
+                break
+            if os.path.isfile(boot_estimates_res_file):
+                df_est = pd.read_pickle(boot_estimates_res_file)
+            else:
+                warnings.warn("Missing data file: {}".format(boot_estimates_res_file))
                 break
 
 
@@ -918,7 +959,7 @@ if __name__ == "__main__":
         print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
         plot_mixes = [0]
         for mix in plot_mixes:  #range(n_mixes):
-            plot_selected_violins(scores, bins, df_est, methods, p_stars, sizes,
+            plot_selected_violins(scores, bins, df_point, df_est, methods, p_stars, sizes,
                                   out_dir, data_label, selected_mix=mix,
                                   add_ci=True, alpha=0.05, ci_method=CI_METHOD)
 
@@ -1024,7 +1065,7 @@ if __name__ == "__main__":
         ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
         # with sns.axes_style("whitegrid"):
             #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
-        plot_bootstraps(df_pe, prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
+        plot_bootstraps(df_pe.iloc[1:, :], df_pe.iloc[[0]], prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
 
             #sns.set_style("ticks")
         ax_dists_ex = fig_ex.add_subplot(gs[0, 1])
@@ -1055,15 +1096,19 @@ if __name__ == "__main__":
                                             boot_size=-1, alpha=alpha,
                                             true_p1=prop_Ref1, n_jobs=-1,
                                             logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
+                    df_bs = df_pe.iloc[[0]]
+                    df_point = df_pe.iloc[[0]]
                 else:
-                    df = df_pe.loc[:n_boots, :]
+                    # df = df_pe.loc[:n_boots, :]
+                    df_point = df_pe.iloc[[0]]
+                    df_bs = df_pe.iloc[1:n_boots+1, :]
                 # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, add_ci=True, alpha=0.05, ci_method="jeffreys")
                 if b == 0:
                     legend = True
                 else:
                     legend = False
                 # plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, legend=legend, orient='h')
-                plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
+                plot_bootstraps(df_bs, df_point, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 
