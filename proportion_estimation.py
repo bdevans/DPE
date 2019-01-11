@@ -198,6 +198,11 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
 
             report.append(" C.I. ({:3.1%}) | {:.5f},  {:.5f} | {:.5f},  {:.5f} "
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
+            if ci_method == "experimental":
+                bias = point_est - np.mean(values)
+                corrected_est = point_est + bias
+                report.append(" Corrected    | {:.5f}           | {:.5f}           "
+                              .format(corrected_est, 1-corrected_est))
         report.append("-"*line_width)
     if true_p1:
         report.append(" {:12} | {:<17.5f} | {:<17.5f} "
