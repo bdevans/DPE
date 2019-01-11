@@ -8,7 +8,7 @@ Created on Thu Jul 19 12:18:40 2018
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
+#import seaborn as sns
 
 
 """Change to R_H (Healthy reference population) and R_D (Disease reference population)
