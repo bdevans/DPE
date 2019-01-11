@@ -519,7 +519,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
     #            g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2)
-                sns.violinplot(x='Estimate', y='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2, color=palette[p+1])
+                sns.violinplot(x='Estimate', y='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2, color=palette[p+1], inner=None)
 
 #            handles, labels = g.get_legend_handles_labels()
 #            g.legend(handles, labels[:len(methods)], title="Method")
