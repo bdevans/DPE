@@ -1105,10 +1105,10 @@ if __name__ == "__main__":
             for b, n_boots in enumerate(n_boots):
                 # ax_ci_ex = fig_ex.add_subplot(gs[b, 0])
                 if n_boots == 0:
-                    df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
-                                            boot_size=-1, alpha=alpha,
-                                            true_p1=prop_Ref1, n_jobs=-1,
-                                            logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
+                    # df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
+                    #                         boot_size=-1, n_mix=n_mix,
+                    #                         alpha=alpha, true_p1=prop_Ref1,
+                    #                         n_jobs=-1, logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
                     df_bs = df_pe.iloc[[0]]
                     df_point = df_pe.iloc[[0]]
                 else:
