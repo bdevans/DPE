@@ -15,7 +15,7 @@ import warnings
 
 import pandas as pd
 import numpy as np
-import scipy as sp
+# import scipy as sp
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -377,20 +377,6 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
         initial = df_point.iloc[0][method]
 
         ci_low, ci_upp = pe.calc_conf_intervals(df_bs[method], initial=initial, average=np.mean, alpha=alpha, ci_method=ci_method)
-
-#        if ci_method == 'centile':
-#            ci_low, ci_upp = np.percentile(df_bs[method], [100*alpha/2, 100-(100*alpha/2)])
-#        elif ci_method == 'stderr':
-#            p = np.mean(df_bs[method])
-#            nobs = len(df_bs[method])
-#            # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Lookup this value for a given alpha
-#            err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
-#            ci_low, ci_upp = p - err, p + err
-#        else:
-#            nobs = len(df_bs[method])
-#            count = int(np.mean(df_bs[method])*nobs)
-#            ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha,
-#                                                method=ci_method)
         errors[0, midx] = means[midx] - ci_low
         errors[1, midx] = ci_upp - means[midx]
 
@@ -544,40 +530,16 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
                 for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
 
                     mean_est = df_means.loc[method, 'Estimate']
-#                    print(df_point)
-#                    initial = df_point.iloc[0][method]
-                    initial = df_point[np.isclose(p_star, df_point['p1*']) & (df_point['Size'] == size) & (df_point["Mix"] == selected_mix)][method].values[0]
 
-                    df_p = df.pivot_table(values="Estimate", index=["p1*", "Size", "Mix", "Boot"], columns="Method")
+                    initial = df_point[np.isclose(p_star, df_point['p1*'])
+                                       & (df_point['Size'] == size)
+                                       & (df_point["Mix"] == selected_mix)][method].values[0]
 
-#                    print(df_p, flush=True)
-#                    print(df_point, flush=True)
+                    df_p = df.pivot_table(values="Estimate",
+                                          index=["p1*", "Size", "Mix", "Boot"],
+                                          columns="Method")
+
                     ci_low, ci_upp = pe.calc_conf_intervals(df_p[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
-#                    print(df_point.iloc[0][method])
-#                    print(ci_low, ci_upp, flush=True)
-
-                    ### PREVIOUS CI METHOD ###
-
-#                    if ci_method == 'centile':
-#                        df_pc = df[df["Method"] == method].loc[:, "Estimate"]
-#                        ci_low, ci_upp = np.percentile(df_pc, [100*alpha/2, 100-(100*alpha/2)])
-#                    elif ci_method == 'stderr':
-#                        # p = np.mean(df_pc)
-#                        # nobs = len(df_pc)
-#                        p = mean_est
-#                        nobs = size
-#                        # err = np.sqrt(p*(1-p)/nobs) * 1.96  # TODO: Look up correct value for alpha
-#                        err = np.sqrt(p*(1-p)/nobs) * sp.stats.norm.ppf(alpha/2)
-#                        ci_low, ci_upp = p - err, p + err
-#                    else:  # Assumes Binomial Distribution
-#                        nobs = size  # len(df_est[method])
-#
-#                        # mean_est = np.mean(df_est[method])
-#                        count = int(mean_est*nobs)
-#                        ci_low, ci_upp = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
-#                        # ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=ci_method)
-#                        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
-
 
                     means.append(mean_est)
                     initials.append(initial)
@@ -585,13 +547,12 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
 #                    errors[1, midx] = ci_upp - mean_est  # ci_upp1 - y[midx]
                     errors[0, midx] = initial - ci_low  # y[midx] - ci_low1
                     errors[1, midx] = ci_upp - initial  # ci_upp1 - y[midx]
-                # print(errors)
 
 #                x = means
                 x = initials
                 y = ax_vio.get_yticks()
 
-                # Add white border around error bars
+                # Add grey border around error bars
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
 
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=18 ,
@@ -599,33 +560,12 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
                                 label="Confidence Intervals ({:3.1%})".format(1-alpha),
                                 markeredgecolor=(0.45, 0.45, 0.45))
 
-        # sns.despine(top=False, bottom=True, left=True, right=False, trim=True)
-#        if si == 0:
-#            ax_mix_base.legend() #title=r"$p_1^*$") #, ncol=len(p_stars))
-
         if si == len(sizes)-1:  # Top row
-#            sns.despine(ax=ax_vio, top=True, bottom=False, left=True, right=True, trim=True)
-#            sns.despine(ax=ax_mix, top=True, bottom=False, left=True, right=True, trim=True)
-#            ax_vio_base.legend(title="Method")
-            ax_mix.legend() #title=r"$p_1^*$") #, ncol=len(p_stars))
-#            ax_vio.set_xticklabels(vio_xlabs)
+            ax_mix.legend()
         else:
-#            sns.despine(ax=ax_vio, top=True, bottom=True, left=True, right=True, trim=True)
-#            sns.despine(ax=ax_mix, top=True, bottom=True, left=True, right=True, trim=True)
-#            ax_vio.get_legend().set_visible(False)
-#            pass
-#            if si != 0:
-#                ax_vio.set_xticklabels([])
-#                ax_mix.set_xticklabels([])
-#            ax_vio.set_xlabel("")
-#            plt.setp(ax_vio.get_xticklabels(), visible=False)
             # Remove legend and label yaxis instead
             ax_mix.get_legend().set_visible(False)
 
-
-
-#        ax_vio.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
-#        ax_vio.set_xlabel("")
         # Remove y axis
         # Set ticks at the ground truth values and do not trim
         ax_vio.set_xticks([0, *p_stars, 1])
@@ -766,9 +706,7 @@ if __name__ == "__main__":
     # Set random seed
     np.random.seed(seed)
     # rng = np.random.RandomState(42)
-
     np.seterr(divide='ignore', invalid='ignore')
-
 
     for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                              ("Renal", load_renal_data())]:
@@ -866,15 +804,11 @@ if __name__ == "__main__":
                                                    alpha=alpha, true_p1=p_star,
                                                    n_jobs=-1, verbose=0)
                         df_point = df_cm.iloc[[0]]
-#                        print(type(df_point), flush=True)
-#                        print(df_point, flush=True)
                         df_point['Size'] = size
                         df_point['p1*'] = p_star
                         df_point['Mix'] = mix
 #                        df_point = df_point.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
                         dfs_point.append(df_point)
-#                        print(type(df_point), flush=True)
-#                        print(df_point, flush=True)
 
                         df_boots = df_cm.iloc[1:, :]
                         if n_mix > 0:
@@ -922,7 +856,7 @@ if __name__ == "__main__":
             ax_vio = fig_vio.add_subplot(111)
 
             for p, p_star in enumerate(p_stars):
-#                df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(mix, df_est['Mix'])]
+                # df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(mix, df_est['Mix'])]
                 df = df_est[np.isclose(p_star, df_est['p1*']) & (df_est['Mix'] == mix)]
                 # df.sort_values(by='Size', ascending=False, inplace=True)
                 with warnings.catch_warnings():
@@ -939,15 +873,10 @@ if __name__ == "__main__":
             g.invert_yaxis()
             fig_vio.savefig(os.path.join(fig_dir, 'violin_bootstraps_{}_{}.png'.format(mix, data_label)))
 
-
-
         # Plot violin stack
         if False:
             print("Plotting violin stacks with {} scores...".format(data_label), flush=True)
             fig_stack = plt.figure(figsize=(16, 2*len(sizes)))
-            # gs = plt.GridSpec(nrows=len(sizes), ncols=len(p_stars), hspace=0.15, wspace=0.15)
-            # gs = plt.GridSpec(nrows=len(sizes), ncols=1, hspace=0.15, wspace=0.15)
-        #    ax_vio = fig_vio.add_subplot(111)
             gs = plt.GridSpec(nrows=1, ncols=len(methods), hspace=0.2, wspace=0.015)
 
             for m, method in enumerate(methods):
@@ -975,10 +904,8 @@ if __name__ == "__main__":
                     g.legend(handles, labels[:n_mixes], title="Mixture")
                     # g.legend.set_title("Method")
 
-        #        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
                 g.invert_yaxis()
             fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
-
 
         # Plot selected violins
         print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
@@ -988,7 +915,6 @@ if __name__ == "__main__":
                                   out_dir, data_label, selected_mix=mix,
                                   add_ci=True, alpha=0.05, ci_method=CI_METHOD)
 
-
         # Plot error bars
         if False:
             orient = 'h'
@@ -997,8 +923,6 @@ if __name__ == "__main__":
             # ax_ci = fig_err.add_subplot(111)
             for s, size in enumerate(sizes):
                 for p, p_star in enumerate(p_stars):
-                    # df = df_est[np.isclose(p_star, df_est['p1*'])]
-#                    df = df_est[np.isclose(df_est.Size, size) & np.isclose(df_est['p1*'], p_star)]
                     df = df_est[(df_est.Size == size) & np.isclose(df_est['p1*'], p_star)]
                     df_means = df.groupby('Method').mean()
                     # Add confidence intervals
@@ -1011,7 +935,6 @@ if __name__ == "__main__":
                         # mean_est = np.mean(df_est[method])
                         count = int(mean_est*nobs)
                         ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method=CI_METHOD)
-                        # ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')# ax.plot(x, y, marker='o', ls='', markersize=20)
                         errors[0, midx] = mean_est - ci_low1  # y[midx] - ci_low1
                         errors[1, midx] = ci_upp1 - mean_est  # ci_upp1 - y[midx]
 
@@ -1036,7 +959,6 @@ if __name__ == "__main__":
             sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
             g.invert_yaxis()
             fig_vio.savefig(os.path.join(fig_dir, 'ci_selection_{}.png'.format(data_label)))
-
 
         # Plot mixture distributions - add reference populations?
         if False:
@@ -1080,20 +1002,17 @@ if __name__ == "__main__":
             ax_base.set_xlabel("GRS")
             fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
-
-
         # Plot worked examples
         print("Plotting application with {} scores...".format(data_label), flush=True)
         fig_ex = plt.figure(figsize=(12, 6))
         gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15)
 
-        #sns.set_style("whitegrid")
         ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
         # with sns.axes_style("whitegrid"):
             #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
         plot_bootstraps(df_pe.iloc[1:, :], df_pe.iloc[[0]], prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
 
-            #sns.set_style("ticks")
+        # sns.set_style("ticks")
         ax_dists_ex = fig_ex.add_subplot(gs[0, 1])
         with sns.axes_style("ticks"):
             plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
@@ -1111,50 +1030,41 @@ if __name__ == "__main__":
             print("Plotting bootstrap convergence with {} scores...".format(data_label), flush=True)
             # Explore the effect of n_boots
             n_boots = [0, 1, 10, 100, 1000]
-            # fig_ex = plt.figure(figsize=(6, 2*len(n_boots)))
-            # gs = plt.GridSpec(nrows=len(n_boots), ncols=1, hspace=0.15, wspace=0.15, sharex=True)
+
             fig, axes = plt.subplots(len(n_boots), 1, sharex=True, figsize=(9, 2*len(n_boots)))
 
             for b, n_boots in enumerate(n_boots):
-                # ax_ci_ex = fig_ex.add_subplot(gs[b, 0])
                 if n_boots == 0:
-                    # df = pe.analyse_mixture(scores, bins, methods, n_boot=0,
-                    #                         boot_size=-1, n_mix=n_mix,
-                    #                         alpha=alpha, true_p1=prop_Ref1,
-                    #                         n_jobs=-1, logfile="{}/pe_{}_{}.log".format(out_dir, n_boots, data_label))
                     df_bs = df_pe.iloc[[0]]
                     df_point = df_pe.iloc[[0]]
                 else:
-                    # df = df_pe.loc[:n_boots, :]
                     df_point = df_pe.iloc[[0]]
                     df_bs = df_pe.iloc[1:n_boots+1, :]
-                # plot_selected_violins(scores, bins, df, methods, p_stars, sizes, out_dir, "b{}_".format(n_boots)+data_label, add_ci=True, alpha=0.05, ci_method="jeffreys")
+
                 if b == 0:
                     legend = True
                 else:
                     legend = False
-                # plot_bootstraps(df, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, legend=legend, orient='h')
+
                 plot_bootstraps(df_bs, df_point, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 
             for mix in range(n_mixes):
-#                df_mix = df_est[np.isclose(mix, df_est['Mix'])]
                 df_mix = df_est[(df_est['Mix'] == mix)]
                 frames = []
 
                 for b in [1000, 100, 10, 1]:
                     for s, size in enumerate(sizes):
                         for p, p_star in enumerate(p_stars):
-#                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*']) & np.isclose(size, df_mix['Size'])]
-                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*']) & (df_mix['Size'] == size)]
+                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*'])
+                                           & (df_mix['Size'] == size)]
 
                             for m, method in enumerate(methods):
                                 df_meth = df_ps[df_ps["Method"] == method]
                                 df_tmp = df_meth[:b]
                                 df_tmp["Error"] = df_tmp["Estimate"] - p_star
                                 df_tmp["Bootstraps"] = b
-            #                    df = df.append(df_tmp, ignore_index=True)
                                 frames.append(df_tmp)
 
                                 print("Bootstraps = {}; Method: {}; p_C = {}; size = {}; Mean = {}; SD = {}"
@@ -1166,8 +1076,6 @@ if __name__ == "__main__":
                 with sns.axes_style("whitegrid"):
                     g = sns.catplot(x="Bootstraps", y="Error", hue="Method", col="p1*", row="Size", row_order=sizes[::-1], data=df, kind="violin") #, margin_titles=True) #, ax=ax_err)
                     g.set(ylim=(-0.5, 0.5)).despine(left="True")
-
-            #        g = sns.catplot(x="Estimate", y="Bootstraps", hue="Method", col="p1*", row="Size", row_order=sizes[::-1], data=df, kind="violin", margin_titles=True) #, ax=ax_err)
-                    #g.despine(left="True")
+                    # g.despine(left="True")
 
                 plt.savefig(os.path.join(fig_dir, "bootstraps_{}_{}.png".format(mix, data_label)))
