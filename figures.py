@@ -1129,7 +1129,7 @@ if __name__ == "__main__":
             #                    df = df.append(df_tmp, ignore_index=True)
                                 frames.append(df_tmp)
 
-                                print("Bootstraps = {}; Method: {}; p_D = {}; size = {}; Mean = {}; SD = {}"
+                                print("Bootstraps = {}; Method: {}; p_C = {}; size = {}; Mean = {}; SD = {}"
                                       .format(b, method, p_star, size, np.mean(df_tmp["Estimate"] - p_star), np.std(df_tmp["Estimate"] - p_star)))
                                 #.sample(n=100, replace=False)
 
