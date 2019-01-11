@@ -81,21 +81,37 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
     scores = {'Ref1': Ref1, 'Ref2': Ref2}
     scores['Mix'] = mixture
 
-    point = pe.analyse_mixture(scores, bins, methods, n_boot=0,
-                               boot_size=-1, alpha=0.05,
-                               true_p1=prop_Ref1, n_jobs=1, seed=seed,
-                               verbose=0, logfile=None)
+#    point = pe.analyse_mixture(scores, bins, methods, n_boot=0, boot_size=-1,
+#                               n_mix=0, alpha=0.05, true_p1=prop_Ref1,
+#                               n_jobs=1, seed=seed, verbose=0, logfile=None)
+#
+#    if n_boot:
+#        if verbose:
+#            logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
+#                                                    .format(sample_size, prop_Ref1, seed))
+#        else:
+#            logfile = None
+#        boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
+#                                   boot_size=-1, n_mix=n_mix, alpha=0.05,
+#                                   true_p1=prop_Ref1, n_jobs=1, seed=seed,
+#                                   verbose=0, logfile=logfile)
+#    else:
+#        boots = {method: None for method in methods}
+
+    if verbose:
+        logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
+                                                .format(sample_size, prop_Ref1, seed))
+    else:
+        logfile = None
+
+    results = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
+                                 boot_size=-1, n_mix=n_mix, alpha=0.05,
+                                 true_p1=prop_Ref1, n_jobs=1, seed=seed,
+                                 verbose=0, logfile=logfile)
+    point = results.iloc[[0]]
 
     if n_boot:
-        if verbose:
-            logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
-                                                    .format(sample_size, prop_Ref1, seed))
-        else:
-            logfile = None
-        boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                                   boot_size=-1, alpha=0.05,
-                                   true_p1=prop_Ref1, n_jobs=1, seed=seed,
-                                   verbose=0, logfile=logfile)
+        boots = results.iloc[1:, :]
     else:
         boots = {method: None for method in methods}
 
