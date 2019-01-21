@@ -52,7 +52,7 @@ proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 # KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
-out_dir = os.path.join("results", "m{}_b{}_ds10000".format(n_samples, n_boot))
+out_dir = os.path.join("results", "s{}_m{}_b{}".format(n_samples, n_mix, n_boot))
 
 # ----------------------------------------------------------------------------
 
