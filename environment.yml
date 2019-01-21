@@ -16,7 +16,7 @@ dependencies:
   - emcee
   - corner
   - dill
-  - joblib == 0.13.0
+  - joblib>=0.13
   - psutil
   - h5py
   - numexpr
