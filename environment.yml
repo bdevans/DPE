@@ -17,6 +17,7 @@ dependencies:
   - corner
   - dill
   - joblib>=0.13
+  - psutil
   - h5py
   - numexpr
   - tqdm
