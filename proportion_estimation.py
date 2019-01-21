@@ -212,71 +212,6 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
     return "\n".join(report)
 
 
-def point_estimate(RM, Ref1, Ref2, bins, methods=None):
-    '''Estimate the proportion of two reference populations comprising
-    an unknown mixture.
-
-    The returned proportions are with respect to Ref_1, the disease group.
-    The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
-    '''
-
-    # bins = kwargs['bins']
-    results = {}
-
-    # ------------------------- Subtraction method ------------------------
-    if "Excess" in methods:
-        # Calculate the proportion of another population w.r.t. the excess
-        # number of cases from the mixture's assumed majority population.
-        # Ref1: disease; Ref2: healthy
-
-        number_low = len(RM[RM <= methods["Excess"]["median"]])
-        number_high = len(RM[RM > methods["Excess"]["median"]])
-        p1_est = abs(number_high - number_low) / len(RM)
-
-        p1_est *= methods["Excess"]["adj_factor"]
-        results['Excess'] = np.clip(p1_est, 0.0, 1.0)
-
-    # --------------------- Difference of Means method --------------------
-    if "Means" in methods:
-
-        mu_1, mu_2 = methods["Means"]["mu_1"], methods["Means"]["mu_2"]
-        if mu_1 > mu_2:
-            p1_est = (RM.mean() - mu_2) / (mu_1 - mu_2)
-        else:
-            p1_est = (mu_2 - RM.mean()) / (mu_2 - mu_1)
-
-        # TODO: Check!
-        # p1_est = abs((RM.mean() - mu2) / (mu1 - mu2))
-        results['Means'] = np.clip(p1_est, 0.0, 1.0)
-
-    # ----------------------------- EMD method ----------------------------
-    if "EMD" in methods:
-        # Interpolated cdf (to compute EMD)
-        CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
-        EMD_M_1 = sum(abs(CDF_Mix - methods["EMD"]["CDF_1"]))
-        EMD_M_2 = sum(abs(CDF_Mix - methods["EMD"]["CDF_2"]))
-        results["EMD"] = 0.5 * (1 + (EMD_M_2 - EMD_M_1) / methods["EMD"]["EMD_1_2"])
-
-    # ----------------------------- KDE method ----------------------------
-    if "KDE" in methods:
-        # TODO: Print out warnings if goodness of fit is poor?
-        results['KDE'] = fit_KDE_model(RM, bins, methods["KDE"]['model'],
-                                       methods["KDE"]["params"],
-                                       methods["KDE"]["kernel"])
-
-    return results
-
-def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
-
-    if boot_size == -1:
-        boot_size = len(Mix)
-
-    if seed is None:
-        bs = np.random.choice(Mix, boot_size, replace=True)
-    else:
-        bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
-
-    return point_estimate(bs, Ref1, Ref2, bins, methods)
 
 
 def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
@@ -293,6 +228,74 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
     # if kwargs is None:
     #     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
     methods = prepare_methods(scores, bins, methods=methods, verbose=verbose)
+
+
+    def point_estimate(RM, Ref1, Ref2, bins, methods=None):
+        '''Estimate the proportion of two reference populations comprising
+        an unknown mixture.
+
+        The returned proportions are with respect to Ref_1, the disease group.
+        The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
+        '''
+
+        # bins = kwargs['bins']
+        results = {}
+
+        # ------------------------- Subtraction method ------------------------
+        if "Excess" in methods:
+            # Calculate the proportion of another population w.r.t. the excess
+            # number of cases from the mixture's assumed majority population.
+            # Ref1: disease; Ref2: healthy
+
+            number_low = len(RM[RM <= methods["Excess"]["median"]])
+            number_high = len(RM[RM > methods["Excess"]["median"]])
+            p1_est = abs(number_high - number_low) / len(RM)
+
+            p1_est *= methods["Excess"]["adj_factor"]
+            results['Excess'] = np.clip(p1_est, 0.0, 1.0)
+
+        # --------------------- Difference of Means method --------------------
+        if "Means" in methods:
+
+            mu_1, mu_2 = methods["Means"]["mu_1"], methods["Means"]["mu_2"]
+            if mu_1 > mu_2:
+                p1_est = (RM.mean() - mu_2) / (mu_1 - mu_2)
+            else:
+                p1_est = (mu_2 - RM.mean()) / (mu_2 - mu_1)
+
+            # TODO: Check!
+            # p1_est = abs((RM.mean() - mu2) / (mu1 - mu2))
+            results['Means'] = np.clip(p1_est, 0.0, 1.0)
+
+        # ----------------------------- EMD method ----------------------------
+        if "EMD" in methods:
+            # Interpolated cdf (to compute EMD)
+            CDF_Mix = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
+            EMD_M_1 = sum(abs(CDF_Mix - methods["EMD"]["CDF_1"]))
+            EMD_M_2 = sum(abs(CDF_Mix - methods["EMD"]["CDF_2"]))
+            results["EMD"] = 0.5 * (1 + (EMD_M_2 - EMD_M_1) / methods["EMD"]["EMD_1_2"])
+
+        # ----------------------------- KDE method ----------------------------
+        if "KDE" in methods:
+            # TODO: Print out warnings if goodness of fit is poor?
+            results['KDE'] = fit_KDE_model(RM, bins, methods["KDE"]['model'],
+                                           methods["KDE"]["params"],
+                                           methods["KDE"]["kernel"])
+
+        return results
+
+
+    def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
+
+        if boot_size == -1:
+            boot_size = len(Mix)
+
+        if seed is None:
+            bs = np.random.choice(Mix, boot_size, replace=True)
+        else:
+            bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
+
+        return point_estimate(bs, Ref1, Ref2, bins, methods)
 
     columns = [method for method in _ALL_METHODS_ if method in methods]
 
