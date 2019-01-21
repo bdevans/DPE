@@ -175,8 +175,8 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
     line_width = 54
     report = []
     report.append(" {:^12} | {:^17s} | {:^17s} ".format("Method",
-                                                        "Estimated pD",   # Reference 1
-                                                        "Estimated pC"))  # Reference 2
+                                                        "Estimated pC",   # Reference 1
+                                                        "Estimated pN"))  # Reference 2
     report.append("="*line_width)
     for method in df_pe:  # loop over columns (i.e. methods)
         values = pe_boot[method]
