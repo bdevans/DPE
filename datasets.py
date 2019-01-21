@@ -102,8 +102,10 @@ def load_renal_data():
 
     metric = 'T2GRS'
 
-    dataset = 'data/renal_data.csv'
-    headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
+    # dataset = 'data/renal_data.csv'
+    # headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
+    dataset = 'data/renal_final_data_mixture_2_type_1_1.xls'
+    headers = {"T2GRS": "T2GRS", "Group": "group"}
     prop_Ref1 = 0.0777
     binning_method = 'fd'  # TODO: Take max over Ref1, Ref2?
 
@@ -116,7 +118,8 @@ def load_renal_data():
     # bin_min = 4.7
     # bin_max = 8.9
 
-    data = pd.read_csv(dataset)
+#    data = pd.read_csv(dataset)
+    data = pd.read_excel(dataset)
     data.rename(columns=headers, inplace=True)
     data.dropna(inplace=True)  # Remove empty entries
     # print(data.describe())
@@ -125,13 +128,21 @@ def load_renal_data():
     means = {}
 
     # Arrays of metric scores for each group
-    scores = {#'Ref1': data.loc[data['group'] == 1, metric].sample(n=100000).values,
-#              'Ref1': data.loc[data['group'] == 1, metric].values,
-              'Ref1': data.loc[data['group'] == 2, metric].values,
-#              'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
-              'Ref2': data.loc[data['group'] == 1, metric].sample(n=10000, random_state=42).values,
-              # 'Ref2': data.loc[data['group'] == 2, metric].values,
-              'Mix': data.loc[data['group'] == 3, metric].values}
+#    scores = {#'Ref1': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+##              'Ref1': data.loc[data['group'] == 1, metric].values,
+#              'Ref1': data.loc[data['group'] == 2, metric].values,
+##              'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+#              'Ref2': data.loc[data['group'] == 1, metric].sample(n=10000, random_state=42).values,
+#              # 'Ref2': data.loc[data['group'] == 2, metric].values,
+#              'Mix': data.loc[data['group'] == 3, metric].values}
+
+    prev_data = pd.read_csv('data/renal_data.csv')
+    prev_data.rename(columns={'t2d_grs_77': 'T2GRS', 'group': 'group'}, inplace=True)
+
+    scores = {'Ref1': data.loc[data['group'] == 1, metric].values,
+              'Ref2': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=42).values,
+              'Mix': data.loc[data['group'] == 2, metric].values}
+
 
     means = {'Ref1': scores['Ref1'].mean(),
              'Ref2': scores['Ref2'].mean()}
