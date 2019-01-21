@@ -397,6 +397,8 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
             index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
             index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
             df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
+    else:
+        df_pe = pd.DataFrame(pe_initial, index=[0], columns=columns)
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
