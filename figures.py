@@ -138,7 +138,7 @@ def load_accuracy(out_dir, label):
     return point_estimates, boots_estimates, PROPORTIONS, SAMPLE_SIZES
 
 
-def get_error_bars(df, average=np.mean, alpha=0.05, ci_method="stderr"):
+def get_error_bars(df, initial=None, average=np.mean, alpha=0.05, ci_method="experimental"):
     """df: columns are method names"""
 
     #methods = list(df.columns)
@@ -147,8 +147,7 @@ def get_error_bars(df, average=np.mean, alpha=0.05, ci_method="stderr"):
     errors = np.zeros(shape=(2, n_methods))
 
     for m, method in enumerate(df):  # enumerate(methods):
-
-        ci_low, ci_upp = pe.calc_conf_intervals(df[method].values,
+        ci_low, ci_upp = pe.calc_conf_intervals(df[method].values, initial=initial,
                                                 average=average, alpha=alpha,
                                                 ci_method=ci_method)
         errors[0, m] = means[m] - ci_low
@@ -369,7 +368,8 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
         means = x
 
     # TODO: Think about means
-    # get_error_bars(df, average=np.mean, alpha=0.05, ci_method="stderr")
+    # errors = get_error_bars(df, average=np.mean, alpha=0.05, ci_method=ci_method)
+
     errors = np.zeros(shape=(2, len(methods)))
 
     for midx, method in enumerate(df_bs):  # enumerate(methods):
