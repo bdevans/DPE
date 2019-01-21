@@ -182,7 +182,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
         values = pe_boot[method]
         point_est = pe_point[method]
 #        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        report.append(" {:6} point | {:.5f}           | {:.5f}           ".format(method, pe_point[method], 1-pe_point[method]))
+        report.append(" {:6} point | {:<17.5f} | {:<17.5f} ".format(method, pe_point[method], 1-pe_point[method]))
         report.append(" {:6} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
@@ -201,7 +201,7 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
             if ci_method == "experimental":
                 bias = point_est - np.mean(values)
                 corrected_est = point_est + bias
-                report.append(" Corrected    | {:.5f}           | {:.5f}           "
+                report.append(" Corrected    | {:<17.5f} | {:<17.5f} "
                               .format(corrected_est, 1-corrected_est))
         report.append("-"*line_width)
     if true_p1:
