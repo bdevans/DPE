@@ -19,6 +19,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import AxesGrid
 from statsmodels.stats.proportion import proportion_confint
 import tqdm
 
@@ -207,8 +208,9 @@ def plot_accuracy(estimates, proportions, sample_sizes, label, fig, ax,
             CS = ax.contourf(proportions, sample_sizes, average_error,
                              SHADING_LEVELS, cmap=cmap, extend='max')
         else:
-            CS = ax.contourf(proportions, sample_sizes, average_error,
-                             SHADING_LEVELS, cmap=cmap, extend='both')  # , vmin=-.05, vmax=.05)
+            # CS = ax.contourf(proportions, sample_sizes, average_error,
+            #                  SHADING_LEVELS, cmap=cmap, extend='both')  # , vmin=-.05, vmax=.05)
+            CS = ax.imshow(average_error, SHADING_LEVELS, cmap=cmap, vmin=-.05, vmax=.05)
     else:
         CS = ax.contourf(proportions, sample_sizes, average_error,
                          SHADING_LEVELS, cmap=cmap,
@@ -261,26 +263,111 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         cl = [0.02]
 
     fig = plt.figure(figsize=figsize)
-    gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
+    # gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
+
+    grid = AxesGrid(fig, 111,  # similar to subplot(122)
+                    nrows_ncols=(2, len(pe._ALL_METHODS_)),
+                    axes_pad=0.20,
+                    label_mode="L",
+                    share_all=True,
+                    cbar_location="right",
+                    cbar_mode="edge",
+                    cbar_size="7%",
+                    cbar_pad="10%",
+                    )
+
+    x_half_width = (proportions[1] - proportions[0]) / 2
+    y_half_width = (sample_sizes[1] - sample_sizes[0]) / 2
+    extent = (proportions[0]-x_half_width, proportions[-1]+x_half_width,
+              sample_sizes[0]-y_half_width, sample_sizes[-1]+y_half_width)
 
     for m, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
 
         # Plot average accuracy across mixtures
-        ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
+        # ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
+        ax_acc = grid[m]
         if m == 0:
             ax_acc.set_ylabel('Sample size ($n$)')
+        # else:
+        #     ax_acc.set_yticklabels([])
+
+        # hm = plot_accuracy(estimates, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl, cbar=False)
+
+        label = method
+        if estimates[label].ndim > 3:  # Take mean over bootstraps first
+            average_error = average(np.mean(estimates[label], axis=3), axis=2) - proportions
         else:
-            ax_acc.set_yticklabels([])
-        plot_accuracy(estimates, proportions, sample_sizes, method, fig, ax_acc, contour_levels=cl)
+            average_error = average(estimates[label], axis=2) - proportions
+
+        shading_levels = np.arange(-0.05, 0.051, 0.005)
+#        shading_levels = np.arange(-0.05, 0.051, 0.01)
+        # SHADING_TICKS = np.linspace(-0.05, 0.05, 11)
+        cmap = "seismic"
+        cmap = plt.cm.get_cmap("seismic", len(shading_levels)-1)  # discrete colours
+
+        hm = ax_acc.imshow(average_error, cmap=cmap, vmin=min(shading_levels), vmax=max(shading_levels), origin='lower', extent=extent, aspect=0.0004)  #shading_levels,
+        # hm = ax_acc.contourf(proportions, sample_sizes, np.random.randn(len(sample_sizes), len(proportions)))
+        # hm = ax_acc.imshow(np.random.randn(len(sample_sizes), len(proportions)), origin='lower', extent=extent, aspect=0.001)
+        ax_acc.set_xlim(extent[:2])
+        ax_acc.set_ylim(extent[2:])
+        ax_acc.set_title(method)
+        if m % len(pe._ALL_METHODS_) == 3:
+            cax = grid.cbar_axes[0]
+            cax.colorbar(hm, extend='both')
+            cax.toggle_label(True)
+            cax.axis[cax.orientation].set_label("Accuracy")
 
         # Plot deviation across mixtures
-        ax_dev = fig.add_subplot(gs[1, m])
+        # ax_dev = fig.add_subplot(gs[1, m])
+        ax_dev = grid[m+len(pe._ALL_METHODS_)]
         if m == 0:
             ax_dev.set_ylabel('Sample size ($n$)')
+        # else:
+        #     ax_dev.set_yticklabels([])
+        ax_dev.set_xlabel('$p_C^*$')  # '$p_1^*$'
+        # hm = plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False, cbar=False)
+
+        # SD values
+        vmin = 0.01
+        vmax = 0.1
+
+        # Model variability
+        def deviation(estimates, axis=None, alpha=0.05):
+            ci_low, ci_upp = np.percentile(estimates, [100*alpha/2, 100-(100*alpha/2)], axis=axis)
+            return ci_upp - ci_low
+
+        vmin = 0
+        vmax = 0.2
+
+
+        if estimates[label].ndim > 3:  # Take mean over bootstraps first
+            bs_dev = deviation(np.mean(estimates[label], axis=3), axis=2)
         else:
-            ax_dev.set_yticklabels([])
-        ax_dev.set_xlabel('$p_D^*$')  # '$p_1^*$'
-        plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False)
+            bs_dev = deviation(estimates[label], axis=2)
+        cmap = "viridis_r"
+
+        shading_levels = np.arange(0.0, 0.2001, 0.02)
+#        shading_levels = np.arange(0.0, 0.4001, 0.05)
+        cmap = plt.cm.get_cmap(cmap, len(shading_levels)-1)  # discrete colours
+
+        hm = ax_dev.imshow(bs_dev, cmap=cmap, vmin=min(shading_levels), vmax=max(shading_levels), origin='lower', extent=extent, aspect=0.0004)
+        # hm = ax_dev.contourf(proportions*1000, sample_sizes, bs_dev, shading_levels, vmin=.01, vmax=.10, cmap=cmap, extend='both')
+
+        # hm = ax_dev.contourf(proportions, sample_sizes, np.random.randn(len(sample_sizes), len(proportions)))
+        # hm = ax_dev.imshow(np.random.randn(len(sample_sizes), len(proportions)), origin='lower', extent=extent, aspect=0.001)
+
+
+        ax_dev.set_xlim(extent[:2])
+        ax_dev.set_ylim(extent[2:])
+        if m % len(pe._ALL_METHODS_) == 3:
+            # print(method)
+            cax = grid.cbar_axes[1]
+            cax.colorbar(hm, extend='max')
+            cax.toggle_label(True)
+            cax.axis[cax.orientation].set_label("Model variability")
+
+    # grid.axes_llc.set_xlim(extent[:2])
+    # grid.axes_llc.set_ylim(extent[2:])
 
     return fig
 
