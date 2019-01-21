@@ -112,7 +112,7 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
                                  verbose=0, logfile=logfile)
     point = results.iloc[[0]]
 
-    if n_boot:
+    if n_boot or n_mix:
         boots = results.iloc[1:, :]
     else:
         boots = {method: None for method in methods}
