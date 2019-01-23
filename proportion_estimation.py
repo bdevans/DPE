@@ -186,15 +186,12 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
         report.append(" {:6} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
                       .format(method, np.mean(values), np.std(values),
                               1-np.mean(values), np.std(1-values)))  # (+/- SD)
-        if n_boot > 1:
 
-            ci_low1, ci_upp1 = calc_conf_intervals(values, initial=point_est, average=np.mean, alpha=alpha, ci_method=ci_method)
+        if n_boot > 1:
+            ci_low1, ci_upp1 = calc_conf_intervals(values, initial=point_est,
+                                                   average=np.mean, alpha=alpha,
+                                                   ci_method=ci_method)
             ci_low2, ci_upp2 = 1-ci_upp1, 1-ci_low1
-            #nobs = len(values)
-            #count = int(np.mean(values)*nobs)
-            # TODO: Multiply the numbers by 10 for more accuracy 45/100 --> 457/1000 ?
-            #ci_low1, ci_upp1 = proportion_confint(count, nobs, alpha=alpha, method='normal')
-            #ci_low2, ci_upp2 = proportion_confint(nobs-count, nobs, alpha=alpha, method='normal')
 
             report.append(" C.I. ({:3.1%}) | {:<8.5f},{:>8.5f} | {:<8.5f},{:>8.5f} "
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
@@ -291,13 +288,10 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
     Ref2 = scores['Ref2']
     Mix = scores['Mix']
 
-    # if kwargs is None:
-    #     kwargs = prepare_methods(methods, scores, bins, verbose=verbose)
     methods = prepare_methods(scores, bins, methods=methods, verbose=verbose)
 
     columns = [method for method in _ALL_METHODS_ if method in methods]
 
-    # if n_boot <= 0:
     # Get initial estimate of proportions
     pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods)
     if verbose > 1:
@@ -308,7 +302,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
     # pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
     # pe_initial.to_dict(orient='records')  # Back to dictionary
 
-    # else:  #
     if n_boot > 0:
         if n_jobs == -1:
             nprocs = cpu_count()
@@ -328,14 +321,15 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
         boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
 
         if n_mix <= 0:
-            # HACK: This is a kludge to reduce the joblib overhead when n_jobs=1
+            # HACK: This is to reduce the joblib overhead when n_jobs==1
             if n_jobs == 1 or n_jobs is None:
-                # NOTE: These results are identical to when n_jobs=1 in the parallel section however it takes about 25% less time per iteration
-                results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None)  #, kwargs=kwargs)
+                # NOTE: These results are identical to when n_jobs==1 in the
+                # parallel section however it takes about 25% less time per iteration
+                results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None)
                            for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
             else:
                 with Parallel(n_jobs=n_jobs) as parallel:
-                    results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)  #, kwargs=kwargs)
+                    results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)
                                        for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
             # Put into dataframe
             pe_boot = pd.DataFrame.from_records(results, columns=columns)
@@ -344,7 +338,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
             # TODO: Refactor for efficiency
             sample_size = len(Mix)
             results = {}
-            # pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods)
 
             for method, prop_Ref1 in tqdm(pe_initial.items(), desc="Method",
                                           dynamic_ncols=True, disable=disable):
@@ -383,13 +376,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
 
             pe_boot = pd.DataFrame.from_records(results, columns=columns)
 
-            # # Put into dataframe
-            # df_pe = pd.concat([pd.DataFrame(pe_initial, index=[0], columns=columns),
-            #                    pd.DataFrame.from_records(results, columns=columns)], ignore_index=True)
-            # index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
-            # index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
-            # df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Mix", "Bootstrap"])
-
         # Put into dataframe
         pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
         df_pe = pd.concat([pe_initial, pe_boot], ignore_index=True)
@@ -402,7 +388,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
-        # TODO: Refactor
         report = generate_report(df_pe, true_p1=true_p1, alpha=alpha)
 
     if verbose > 0:
