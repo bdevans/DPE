@@ -1,5 +1,5 @@
 
-name: pe
+name: dpe
 channels:
   - conda-forge
 dependencies:
