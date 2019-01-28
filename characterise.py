@@ -28,16 +28,13 @@ import datasets as ds
 
 # ---------------------------- Define constants ------------------------------
 
-# out_dir = "results"
 verbose = False
 seed = 42
 
 n_samples = 1000  # 1000
-# n_boot = 10
-# sample_sizes = np.arange(100, 2501, 100)  # 3100
-# n_boot = 100
 n_boot = 0
 n_mix = 0
+alpha = 0.05
 # sample_sizes = np.arange(100, 1001, 100)  # 3100
 sample_sizes = np.linspace(100, 2500, 25, endpoint=True, dtype=int)
 # proportions = np.arange(0.0, 1.01, 0.01)  # Ref1 propoertions
@@ -83,23 +80,6 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
     scores = {'Ref1': Ref1, 'Ref2': Ref2}
     scores['Mix'] = mixture
 
-#    point = pe.analyse_mixture(scores, bins, methods, n_boot=0, boot_size=-1,
-#                               n_mix=0, alpha=0.05, true_p1=prop_Ref1,
-#                               n_jobs=1, seed=seed, verbose=0, logfile=None)
-#
-#    if n_boot:
-#        if verbose:
-#            logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
-#                                                    .format(sample_size, prop_Ref1, seed))
-#        else:
-#            logfile = None
-#        boots = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-#                                   boot_size=-1, n_mix=n_mix, alpha=0.05,
-#                                   true_p1=prop_Ref1, n_jobs=1, seed=seed,
-#                                   verbose=0, logfile=logfile)
-#    else:
-#        boots = {method: None for method in methods}
-
     if verbose:
         logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
                                                 .format(sample_size, prop_Ref1, seed))
@@ -107,7 +87,7 @@ def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None)
         logfile = None
 
     results = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                                 boot_size=-1, n_mix=n_mix, alpha=0.05,
+                                 boot_size=-1, n_mix=n_mix, alpha=alpha,
                                  true_p1=prop_Ref1, n_jobs=1, seed=seed,
                                  verbose=0, logfile=logfile)
     point = results.iloc[[0]]
