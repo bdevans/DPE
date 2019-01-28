@@ -18,6 +18,9 @@ Execution
     3. Copy the data for processing:
         - From the client: `scp -r bde201-admin@144.173.106.18:/home/bde201-admin/results results`
         - From the server: `scp -r results ben@144.173.111.1:/Users/ben/EXE/repos/DPE/results`
+    4. To quit a screen:
+        - When attached: `Ctrl+a` then `:quit`
+        - When detached: `screen -X -S <session #> quit`
 
 Methods
 -------
