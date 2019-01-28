@@ -9,6 +9,7 @@ dependencies:
   - scipy
   - pandas
   - scikit-learn
+  - xlrd
   #- matplotlib
   #- seaborn
   - lmfit
