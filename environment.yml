@@ -1,10 +1,10 @@
 
-name: dpe
+name: pe
 channels:
   - conda-forge
 dependencies:
   - python=3.7
-  - pip
+  # - pip
   - numpy
   - scipy
   - pandas
@@ -12,12 +12,12 @@ dependencies:
   #- matplotlib
   #- seaborn
   - lmfit
-  - statsmodels
   - emcee
-  - corner
-  - dill
+  # - corner
+  - statsmodels
+  # - dill
   - joblib>=0.13
   - psutil
-  - h5py
-  - numexpr
+  # - h5py
+  # - numexpr
   - tqdm
