@@ -14,6 +14,7 @@ import pandas as pd
 """Change to R_H (Healthy reference population) and R_D (Disease reference population)
 --> p_D := prevalence"""
 
+
 def load_diabetes_data(metric):
 
     dataset = 'data/biobank_mix_WTCC_ref.csv'
@@ -77,13 +78,13 @@ def load_diabetes_data(metric):
     #         'edges': bin_edges,
     #         'centers': bin_centers}
 
-    if False:
-        sns.jointplot(x='T1GRS', y='T2GRS', data=data)
-    #    f, ax = plt.subplots(1, 3)
-        sns.jointplot(x='T1GRS', y='T2GRS', color='r', data=data.loc[data["group"]==1])
-        sns.jointplot(x='T1GRS', y='T2GRS', color='b', data=data.loc[data["group"]==2])
-        sns.jointplot(x='T1GRS', y='T2GRS', color='g', data=data.loc[data["group"]==3])
-    #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
+    # if False:
+    #     sns.jointplot(x='T1GRS', y='T2GRS', data=data)
+    # #    f, ax = plt.subplots(1, 3)
+    #     sns.jointplot(x='T1GRS', y='T2GRS', color='r', data=data.loc[data["group"]==1])
+    #     sns.jointplot(x='T1GRS', y='T2GRS', color='b', data=data.loc[data["group"]==2])
+    #     sns.jointplot(x='T1GRS', y='T2GRS', color='g', data=data.loc[data["group"]==3])
+    # #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
 
     print("Diabetes Data [{}]".format(metric))
     # print("=====================")
@@ -93,7 +94,6 @@ def load_diabetes_data(metric):
 
 
 def load_renal_data():
-
     '''Load individuals with Type 2 Diabetes GRS and renal disease (microalbuminuria)
     Group: 1 is controls;
     2 is non insulin treated type 2;
@@ -142,7 +142,6 @@ def load_renal_data():
     scores = {'Ref1': data.loc[data['group'] == 1, metric].values,
               'Ref2': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=42).values,
               'Mix': data.loc[data['group'] == 2, metric].values}
-
 
     means = {'Ref1': scores['Ref1'].mean(),
              'Ref2': scores['Ref2'].mean()}
