@@ -31,20 +31,27 @@ from datasets import (load_diabetes_data, load_renal_data)
 
 # METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
 FRESH_DATA = False  # CAUTION!
-#out_dir = "results_test"
+# out_dir = "results_test"
 # out_dir = "results_100_100"
 # out_dir = "results/m1000_b0"
-out_dir = "results/m1000_b10"
+# out_dir = "results/m1000_b10"
+
+# out_dir = "results/m100_b1000"
+# out_dir = "results/m10_b100"
+out_dir = "results/m100_b100"
+# out_dir = "results/m1000_b100"
 fig_dir = os.path.join(out_dir, "figs")
 
 verbose = False
 
 
-seed = 42
-n_boot = 1000
-n_mix = 5 #100
+# seed = 4242
+seed = 420
+n_boot = 100
+n_mix = 100
+correction = True
 sample_size = 1000  # -1
-n_seeds = 5
+n_seeds = 1
 selected_mix = 0
 alpha = 0.05
 CI_METHOD = "experimental"  # "stderr" # "centile" "jeffreys"
@@ -139,22 +146,33 @@ def load_accuracy(out_dir, label):
     return point_estimates, boots_estimates, PROPORTIONS, SAMPLE_SIZES
 
 
-def get_error_bars(df, initial=None, average=np.mean, alpha=0.05, ci_method="experimental"):
+def get_error_bars(df_pe, correction=False, average=np.mean, alpha=0.05, ci_method="centile"):
     """df: columns are method names"""
 
     #methods = list(df.columns)
     #n_est, n_methods = df.shape
-    n_methods = len(df.columns)
+    n_methods = len(df_pe.columns)
     errors = np.zeros(shape=(2, n_methods))
+    centres = np.zeros(n_methods)
 
-    for m, method in enumerate(df):  # enumerate(methods):
-        ci_low, ci_upp = pe.calc_conf_intervals(df[method].values, initial=initial,
+    for m, method in enumerate(df_pe):  # enumerate(methods):
+
+        boot_values = df_pe.iloc[1:, m]
+
+        if correction:
+            centres[m] = 2 * df_pe.iloc[0, m] - np.mean(boot_values)
+            boot_values = 2 * df_pe.iloc[0, m] - boot_values
+        else:
+            centres[m] = df_pe.iloc[0, m]
+            # boot_values = df_pe.iloc[1:, m]
+
+        ci_low, ci_upp = pe.calc_conf_intervals(boot_values, correction=False,  #initial=centre,
                                                 average=average, alpha=alpha,
                                                 ci_method=ci_method)
-        errors[0, m] = means[m] - ci_low
-        errors[1, m] = ci_upp - means[m]
+        errors[0, m] = centres[m] - ci_low
+        errors[1, m] = ci_upp - centres[m]
 
-    return errors
+    return (errors, centres)
 
 
 # TODO: Plot only one colourbar per row: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.colorbar.html
@@ -406,10 +424,13 @@ def plot_distributions(scores, bins, data_label, ax=None):
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, alpha=0.05,
-                    ci_method='jeffreys', legend=True, orient='v'):
+def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
+                    ax=None, limits=None, alpha=0.05, ci_method='jeffreys',
+                    legend=True, orient='v'):
 
-    c = sns.color_palette()[-3]  # 'gray'
+    # c = sns.color_palette()[-3]  # 'gray'
+    c = '#999999'
+    c_edge = '#777777'
 
     # df_bs = df_bs[pe._ALL_METHODS_]
 
@@ -421,10 +442,19 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
         if orient == 'h':
             ax.set_xlim(limits)
 
+    df_point = df_pe.iloc[0, :]
+    df_bs = df_pe.iloc[1:, :]
+    # TODO: Think...
+#    if correction:
+#        df_correct = pe.correct_estimate(df_pe)
+
+
     # Draw violin plots of bootstraps
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=FutureWarning)
-        sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0)  # , inner="stick")
+#    with warnings.catch_warnings():
+#        warnings.simplefilter("ignore", category=FutureWarning)
+    sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0, inner=None,
+                   palette=sns.color_palette("muted"), saturation=1.0)
+
     if orient == 'v':
         sns.despine(ax=ax, top=True, bottom=True, left=False, right=True, trim=True)
     elif orient == 'h':
@@ -433,10 +463,10 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
     if prop_Ref1:  # Add ground truth
         truth_label = r"$\tilde{{p}}_C: {:4.3}$".format(prop_Ref1)
         if orient == 'v':
-            ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--',
+            ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--', c='#aaaaaa',
                        label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
         elif orient == 'h':
-            ax.axvline(x=prop_Ref1, ymin=0, ymax=1, ls='--',
+            ax.axvline(x=prop_Ref1, ymin=0, ymax=1, ls='--', c='#aaaaaa',
                        label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
 
     # Add confidence intervals # TODO: Refactor
@@ -447,37 +477,79 @@ def plot_bootstraps(df_bs, df_point=None, prop_Ref1=None, ax=None, limits=None, 
 #        x, y = df_bs.mean().values, ax.get_yticks()
 #        means = x
 
-    if orient == 'v':
-        x, y = ax.get_xticks(), df_point.iloc[0].values
-        means = y
-    elif orient =='h':
-        x, y = df_point.iloc[0].values, ax.get_yticks()
-        means = x
+#    if orient == 'v':
+#        x, y = ax.get_xticks(), df_point.iloc[0].values
+#        means = y
+#    elif orient == 'h':
+#        x, y = df_point.iloc[0].values, ax.get_yticks()
+#        means = x
 
-    # TODO: Think about means
-    # errors = get_error_bars(df, average=np.mean, alpha=0.05, ci_method=ci_method)
+    errors, centres = get_error_bars(df_pe, correction=correction)
 
-    errors = np.zeros(shape=(2, len(methods)))
+    if correction:
+        if orient == 'v':
+            x, y = ax.get_xticks(), centres
+            x_init, y_init = x, df_point
+        elif orient == 'h':
+            x, y = centres, ax.get_yticks()
+            x_init, y_init = df_point, y
 
-    for midx, method in enumerate(df_bs):  # enumerate(methods):
+        # Plot initial estimate
+        # ax.plot(x_init, y_init, 'o', markersize=10, c='#737373')  #(0.25, 0.25, 0.25))
+        ax.plot(x_init, y_init, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Initial")
 
-        initial = df_point.iloc[0][method]
+    else:
+        if orient == 'v':
+            x, y = ax.get_xticks(), df_pe.iloc[0].values
+        elif orient == 'h':
+            x, y = df_pe.iloc[0].values, ax.get_yticks()
 
-        ci_low, ci_upp = pe.calc_conf_intervals(df_bs[method], initial=initial, average=np.mean, alpha=alpha, ci_method=ci_method)
-        errors[0, midx] = means[midx] - ci_low
-        errors[1, midx] = ci_upp - means[midx]
+#    if correction:
+#        # Plot initial estimate
+#        ax.plot(x, y, 'o', markersize=12, c=(0.25, 0.25, 0.25))
+#        ax.plot(x, y, 'o', markersize=8, c=c, label="Initial")
+
+    # errors = np.zeros(shape=(2, len(methods)))
+
+#    for midx, method in enumerate(df_bs):  # enumerate(methods):
+#
+#        # initial = df_point.iloc[0][method]  # Avoid chained indexing
+#        # initial = df_point.iloc[0, midx]
+#
+#        if correction:
+#            # Plot initial estimate
+#            ax.plot(x, y, fmt='x', markersize=12, c=(0.25, 0.25, 0.25))
+#            ax.plot(x, y, fmt='x', markersize=8, c=c, label="Initial")
+#
+##            centre = df_correct.iloc[0, midx]
+##
+##        else:
+##            centre = df_point.iloc[0, midx]
+##
+##        ci_low, ci_upp = pe.calc_conf_intervals(df_bs[method], initial=centre, average=np.mean, alpha=alpha, ci_method=ci_method)
+##        errors[0, midx] = means[midx] - ci_low
+##        errors[1, midx] = ci_upp - means[midx]
+
+
 
     # Add white border around error bars
     # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
 
 #    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
     error_label = "{:3.1%} CI".format(1-alpha)
+    if correction:
+        error_label += " (Corrected)"
+
     if orient == 'v':
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='*', markersize=9, c=c, lw=5,
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=6, capsize=14, capthick=6)
+
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='*', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
                     capsize=12, capthick=3, label=error_label)
     elif orient == 'h':
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=9, c=c, lw=5,
-                    capsize=12, capthick=3, label=error_label)
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=6, capsize=14, capthick=6)
+
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
+                    capsize=12, capthick=3, label=error_label)  # , zorder=10
 
     if orient == 'v':
         ax.yaxis.tick_left()
@@ -515,7 +587,7 @@ def construct_mixture(Ref1, Ref2, p1, size):
     return mix
 
 
-def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, add_ci=True, alpha=0.05, ci_method="jeffreys"):
+def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, add_ci=True, alpha=0.05, ci_method="jeffreys", correction=False):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
@@ -584,16 +656,15 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
 
 
             # Select estimates at p_star and size for all methods
-            df = df_boots[np.isclose(p_star, df_est['p1*']) &
-                          (df_est['Size'] == size) &
-                          (df_est["Mix"] == selected_mix)]
-#                          np.isclose(size, df_est['Size']) &
-#                          np.isclose(selected_mix, df_est["Mix"])]
+            df_b = df_boots[np.isclose(p_star, df_est['p1*']) &
+                            (df_est['Size'] == size) &
+                            (df_est["Mix"] == selected_mix)]
+
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
     #            g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2)
-                sns.violinplot(x='Estimate', y='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2, color=palette[p+1], inner=None)
+                sns.violinplot(x='Estimate', y='Method', data=df_b, ax=ax_vio, orient='h', cut=0, linewidth=2, color=palette[p+1], inner=None)
 
 #            handles, labels = g.get_legend_handles_labels()
 #            g.legend(handles, labels[:len(methods)], title="Method")
@@ -608,44 +679,85 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
             ax_vio.set(xlim=(0, 1))
 
             if add_ci:  # Add confidence intervals
-                # The true value will be within these bars for 95% of samples (not measures)
-                # For alpha = 0.05, the CI bounds are +/- 1.96*SEM
-                df_means = df.groupby('Method').mean()
-                errors = np.zeros(shape=(2, len(methods)))
-                means = []
-                initials = []
-                for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
+#                # The true value will be within these bars for 95% of samples (not measures)
+#                # For alpha = 0.05, the CI bounds are +/- 1.96*SEM
+#                df_means = df_b.groupby('Method').mean()
+#                errors = np.zeros(shape=(2, len(methods)))
+#                means = []
+#                initials = []
+#                for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
+#
+#                    mean_est = df_means.loc[method, 'Estimate']
+#
+#                    initial = df_point[np.isclose(p_star, df_point['p1*'])
+#                                       & (df_point['Size'] == size)
+#                                       & (df_point["Mix"] == selected_mix)][method].values[0]
+#
+#                    df_piv = df_b.pivot_table(values="Estimate",
+#                                            index=["p1*", "Size", "Mix", "Boot"],
+#                                            columns="Method")
+#
+#                    ci_low, ci_upp = pe.calc_conf_intervals(df_piv[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
+#
+#                    means.append(mean_est)
+#                    initials.append(initial)
+##                    errors[0, midx] = mean_est - ci_low  # y[midx] - ci_low1
+##                    errors[1, midx] = ci_upp - mean_est  # ci_upp1 - y[midx]
+#                    errors[0, midx] = initial - ci_low  # y[midx] - ci_low1
+#                    errors[1, midx] = ci_upp - initial  # ci_upp1 - y[midx]
+#
+##                x = means
+#                x = initials
+#                y = ax_vio.get_yticks()
+#
+#                # Add grey border around error bars
+#                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
+#
+#                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=18 ,
+#                                c=palette[p+1], lw=2, capsize=12, capthick=2,
+#                                label="Confidence Intervals ({:3.1%})".format(1-alpha),
+#                                markeredgecolor=(0.45, 0.45, 0.45))
 
-                    mean_est = df_means.loc[method, 'Estimate']
 
-                    initial = df_point[np.isclose(p_star, df_point['p1*'])
-                                       & (df_point['Size'] == size)
-                                       & (df_point["Mix"] == selected_mix)][method].values[0]
+                ##### NEW METHOD #####
 
-                    df_p = df.pivot_table(values="Estimate",
-                                          index=["p1*", "Size", "Mix", "Boot"],
-                                          columns="Method")
+                # Estract point estimates for the particular hyperparameters
+                df_p = df_point[np.isclose(p_star, df_point['p1*'])
+                                & (df_point['Size'] == size)
+                                & (df_point["Mix"] == selected_mix)]
 
-                    ci_low, ci_upp = pe.calc_conf_intervals(df_p[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
+                df_p_piv = df_p.drop(columns=["p1*", "Size", "Mix"])
 
-                    means.append(mean_est)
-                    initials.append(initial)
-#                    errors[0, midx] = mean_est - ci_low  # y[midx] - ci_low1
-#                    errors[1, midx] = ci_upp - mean_est  # ci_upp1 - y[midx]
-                    errors[0, midx] = initial - ci_low  # y[midx] - ci_low1
-                    errors[1, midx] = ci_upp - initial  # ci_upp1 - y[midx]
+                df_b_piv = df_b.pivot_table(values="Estimate",
+                                            index=["p1*", "Size", "Mix", "Boot"],
+                                            columns="Method")
 
-#                x = means
-                x = initials
-                y = ax_vio.get_yticks()
+                df_b_piv = df_b_piv[df_p_piv.columns]  # Manually sort before merge
+                df_pe = pd.concat([df_p_piv, df_b_piv], ignore_index=True)
+                errors, centres = get_error_bars(df_pe, correction=correction)
+
+
+                if correction:
+                    x, y = centres, ax_vio.get_yticks()
+                    x_init, y_init = np.squeeze(df_p_piv), y
+
+                    # Plot initial estimate
+                    # ax_vio.plot(x_init, y_init, 'o', markersize=10, c=(0.45, 0.45, 0.45))
+                    ax_vio.plot(x_init, y_init, 'o', c=palette[p+1],
+                                markersize=9, markeredgecolor=(0.45, 0.45, 0.45), label="Initial")
+
+                else:
+                    x, y = df_pe.iloc[0].values, ax_vio.get_yticks()
 
                 # Add grey border around error bars
-                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
+                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none',
+                                c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
 
-                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=18 ,
-                                c=palette[p+1], lw=2, capsize=12, capthick=2,
-                                label="Confidence Intervals ({:3.1%})".format(1-alpha),
-                                markeredgecolor=(0.45, 0.45, 0.45))
+                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='*', c=palette[p+1],
+                                markersize=12, lw=2, capsize=12, capthick=2,
+                                markeredgecolor=(0.45, 0.45, 0.45),
+                                label="Confidence Intervals ({:3.1%})".format(1-alpha))
+
 
         if si == len(sizes)-1:  # Top row
             ax_mix.legend()
@@ -749,7 +861,7 @@ if __name__ == "__main__":
             fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
 
         # Plot bootstrapped estimates of p1
-        if bool(boots_estimates):
+        if False:  # bool(boots_estimates):
             print("Plotting bootstrapped characterisation of {} scores...".format(data_label), flush=True)
             fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
             fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
@@ -904,7 +1016,8 @@ if __name__ == "__main__":
         for mix in plot_mixes:  #range(n_seeds):
             plot_selected_violins(scores, bins, df_point, df_est, methods, p_stars, sizes,
                                   out_dir, data_label, selected_mix=mix,
-                                  add_ci=True, alpha=0.05, ci_method=CI_METHOD)
+                                  add_ci=True, alpha=0.05, ci_method=CI_METHOD,
+                                  correction=correction)
 
         # Plot error bars
         if False:
@@ -930,15 +1043,15 @@ if __name__ == "__main__":
                         errors[1, midx] = ci_upp1 - mean_est  # ci_upp1 - y[midx]
 
                     # Add white border around error bars
-                    # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
+                    # ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c='w', lw=6, capsize=14, capthick=6)
                     if orient == 'v':
                         x = ax_vio.get_xticks()
                         y = means
-                        ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+                        ax_vio.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=7, c=c, lw=4, capsize=12, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
                     elif orient == 'h':
                         x = means
                         y = ax_vio.get_yticks()
-                        ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=5, capsize=12, capthick=3, label="Confidence Intervals ({:3.1%})".format(1-alpha))
+                        ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='s', markersize=7, c=c, lw=4, capsize=12, capthick=4, label="Confidence Intervals ({:3.1%})".format(1-alpha))
 
 
                     g.axvline(x=p_star, ymin=0, ymax=1, ls='--')  # ,
@@ -1001,7 +1114,7 @@ if __name__ == "__main__":
         ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
         # with sns.axes_style("whitegrid"):
             #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
-        plot_bootstraps(df_pe.iloc[1:, :], df_pe.iloc[[0]], prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
+        plot_bootstraps(df_pe, correction, prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
 
         # sns.set_style("ticks")
         ax_dists_ex = fig_ex.add_subplot(gs[0, 1])
@@ -1037,7 +1150,7 @@ if __name__ == "__main__":
                 else:
                     legend = False
 
-                plot_bootstraps(df_bs, df_point, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
+                plot_bootstraps(df_pe, correction, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 
