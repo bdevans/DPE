@@ -13,7 +13,7 @@ Module to analyse an unknown mixture population.
 
 from pprint import pprint
 import itertools
-# import warnings
+import warnings
 
 import numpy as np
 import scipy as sp
@@ -143,15 +143,37 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
     return methods
 
 
-def calc_conf_intervals(values, initial=None, average=np.mean, alpha=0.05, ci_method="experimental"):
+def correct_estimate(df_pe):
+    assert len(df_pe) > 1  # Need at least one boot strap estimate
+    pe_point = df_pe.iloc[0, :]
+    # if len(df_pe) == 1:  # No bootstraps
+    #     return pe_point
+    pe_boot = df_pe.iloc[1:, :]
+    n_boot = len(pe_boot)
+    corrected = {}
+    for method in df_pe:  # loop over columns (i.e. methods)
+        # point_est = pe_point[method]
+        if n_boot > 0:
+            # bias = point_est - np.mean(pe_boot[method])
+            # corrected[method] = point_est + bias
+            corrected[method] = 2 * pe_point[method] - np.mean(pe_boot[method])
+    return pd.DataFrame(corrected, index=[-1], columns=df_pe.columns)
+
+
+def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
+                        alpha=0.05, ci_method="experimental"):
 
     n_obs = len(values)
     average_value = average(values)
 
     if ci_method == 'experimental':
         assert initial is not None and 0.0 <= initial <= 1.0
-        err_low, err_upp = np.percentile(values-initial, [100*alpha/2, 100*(1-alpha/2)])
-        ci_low, ci_upp = initial-err_upp, initial-err_low
+        if correction:
+            err_low, err_upp = np.percentile(values-initial, [100*alpha/2, 100*(1-alpha/2)])
+            ci_low, ci_upp = initial-err_upp, initial-err_low
+        else:
+            # TODO: Refactor
+            ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
     elif ci_method == 'centile':
         ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
     elif ci_method == 'stderr':
@@ -278,11 +300,14 @@ def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
 
 
 def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_p1=None, n_jobs=1, seed=None,
-                    verbose=1, logfile=''):
+                    alpha=0.05, true_p1=None, correction=False,
+                    n_jobs=1, seed=None, verbose=1, logfile=''):
 
     if seed is not None:
         np.random.seed(seed)
+
+    if correction and n_mix + n_boot == 0:
+        warnings.warn("No bootstraps - Ignoring correction!")
 
     Ref1 = scores['Ref1']
     Ref2 = scores['Ref2']
@@ -383,6 +408,9 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
             index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
             index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
             df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
+
+        if correction:
+            df_correct = correct_estimate(df_pe)
     else:
         df_pe = pd.DataFrame(pe_initial, index=[0], columns=columns)
 
@@ -400,4 +428,6 @@ def analyse_mixture(scores, bins, methods, n_boot=1000, boot_size=-1, n_mix=0,
             lf.write(report)
             lf.write("\n")
 
+    if correction:
+        return df_pe, df_correct
     return df_pe
