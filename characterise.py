@@ -60,29 +60,29 @@ def SecToStr(sec):
     return u'%d:%02d:%02d' % (h, m, s)
 
 
-def assess(sample_size, prop_Ref1, Ref1, Ref2, bins, methods, n_boot, seed=None):
+def assess(sample_size, pC, RefC, RefN, bins, methods, n_boot, seed=None):
     '''New method using analyse_mixture'''
 
-    assert(0.0 <= prop_Ref1 <= 1.0)
-    n_Ref1 = int(round(sample_size * prop_Ref1))
-    n_Ref2 = sample_size - n_Ref1
+    assert(0.0 <= pC <= 1.0)
+    n_RefC = int(round(sample_size * pC))
+    n_RefN = sample_size - n_RefC
 
     # Construct mixture
-    mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                              np.random.choice(Ref2, n_Ref2, replace=True)))
+    mixture = np.concatenate((np.random.choice(RefC, n_RefC, replace=True),
+                              np.random.choice(RefN, n_RefN, replace=True)))
 
-    scores = {'Ref1': Ref1, 'Ref2': Ref2}
+    scores = {'Ref1': RefC, 'Ref2': RefN}
     scores['Mix'] = mixture
 
     if verbose:
         logfile = os.path.join(out_dir, "logs", 'pe_s{:05}_p{:.2f}_{}.log'
-                                                .format(sample_size, prop_Ref1, seed))
+                                                .format(sample_size, pC, seed))
     else:
         logfile = None
 
     results = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
                                  boot_size=-1, n_mix=n_mix, alpha=alpha,
-                                 true_p1=prop_Ref1, n_jobs=1, seed=seed,
+                                 true_p1=pC, n_jobs=1, seed=seed,
                                  verbose=0, logfile=logfile)
     point = results.iloc[[0]]
 
@@ -124,9 +124,9 @@ if __name__ == '__main__':
         t = time.time()  # Start timer
 
         # Unpack data
-        scores, bins, means, medians, prop_Ref1 = data
-        Ref1 = scores['Ref1']
-        Ref2 = scores['Ref2']
+        scores, bins, means, medians, pC = data
+        RefC = scores['Ref1']
+        RefN = scores['Ref2']
         Mix = scores['Mix']
         bin_width = bins['width']
         bin_edges = bins['edges']
@@ -160,8 +160,8 @@ if __name__ == '__main__':
             size_bar.set_description("Size = {:6,}".format(sample_size))
 
             prop_bar = tqdm(proportions, dynamic_ncols=True)
-            for p, prop_Ref1 in enumerate(prop_bar):
-                prop_bar.set_description(" p1* = {:6.2f}".format(prop_Ref1))
+            for p, pC in enumerate(prop_bar):
+                prop_bar.set_description(" p1* = {:6.2f}".format(pC))
 
                 # Make mixtures deterministic with parallelism
                 # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
@@ -170,8 +170,8 @@ if __name__ == '__main__':
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:
                     # Parallelise over mixtures
-                    results = parallel(delayed(assess)(sample_size, prop_Ref1,
-                                                       Ref1, Ref2, bins, methods,
+                    results = parallel(delayed(assess)(sample_size, pC,
+                                                       RefC, RefN, bins, methods,
                                                        n_boot, seed=seed)
 
                                        for seed in tqdm(mix_seeds,
