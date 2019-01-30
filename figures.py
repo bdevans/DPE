@@ -38,8 +38,10 @@ FRESH_DATA = False  # CAUTION!
 
 # out_dir = "results/m100_b1000"
 # out_dir = "results/m10_b100"
-out_dir = "results/m100_b100"
+#out_dir = "results/m100_b100"
+
 # out_dir = "results/m1000_b100"
+out_dir = "results/s1000_m0_b0"
 fig_dir = os.path.join(out_dir, "figs")
 
 verbose = False
