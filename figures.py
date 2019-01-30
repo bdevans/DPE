@@ -749,7 +749,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
                     # Plot initial estimate
                     # ax_vio.plot(x_init, y_init, 'o', markersize=10, c=(0.45, 0.45, 0.45))
                     ax_vio.plot(x_init, y_init, 'o', c=palette[p+1],
-                                markersize=9, markeredgecolor=(0.45, 0.45, 0.45), label="Initial")
+                                markersize=9, markeredgecolor=(0.45, 0.45, 0.45), label="Initial", zorder=10)
 
                 else:
                     x, y = df_pe.iloc[0].values, ax_vio.get_yticks()
@@ -758,10 +758,14 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none',
                                 c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
 
-                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='*', c=palette[p+1],
+                ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=palette[p+1],
                                 markersize=12, lw=2, capsize=12, capthick=2,
                                 markeredgecolor=(0.45, 0.45, 0.45),
                                 label="Confidence Intervals ({:3.1%})".format(1-alpha))
+
+                if correction:
+                    ax_vio.plot(x, y, '*', markersize=12, c=palette[p+1], markeredgecolor=(0.45, 0.45, 0.45), label="Corrected", zorder=20)
+
 
 
         if si == len(sizes)-1:  # Top row
