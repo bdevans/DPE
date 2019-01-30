@@ -496,7 +496,7 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
 
         # Plot initial estimate
         # ax.plot(x_init, y_init, 'o', markersize=10, c='#737373')  #(0.25, 0.25, 0.25))
-        ax.plot(x_init, y_init, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Initial")
+        ax.plot(x_init, y_init, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Initial", zorder=10)
 
     else:
         if orient == 'v':
@@ -537,19 +537,22 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
 
 #    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
     error_label = "{:3.1%} CI".format(1-alpha)
-    if correction:
-        error_label += " (Corrected)"
+#    if correction:
+#        error_label += " (Corrected)"
 
     if orient == 'v':
         ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=6, capsize=14, capthick=6)
 
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='*', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
                     capsize=12, capthick=3, label=error_label)
     elif orient == 'h':
         ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=6, capsize=14, capthick=6)
 
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='*', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
                     capsize=12, capthick=3, label=error_label)  # , zorder=10
+
+    if correction:
+        ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
 
     if orient == 'v':
         ax.yaxis.tick_left()
