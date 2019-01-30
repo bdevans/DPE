@@ -379,6 +379,14 @@ def plot_characterisation(estimates, proportions, sample_sizes,
 
         ax_dev.set_xlim(extent[:2])
         ax_dev.set_ylim(extent[2:])
+
+        # Show only 1 sf for 0.00 and 1.00 to avoid crowding
+        xticks = [0, 0.25, 0.5, 0.75, 1]
+        ax_dev.set_xticks(xticks)
+#        xticklabels = ax_dev.get_xticks().tolist()  # [label.get_text() for label in ax_dev.get_xticklabels()]
+#        xticklabels[0] = "0"
+#        xticklabels[-1] = "1"
+        ax_dev.set_xticklabels([str(tick) for tick in xticks])
         if m % len(pe._ALL_METHODS_) == 3:
             # print(method)
             cax = grid.cbar_axes[1]
