@@ -334,7 +334,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         ax_acc.set_title(method)
         if m % len(pe._ALL_METHODS_) == 3:
             cax = grid.cbar_axes[0]
-            cax.colorbar(hm, extend='both')
+            cax.colorbar(hm, ticks=shading_ticks)  # , extend='both')  # TODO: Fix!
             cax.toggle_label(True)
             cax.axis[cax.orientation].set_label("Accuracy")
 
@@ -392,7 +392,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         if m % len(pe._ALL_METHODS_) == 3:
             # print(method)
             cax = grid.cbar_axes[1]
-            cax.colorbar(hm, extend='max')
+            cax.colorbar(hm)  # , extend='max')  # TODO: Fix!
             cax.toggle_label(True)
             cax.axis[cax.orientation].set_label("Model variability")
 
