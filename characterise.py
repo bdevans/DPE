@@ -7,10 +7,7 @@ Parallelised script for systematically characterising the parameter space for
 proportion estimation methods by generating artificial mixtures across a grid
 of proprtions and sample sizes.
 
-@author: ben
-
-Original Diabetes data was processed with commit 01a9705b
-https://git.exeter.ac.uk/bdevans/DPE/commit/01a9705b6fa1bf0d1df4fd3a4beaa1a413f64cb5
+@author: Benjamin D. Evans
 """
 
 import os
@@ -18,13 +15,10 @@ import time
 
 import numpy as np
 from tqdm import tqdm
-# from joblib import Memory
-# mem = Memory(cachedir='/tmp')
 from joblib import Parallel, delayed, cpu_count
 
 import proportion_estimation as pe
 import datasets as ds
-# from datasets import (load_diabetes_data, load_renal_data)
 
 # ---------------------------- Define constants ------------------------------
 
@@ -208,9 +202,11 @@ if __name__ == '__main__':
         results_arrays = {}
 
         for method in methods:
-            np.save('{}/point_{}_{}'.format(out_dir, method, tag), point_arrays[method])
+            np.save('{}/point_{}_{}'.format(out_dir, method, tag),
+                    point_arrays[method])
             if n_boot:
-                np.save('{}/boots_{}_{}'.format(out_dir, method, tag), boots_arrays[method])
+                np.save('{}/boots_{}_{}'.format(out_dir, method, tag),
+                        boots_arrays[method])
         # TODO: Save the arrays in the dictionary as a pickle file
         np.save('{}/sample_sizes_{}'.format(out_dir, tag), sample_sizes)
         np.save('{}/proportions_{}'.format(out_dir, tag), proportions)
