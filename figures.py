@@ -319,9 +319,10 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         else:
             average_error = average(estimates[label], axis=2) - proportions
 
-        shading_levels = np.arange(-0.05, 0.051, 0.005)
+#        shading_levels = np.arange(-0.05, 0.051, 0.005)
+        shading_levels = np.linspace(-0.05, 0.05, num=21, endpoint=True)
 #        shading_levels = np.arange(-0.05, 0.051, 0.01)
-        # SHADING_TICKS = np.linspace(-0.05, 0.05, 11)
+        shading_ticks = np.linspace(-0.05, 0.05, 11, endpoint=True)
         cmap = "seismic"
         cmap = plt.cm.get_cmap("seismic", len(shading_levels)-1)  # discrete colours
 
@@ -366,7 +367,8 @@ def plot_characterisation(estimates, proportions, sample_sizes,
             bs_dev = deviation(estimates[label], axis=2)
         cmap = "viridis_r"
 
-        shading_levels = np.arange(0.0, 0.2001, 0.02)
+#        shading_levels = np.arange(0.0, 0.4001, 0.05)
+        shading_levels = np.linspace(0.0, 1.0, num=11, endpoint=True)
 #        shading_levels = np.arange(0.0, 0.4001, 0.05)
         cmap = plt.cm.get_cmap(cmap, len(shading_levels)-1)  # discrete colours
 
