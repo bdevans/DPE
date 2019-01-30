@@ -348,16 +348,16 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         # hm = plot_deviation(estimates, proportions, sample_sizes, method, fig, ax_dev, title=False, cbar=False)
 
         # SD values
-        vmin = 0.01
-        vmax = 0.1
+#        vmin = 0.01
+#        vmax = 0.1
 
         # Model variability
         def deviation(estimates, axis=None, alpha=0.05):
             ci_low, ci_upp = np.percentile(estimates, [100*alpha/2, 100-(100*alpha/2)], axis=axis)
             return ci_upp - ci_low
 
-        vmin = 0
-        vmax = 0.2
+#        vmin = 0
+#        vmax = 0.25
 
 
         if estimates[label].ndim > 3:  # Take mean over bootstraps first
