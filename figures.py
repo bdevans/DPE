@@ -285,15 +285,20 @@ def plot_characterisation(estimates, proportions, sample_sizes,
     fig = plt.figure(figsize=figsize)
     # gs = plt.GridSpec(nrows=2, ncols=4, hspace=0.15, wspace=0.15)
 
-    grid = AxesGrid(fig, 111,  # similar to subplot(122)
+    # rect=[left, bottom, width, height] or 111
+    left = 0.06
+    bottom = 0.10
+    width = 0.88
+    height = 0.84
+    grid = AxesGrid(fig, rect=[left, bottom, width, height], aspect=False,  # similar to subplot(122)
                     nrows_ncols=(2, len(pe._ALL_METHODS_)),
-                    axes_pad=0.20,
+                    axes_pad=0.15,
                     label_mode="L",
                     share_all=True,
                     cbar_location="right",
                     cbar_mode="edge",
                     cbar_size="7%",
-                    cbar_pad="10%",
+                    cbar_pad="8%",
                     )
 
     x_half_width = (proportions[1] - proportions[0]) / 2
