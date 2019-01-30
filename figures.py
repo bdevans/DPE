@@ -614,7 +614,9 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
     print(palette)
 
     fig_select = plt.figure(figsize=(12, 3*len(sizes)))
-    gs = plt.GridSpec(nrows=len(sizes), ncols=2, width_ratios=[3, 2], hspace=0.2, wspace=0.005)
+    gs = plt.GridSpec(nrows=len(sizes), ncols=2, width_ratios=[3, 2],
+                      hspace=0.15, wspace=0.005,
+                      left=0.10, right=0.97, bottom=0.08, top=0.98)
 
     for si, size in enumerate(sizes):
 #        ax_vio = fig_select.add_subplot(gs[-(si+1), :-1])
@@ -1126,7 +1128,8 @@ if __name__ == "__main__":
         # Plot worked examples
         print("Plotting application with {} scores...".format(data_label), flush=True)
         fig_ex = plt.figure(figsize=(12, 6))
-        gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15)
+        gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
+                          left=0.07, right=0.98, bottom=0.10, top=0.98)
 
         ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
         # with sns.axes_style("whitegrid"):
