@@ -106,7 +106,7 @@ def load_renal_data():
     # headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
     dataset = 'data/renal_final_data_mixture_2_type_1_1.xls'
     headers = {"T2GRS": "T2GRS", "Group": "group"}
-    prop_Ref1 = 0.0777
+    prop_Ref1 = 0.0758
     binning_method = 'fd'  # TODO: Take max over Ref1, Ref2?
 
     # New "enriched" data set
