@@ -373,7 +373,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         cmap = "viridis_r"
 
 #        shading_levels = np.arange(0.0, 0.4001, 0.05)
-        shading_levels = np.linspace(0.0, 1.0, num=11, endpoint=True)
+        shading_levels = np.linspace(0.0, 1.0, num=21, endpoint=True)
 #        shading_levels = np.arange(0.0, 0.4001, 0.05)
         cmap = plt.cm.get_cmap(cmap, len(shading_levels)-1)  # discrete colours
 
