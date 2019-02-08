@@ -341,7 +341,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
             cax = grid.cbar_axes[0]
             cax.colorbar(hm, ticks=shading_ticks)  # , extend='both')  # TODO: Fix!
             cax.toggle_label(True)
-            cax.axis[cax.orientation].set_label("Accuracy")
+            cax.axis[cax.orientation].set_label("Average Deviation from $p_C^*$")
 
         # Plot deviation across mixtures
         # ax_dev = fig.add_subplot(gs[1, m])
