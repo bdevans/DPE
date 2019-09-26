@@ -16,7 +16,7 @@ ENTRYPOINT [ "/bin/bash", "-c" ]
 # https://fmgdata.kinja.com/using-docker-with-conda-environments-1790901398
 RUN [ "conda", "update", "conda", "-y" ]
 RUN [ "conda", "update", "--all", "-y" ]
-COPY environment.yml /tmp/environment.yml
+COPY characterise_env.yml /tmp/environment.yml
 WORKDIR /tmp
 RUN [ "conda", "env", "create" ]
 
