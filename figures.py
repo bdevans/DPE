@@ -819,6 +819,8 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
 #    plt.tight_layout()
     fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}_{}.png'.format(selected_mix, data_label)))
+    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}_{}.svg'.format(selected_mix, data_label)), transparent=True)
+
 
 
 # NOTE: KDEs are very expensive when large arrays are passed to score_samples
@@ -887,6 +889,7 @@ if __name__ == "__main__":
             print("Plotting characterisation of {} scores...".format(data_label), flush=True)
             fig = plot_characterisation(point_estimates, proportions, sample_sizes)
             fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
+            fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.svg'.format(data_label)), transparent=True)
 
         # Plot bootstrapped estimates of p1
         if False:  # bool(boots_estimates):
@@ -1151,6 +1154,7 @@ if __name__ == "__main__":
             plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
 
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
+        fig_ex.savefig(os.path.join(fig_dir, 'application_{}.svg'.format(data_label)), transparent=True)
 
         # Plot distributions around the estimated proportion with given sample_size from the characterisation data
         # if prop_Ref1 is not None:
