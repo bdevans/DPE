@@ -94,11 +94,11 @@ deviation = np.std
 # plt.style.use('seaborn-white')
 mpl.rc('figure', figsize=(10, 8))
 mpl.rc('font', size=14)
-mpl.rc('axes', titlesize=14)     # fontsize of the axes title
+mpl.rc('axes', titlesize=14)    # fontsize of the axes title
 mpl.rc('axes', labelsize=14)    # fontsize of the x and y labels
-mpl.rc('xtick', labelsize=12)    # fontsize of the tick labels
-mpl.rc('ytick', labelsize=12)    # fontsize of the tick labels
-mpl.rc('legend', fontsize=11)    # legend fontsize
+mpl.rc('xtick', labelsize=12)   # fontsize of the tick labels
+mpl.rc('ytick', labelsize=12)   # fontsize of the tick labels
+mpl.rc('legend', fontsize=11)   # legend fontsize
 mpl.rc('figure', titlesize=14)  # fontsize of the figure title
 mpl.rc('lines', linewidth=2)
 mpl.rc('figure', dpi=100)
@@ -473,9 +473,9 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
                    palette=sns.color_palette("muted"), saturation=1.0)
 
     if orient == 'v':
-        sns.despine(ax=ax, top=True, bottom=True, left=False, right=True, trim=True)
+        sns.despine(ax=ax, top=True, bottom=True, left=False, right=True)#, trim=True)
     elif orient == 'h':
-        sns.despine(ax=ax, top=True, bottom=False, left=False, right=True, trim=True)
+        sns.despine(ax=ax, top=True, bottom=False, left=False, right=True)#, trim=True)
 
     if prop_Ref1:  # Add ground truth
         truth_label = r"$\tilde{{p}}_C: {:4.3}$".format(prop_Ref1)
@@ -558,15 +558,15 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
 #        error_label += " (Corrected)"
 
     if orient == 'v':
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=6, capsize=14, capthick=6)
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=3, capsize=14, capthick=6)
 
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
-                    capsize=12, capthick=3, label=error_label)
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', markersize=14, c=c, lw=2, markeredgecolor=c_edge,
+                    capsize=12, capthick=2, label=error_label)
     elif orient == 'h':
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=6, capsize=14, capthick=6)
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=2, capsize=14, capthick=4)
 
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=3, markeredgecolor=c_edge,
-                    capsize=12, capthick=3, label=error_label)  # , zorder=10
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=1.25, markeredgecolor=c_edge,
+                    capsize=12, capthick=1, label=error_label)  # , zorder=10
 
     if correction:
         ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
@@ -574,10 +574,12 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
     if orient == 'v':
         ax.yaxis.tick_left()
         ax.set_ylabel("$p_C$", {"rotation": "horizontal"})  # "$p_1$"
+        ax.set_ylim(0, 1)
         # ax.set_xticks([])  # Remove ticks for method labels
     elif orient == 'h':
         ax.xaxis.tick_bottom()
         ax.set_xlabel("$p_C$")  # "$p_1$"
+        ax.set_xlim(0, 1)
         # ax.set_yticks([])  # Remove ticks for method labels
     #plt.setp(ax, yticks=yticks)
     #ax.yaxis.set_ticks_position('right')
