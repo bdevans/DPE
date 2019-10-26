@@ -16,6 +16,7 @@ import warnings
 import pandas as pd
 import numpy as np
 # import scipy as sp
+from sklearn.metrics import roc_curve, auc
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -430,7 +431,7 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[2])
 
         if despine:
-        sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
+            sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
     #ax.yaxis.tick_left()
     #ax.yaxis.set_ticks_position('left')
@@ -823,6 +824,83 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, si
     fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}_{}.svg'.format(selected_mix, data_label)), transparent=True)
 
 
+def plot_ROC(scores, bins, title=None, ax=None):
+    """Plot the Reciever Operator characteristic
+
+    Args:
+
+    """
+    # http://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_curve.html
+    if not ax:
+        fig, ax = plt.subplots()
+    plt.sca(ax)
+
+    # scores, bins
+    # method = 'fd'
+    # all_refs = [*scores["Ref1"], *scores["Ref2"]]
+    # # probas_, edges_r = np.histogram(all_refs, bins=method, range=(bins["min"], bins["max"]), density=True)
+    # probas_, edges_a = np.histogram(all_refs, bins=bins["edges"], density=True)
+
+
+    # TPR = TP / P
+    # FPR = FP / N
+    # x=FPR, y=TPR
+    density = False
+    # p = 1. * np.arange(len(all_refs)) / (len(all_refs) - 1)
+    hist_1, _ = np.histogram(scores["Ref1"], bins=bins["edges"], density=density)
+    hist_2, _ = np.histogram(scores["Ref2"], bins=bins["edges"], density=density)
+    if scores["Ref1"].mean() > scores["Ref2"].mean():
+        hist_p = hist_1
+        hist_n = hist_2
+    else:
+        hist_p = hist_2
+        hist_n = hist_1
+
+    cum_p = np.cumsum(hist_p)  # Ref1 := cases := positive
+    cond_P = hist_p.sum()
+    # print(hist_c)
+    # print(cum_c)
+    tp = cond_P - cum_p  # Must subtract from P since cumsum grows the opposite way
+    
+    cum_n = np.cumsum(hist_n)  # Ref2 := non-cases := negative
+    cond_N = hist_n.sum()
+    # print(hist_n)
+    # print(cum_n)
+    tn = cum_n
+
+    # if scores["Ref1"].mean() > scores["Ref2"].mean():
+    #     tp = np.flip(tp)
+    #     tn = np.flip(tn)
+
+    print(bins['centers'])
+    print(tp)
+    print(tn)
+
+    # Assume mean(GRS_c) > mean(GRS_n)
+    tpr = tp / cond_P
+    fpr = 1 - (tn / cond_N)
+    print(tpr)
+    print(fpr)
+
+    # fpr, tpr, thresholds = roc_curve(y, probas_[:, 1])
+    # fpr = np.r_[0, fpr]
+    # tpr = np.r_[0, tpr]
+    roc_auc = auc(fpr, tpr)
+    ax.plot(fpr, tpr, lw=1, label=f'AUC = {roc_auc:.2f}')
+    ax.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Chance')
+
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.xlabel('False Positive Rate (1 - Specificity)')
+    plt.ylabel('True Positive Rate (Sensitivity)')
+    if not title:
+        plt.title('Receiver operating characteristic')
+    else:
+        plt.title(title)
+    plt.legend(loc="lower right")
+    ax.set(aspect="equal")
+
+    return roc_auc
 
 # NOTE: KDEs are very expensive when large arrays are passed to score_samples
 # Increasing the tolerance: atol and rtol speeds the process up significantly
@@ -841,6 +919,20 @@ if __name__ == "__main__":
     np.random.seed(seed)
     # rng = np.random.RandomState(42)
     np.seterr(divide='ignore', invalid='ignore')
+
+    fig, axes = plt.subplots(2, 3, sharex=False, sharey=False, figsize=(18, 12))
+    # fig, axes = plt.subplots(3,3)
+    (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T1GRS')
+    plot_ROC(scores, bins, title='Diabetes: T1GRS', ax=axes[0, 0])
+    plot_distributions(scores, bins, 'Diabetes: T1GRS', norm=True, despine=False, ax=axes[1, 0])
+    (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T2GRS')
+    plot_ROC(scores, bins, title='Diabetes: T2GRS', ax=axes[0, 1])
+    plot_distributions(scores, bins, 'Diabetes: T2GRS', norm=True, despine=False, ax=axes[1, 1])
+    (scores, bins, means, medians, prop_Ref1) = load_renal_data()
+    plot_ROC(scores, bins, title='Renal', ax=axes[0, 2])
+    plot_distributions(scores, bins, 'Renal', norm=True, despine=False, ax=axes[1, 2])
+    fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
+    exit()
 
     for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                              ("Renal", load_renal_data())]:
