@@ -407,7 +407,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
     return fig
 
 
-def plot_distributions(scores, bins, data_label, ax=None):
+def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=None):
 
     if not ax:
         f, ax = plt.subplots()
@@ -417,18 +417,19 @@ def plot_distributions(scores, bins, data_label, ax=None):
 
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
-        sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=False,
+        sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=norm,
                      label="$R_C: n={:,}$".format(len(scores['Ref1'])),
                      # label="$R_1: n={:,}$".format(len(scores['Ref1'])),
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[-1])
-        sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=False,
+        sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=norm,
                      label="$R_N: n={:,}$".format(len(scores['Ref2'])),
                      # label="$R_2: n={:,}$".format(len(scores['Ref2'])),
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[0])
-        sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=False,
+        sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=norm,
                      label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])),
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[2])
 
+        if despine:
         sns.despine(top=True, bottom=False, left=False, right=True, trim=True)
 
     #ax.yaxis.tick_left()
