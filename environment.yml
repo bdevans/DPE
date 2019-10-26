@@ -10,11 +10,12 @@ dependencies:
   - pandas
   - scikit-learn
   - xlrd
-  #- matplotlib
-  #- seaborn
+  - scikit-plot
+  - matplotlib
+  - seaborn
   - lmfit
   - emcee
-  # - corner
+  - corner
   - statsmodels
   # - dill
   - joblib>=0.13
