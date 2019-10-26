@@ -126,6 +126,7 @@ def plot_kernels(scores, bins):
         ax.legend(loc='upper left')
         ax.plot(X, -0.5 - 5 * np.random.random(X.shape[0]), '.')
         ax.set_ylabel(label)
+    return (fig, axes)
 
 
 def load_accuracy(out_dir, label):
