@@ -25,7 +25,7 @@ from statsmodels.stats.proportion import proportion_confint
 import tqdm
 
 import proportion_estimation as pe
-from datasets import (load_diabetes_data, load_renal_data)
+from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 
 
 # ---------------------------- Define constants ------------------------------
@@ -935,8 +935,9 @@ if __name__ == "__main__":
     fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
     exit()
 
-    for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
-                             ("Renal", load_renal_data())]:
+    for data_label, data in [#("Diabetes", load_diabetes_data('T1GRS')),
+                            #  ("Renal", load_renal_data()),
+                             ("Coeliac", load_coeliac_data())]:
 
         (scores, bins, means, medians, prop_Ref1) = data
 

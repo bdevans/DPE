@@ -15,6 +15,9 @@ import pandas as pd
 --> p_D := prevalence"""
 
 
+"""Ref1 := cases; Ref2 := non-cases; Mix := mixture"""
+
+
 def load_diabetes_data(metric):
 
     dataset = 'data/biobank_mix_WTCC_ref.csv'
@@ -163,6 +166,37 @@ def load_renal_data():
     #         'centers': bin_centers}
 
     print("Renal Data")
+    # print("==========")
+    # print("Chosen: width = {}".format(bin_width))
+    hist, bins = estimate_bins(scores)
+    return scores, bins[binning_method], means, medians, prop_Ref1
+
+
+def load_coeliac_data():
+    '''
+    non-cases 1, 
+    cases 2,
+    mixture 3
+    '''
+
+    dataset = 'data/new_data_control_1_cases_2_mixture_3.csv'
+    prop_Ref1 = None
+    binning_method = 'fd'
+
+    data = pd.read_csv(dataset, header=None, names=['GRS', 'group'])
+    data.dropna(inplace=True)  # Remove empty entries
+
+    scores = {'Ref1': data.loc[data['group'] == 2, 'GRS'].values,
+              'Ref2': data.loc[data['group'] == 1, 'GRS'].values,
+              'Mix': data.loc[data['group'] == 3, 'GRS'].values}
+
+    means = {'Ref1': scores['Ref1'].mean(),
+             'Ref2': scores['Ref2'].mean()}
+
+    medians = {"Ref1": np.median(scores['Ref1']),
+               "Ref2": np.median(scores['Ref2'])}
+
+    print("Coeliac Data")
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
