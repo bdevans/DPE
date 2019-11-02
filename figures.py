@@ -873,15 +873,15 @@ def plot_ROC(scores, bins, title=None, ax=None):
     #     tp = np.flip(tp)
     #     tn = np.flip(tn)
 
-    print(bins['centers'])
-    print(tp)
-    print(tn)
+    # print(bins['centers'])
+    # print(tp)
+    # print(tn)
 
     # Assume mean(GRS_c) > mean(GRS_n)
     tpr = tp / cond_P
     fpr = 1 - (tn / cond_N)
-    print(tpr)
-    print(fpr)
+    # print(tpr)
+    # print(fpr)
 
     # fpr, tpr, thresholds = roc_curve(y, probas_[:, 1])
     # fpr = np.r_[0, fpr]
@@ -924,16 +924,19 @@ if __name__ == "__main__":
     fig, axes = plt.subplots(2, 3, sharex=False, sharey=False, figsize=(18, 12))
     # fig, axes = plt.subplots(3,3)
     (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T1GRS')
+    # scores['Ref1'] = np.append(scores['Ref1'], np.random.randn(100000)*0.1+0.8)
     plot_ROC(scores, bins, title='Diabetes: T1GRS', ax=axes[0, 0])
     plot_distributions(scores, bins, 'Diabetes: T1GRS', norm=True, despine=False, ax=axes[1, 0])
     (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T2GRS')
+    # scores['Ref1'] = np.append(scores['Ref1'], np.random.randn(100000)+5)
     plot_ROC(scores, bins, title='Diabetes: T2GRS', ax=axes[0, 1])
     plot_distributions(scores, bins, 'Diabetes: T2GRS', norm=True, despine=False, ax=axes[1, 1])
     (scores, bins, means, medians, prop_Ref1) = load_renal_data()
+    # scores['Ref1'] = np.append(scores['Ref1'], np.random.randn(100000)+10)
     plot_ROC(scores, bins, title='Renal', ax=axes[0, 2])
     plot_distributions(scores, bins, 'Renal', norm=True, despine=False, ax=axes[1, 2])
     fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
-    exit()
+    # exit()
 
     for data_label, data in [#("Diabetes", load_diabetes_data('T1GRS')),
                             #  ("Renal", load_renal_data()),
@@ -1003,7 +1006,7 @@ if __name__ == "__main__":
         # Generate multiple mixes
         point_estimates_res_file = '{}/pe_stack_analysis_point_{}.pkl'.format(out_dir, data_label)
         boot_estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
-        if FRESH_DATA:
+        if FRESH_DATA:  # or True:
             print("Running mixture analysis with {} scores...".format(data_label), flush=True)
             t = time.time()  # Start timer
 
