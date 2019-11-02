@@ -1032,14 +1032,14 @@ if __name__ == "__main__":
                                                    n_mix=n_mix,
                                                    alpha=alpha, true_p1=p_star,
                                                    n_jobs=-1, verbose=0)
-                        df_point = df_cm.iloc[[0]]
+                        df_point = df_cm.iloc[[0]].copy()
                         df_point['Size'] = size
                         df_point['p1*'] = p_star
                         df_point['Mix'] = mix
 #                        df_point = df_point.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
                         dfs_point.append(df_point)
 
-                        df_boots = df_cm.iloc[1:, :]
+                        df_boots = df_cm.iloc[1:, :].copy()
                         if n_mix > 0:
                             n_bootstraps = n_mix * n_boot
                         else:
