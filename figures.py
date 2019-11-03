@@ -1244,15 +1244,16 @@ if __name__ == "__main__":
         gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
                           left=0.07, right=0.98, bottom=0.10, top=0.98)
 
-        ax_ci_ex = fig_ex.add_subplot(gs[0, 0])
+        # sns.set_style("ticks")
+        with sns.axes_style("ticks"):
+            ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
+            plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+
         # with sns.axes_style("whitegrid"):
+        with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
+            ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
             #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
         plot_bootstraps(df_pe, correction, prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
-
-        # sns.set_style("ticks")
-        ax_dists_ex = fig_ex.add_subplot(gs[0, 1])
-        with sns.axes_style("ticks"):
-            plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
 
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.svg'.format(data_label)), transparent=True)
