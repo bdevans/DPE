@@ -612,7 +612,10 @@ def construct_mixture(Ref1, Ref2, p1, size):
     return mix
 
 
-def plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, sizes, out_dir, data_label, selected_mix=0, add_ci=True, alpha=0.05, ci_method="jeffreys", correction=False):
+def plot_selected_violins(scores, bins, df_point, df_boots, methods, 
+                          p_stars, sizes, out_dir, data_label, selected_mix=0,
+                          add_ci=True, alpha=0.05, ci_method="jeffreys",
+                          correction=False):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
