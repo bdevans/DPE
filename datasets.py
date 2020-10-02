@@ -174,13 +174,13 @@ def load_renal_data():
 
 def load_coeliac_data():
     '''
-    non-cases 1, 
+    non-cases 1,
     cases 2,
     mixture 3
     '''
 
     dataset = 'data/new_data_control_1_cases_2_mixture_3.csv'
-    prop_Ref1 = None
+    prop_Ref1 = 0.139  # Not ground truth - 13.9% report a diagnosis of coeliac so our analysis shows there is no undiagnosed coeliac within a gluten free cohort
     binning_method = 'fd'
 
     data = pd.read_csv(dataset, header=None, names=['GRS', 'group'])
@@ -225,6 +225,8 @@ def estimate_bins(data, bin_range=None, verbose=0):
                 all_refs.extend(scores)
             # else:  # Add extremes to ensure the full range is spanned
             #     all_refs.extend([min(scores), max(scores)])
+            if bin_range is None:
+                bin_range = (min(all_scores), max(all_scores))
             if verbose > 1:
                 _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
                 print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
