@@ -444,9 +444,9 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
+def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
                     ax=None, limits=None, alpha=0.05, ci_method='jeffreys',
-                    legend=True, orient='v'):
+                    violins=True, legend=True, orient='v'):
 
     # c = sns.color_palette()[-3]  # 'gray'
     c = '#999999'
@@ -470,15 +470,22 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
 
 
     # Draw violin plots of bootstraps
-#    with warnings.catch_warnings():
-#        warnings.simplefilter("ignore", category=FutureWarning)
-    sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0, inner=None,
-                   palette=sns.color_palette("muted"), saturation=1.0)
+    if violins:
+        # with warnings.catch_warnings():
+        #     warnings.simplefilter("ignore", category=FutureWarning)
+        sns.violinplot(data=df_bs, orient=orient, ax=ax, cut=0, inner=None,
+                       palette=sns.color_palette("muted"), saturation=1.0)
 
+    # TODO: This could all be passed in a dict when setting the axis style context
     if orient == 'v':
         sns.despine(ax=ax, top=True, bottom=True, left=False, right=True)#, trim=True)
     elif orient == 'h':
-        sns.despine(ax=ax, top=True, bottom=False, left=False, right=True)#, trim=True)
+        if True:
+            sns.despine(ax=ax, top=True, bottom=False, left=True, right=True)#, trim=True)
+        else:
+            sns.despine(ax=ax, top=True, bottom=False, left=True, right=False)
+            ax.yaxis.set_label_position("right")
+            ax.yaxis.tick_right()
 
     if prop_Ref1:  # Add ground truth
         truth_label = r"$\tilde{{p}}_C: {:4.3}$".format(prop_Ref1)
@@ -510,13 +517,23 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
         if orient == 'v':
             x, y = ax.get_xticks(), centres
             x_init, y_init = x, df_point
+            if not violins:
+                x = x_init = list(range(len(df_point)))
+                ax.set_xticklabels(list(methods))
         elif orient == 'h':
             x, y = centres, ax.get_yticks()
+            print(x, y)
+            print(type(y))
             x_init, y_init = df_point, y
+            if not violins:
+                y = y_init = list(range(len(df_point)))
+                ax.set_yticklabels(list(methods))
+        print(x, y)
 
         # Plot initial estimate
-        # ax.plot(x_init, y_init, 'o', markersize=10, c='#737373')  #(0.25, 0.25, 0.25))
-        ax.plot(x_init, y_init, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Initial", zorder=10)
+        if initial:
+            # ax.plot(x_init, y_init, 'o', markersize=10, c='#737373')  #(0.25, 0.25, 0.25))
+            ax.plot(x_init, y_init, 's', markersize=7, c=c, markeredgecolor=c_edge, label="Initial", zorder=10)
 
     else:
         if orient == 'v':
@@ -572,7 +589,8 @@ def plot_bootstraps(df_pe, correction=None, prop_Ref1=None,
                     capsize=12, capthick=1, label=error_label)  # , zorder=10
 
     if correction:
-        ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
+        # ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
+        ax.plot(x, y, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
 
     if orient == 'v':
         ax.yaxis.tick_left()
@@ -1253,7 +1271,9 @@ if __name__ == "__main__":
         with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
             ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
             #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
-        plot_bootstraps(df_pe, correction, prop_Ref1, ax_ci_ex, limits=None, ci_method=CI_METHOD, orient='h')
+            plot_bootstraps(df_pe, correction=correction, prop_Ref1=prop_Ref1, 
+                            ax=ax_ci_ex, limits=None, ci_method=CI_METHOD, 
+                            initial=False, legend=False, violins=True, orient='h')
 
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.svg'.format(data_label)), transparent=True)
