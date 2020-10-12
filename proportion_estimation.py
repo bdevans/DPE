@@ -8,7 +8,7 @@ Module to analyse an unknown mixture population.
 @author: ben
 """
 
-# TODO: Rename {Ref1: R_D, Ref2: R_N}
+# TODO: Rename {Ref1: R_C, Ref2: R_N}
 # TODO: Move point_estimate and bootstrap_mixture to top level and hide other functions
 
 from pprint import pprint
