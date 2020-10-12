@@ -1,7 +1,10 @@
 data_previous
 *results*
 figs
-.*
+# .*
+.ropeproject
+.ipynb_checkpoints
+.DS_Store
 *.m
 *.ipynb
 tmp*
