@@ -3,7 +3,7 @@ name: dpe
 channels:
   - conda-forge
 dependencies:
-  - python=3.7
+  - python=3.8
   # - pip
   - numpy
   - scipy
@@ -11,7 +11,7 @@ dependencies:
   - scikit-learn
   - xlrd
   - scikit-plot
-  - matplotlib
+  - matplotlib>=3.3
   - seaborn
   - lmfit
   - emcee
