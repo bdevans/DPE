@@ -40,6 +40,16 @@ _ALL_METHODS_ = ["Excess", "Means", "EMD", "KDE"]
 
 # Let's use FD!
 def estimate_bins(data, bin_range=None, verbose=0):
+    """Generate GRS bins through data-driven methods in `np.histogram`.
+    
+    These methods include:
+    ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']
+
+    For more information see: 
+    https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges
+    """
+    # TODO: Refactor to pass one method and return only that dictionary
+
     # 'scott': n**(-1./(d+4))
     # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
     # (n * (d + 2) / 4.)**(-1. / (d + 4))
@@ -109,17 +119,28 @@ def fit_kernels(scores, bw, kernel='gaussian'):
     return kernels
 
 
-def fit_kernel(scores, bw, kernel='gaussian'):
+def fit_kernel(scores, bw, kernel='gaussian'):  # , atol=0, rtol=1-4):
+    """Fit kernel densities to the data."""
     X = scores[:, np.newaxis]
     return KernelDensity(kernel=kernel, bandwidth=bw, atol=0, rtol=1e-4).fit(X)
 
 
 # @mem.cache
 def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
+    """Fit a combination of two reference population kernel density estimates
+    to a mixture. 
+    
+    The amplitude of each reference population is adjust iteratively using the
+    Levenberg-Marquardt (least squares) algorithm by default, to optimise
+    the fit to the mixture population. The amplitudes are then normalised to 
+    give the proportion of Ref1 (cases) within the mixture.
+    """
+
     # model = methods["model"]
     x_KDE = bins["centers"]
     kde_mix = KernelDensity(kernel=kernel, bandwidth=bins['width'])
     kde_mix.fit(Mix[:, np.newaxis])
+    # kde_mix = fit_kernel(Mix, bw=bins['width'], kernel=kernel)  # TODO
     res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
                         x=x_KDE, params=params_mix, method=method)
     amp_Ref1 = res_mix.params['amp_1'].value
@@ -128,6 +149,10 @@ def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
 
 
 def interpolate_CDF(scores, x_i, min_edge, max_edge):
+    """Interpolate the cumulative density function of the scores at the points
+    in the array `x_i`.
+    """
+
     # TODO: x = [x_i[0], *sorted(scores), x_i[-1]]
     x = [min_edge, *sorted(scores), max_edge]
     y = np.linspace(0, 1, num=len(x), endpoint=True)
@@ -136,6 +161,9 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
 
 
 def prepare_methods(scores, bins, methods=None, verbose=1):
+    """Extract properties of the score distributions and cache intermediate
+    results for efficiency.
+    """
 
     methods_ = copy.deepcopy(methods)  # Prevent issue with repeated runs
     if isinstance(methods_, str):
@@ -224,6 +252,14 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
 
 
 def correct_estimate(df_pe):
+    """Apply bootstrap based bias correction.
+    
+    Assuming that the distribution of error between the the initial point 
+    estimate and the real proportion is well approximated by the distribution
+    of the error between the bootstrap estimates and the initial point
+    estimate.
+    """
+
     assert len(df_pe) > 1  # Need at least one boot strap estimate
     pe_point = df_pe.iloc[0, :]
     # if len(df_pe) == 1:  # No bootstraps
@@ -242,6 +278,11 @@ def correct_estimate(df_pe):
 
 def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
                         alpha=0.05, ci_method="experimental"):
+    """Calculate confidence intervals for a point estimate.
+    
+    By default we use the alpha quantile of the distribution of the N_M * N_B
+    bootstrapped p_C values, where alpha = 0.05.
+    """
 
     n_obs = len(values)
     average_value = average(values)
@@ -270,6 +311,7 @@ def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
 
 
 def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
+    """Generate an proportion estimate report for each method."""
     # TODO: Incorporate ipoint estimates in report
     pe_point = df_pe.iloc[0, :]
     pe_boot = df_pe.iloc[1:, :]
@@ -312,12 +354,12 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
 
 
 def point_estimate(RM, Ref1, Ref2, bins, methods=None):
-    '''Estimate the proportion of two reference populations comprising
+    """Estimate the proportion of two reference populations comprising
     an unknown mixture.
 
     The returned proportions are with respect to Ref_1, the disease group.
     The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
-    '''
+    """
 
     # bins = kwargs['bins']
     results = {}
@@ -362,11 +404,20 @@ def point_estimate(RM, Ref1, Ref2, bins, methods=None):
         results['KDE'] = fit_KDE_model(RM, bins, methods["KDE"]['model'],
                                        methods["KDE"]["params"],
                                        methods["KDE"]["kernel"])
+        # x_KDE = bins["centers"]
+        # kde_mix = fit_kernel(Mix, bw=bins['width'], kernel=kernel)
+        # res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
+        #                     x=x_KDE, params=params_mix, method=method)
+        # amp_Ref1 = res_mix.params['amp_1'].value
+        # amp_Ref2 = res_mix.params['amp_2'].value
+        # results['KDE'] = amp_Ref1 / (amp_Ref1 + amp_Ref2)
 
     return results
 
 
 def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
+    """Generate a bootstrap of the mixture distribution and return an estimate
+    of its proportion."""
 
     if boot_size == -1:
         boot_size = len(Mix)
@@ -383,6 +434,73 @@ def analyse_mixture(scores, bins='fd', methods='all',
                     n_boot=1000, boot_size=-1, n_mix=0,
                     alpha=0.05, true_p1=None, correction=False,
                     n_jobs=1, seed=None, verbose=1, logfile=''):
+    """Analyse a mixture distribution and estimate the proportions of two
+    reference distributions of which it is assumed to be comprised.
+
+    Parameters
+    ----------
+    scores : dict
+        A required dictionary of the form,
+        `{‘Ref1’: array_of_ref_1_scores,
+          ‘Ref2’: array_of_ref_2_scores,
+          ‘Mix’: array_of_mix_scores}`.
+    bins : str
+        A string specifying the binning method:
+        `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`.
+        Default: `‘fd’`.
+        Alternatively, a dictionary,
+        `{‘width’: bin_width, ‘min’, min_edge, ‘max’: max_edge,
+          ‘edges’: array_of_bin_edges, ‘centers’: array_of_bin_centers,
+          ‘n’: number_of_bins}`.
+    methods : str
+        A string with the name of the method or `'all'` to run all methods
+        (default). Alternatively, a list of method names (strings),
+        `["Excess", "Means", "EMD", "KDE"]`, or a dictionary of (bool) flags,
+        `{‘Excess’: True, ‘Means’: True, ‘EMD’: True, ‘KDE’: True}`.
+    n_boot : int
+        Number of bootstraps of the mixture to generate. Default: `1000`.
+    boot_size : int
+        The size of each mixture bootstrap. Default is the same size as the mixture.
+    n_mix : int
+        Number of mixtures to construct based on the initial point estimate.
+        Default: `0`.
+    alpha : float
+        The alpha value for calculating confidence intervals from bootstrap
+        distributions. Default: `0.05`.
+    true_p1 : float
+        Optionally pass the true proportion for showing the comparison with
+        estimated proportion(s).
+    correction : bool
+        A boolean flag specifing whether to apply the bootstrap correction
+        method or not. Default: `False`.
+    n_jobs : int
+        Number of bootstrap jobs to run in parallel. Default: `1`.
+        Set `n_jobs = -1` runs on all CPUs.
+    seed : int
+        An optional value to seed the random number generator with for
+        reproducibility (in the range [0, (2^32)-1]).
+    verbose : int
+        Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to
+        turn off all console output except the progress bars.
+    logfile : str
+        Optional filename for the output logs.
+        Default: `"proportion_estimates.log"`.
+ 
+    Returns
+    -------
+    df_pe : DataFrame
+        A `pandas` dataframe of the proportion estimates. The first row is the
+        point estimate. The remaining `n_boot * n_mix` rows are the
+        bootstrapped estimates. Each column is the name of the estimation method.
+
+    Alternatively if `correction == True`:
+    (df_pe, df_correct) : tuple
+        A tuple of the proportion estimates and the corrected proportion
+        estimates as dataframes.
+
+    Additionally the logfile is written to the working directory.
+    """
+
 
     if seed is not None:
         np.random.seed(seed)
