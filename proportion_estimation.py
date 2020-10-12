@@ -13,6 +13,7 @@ Module to analyse an unknown mixture population.
 
 from pprint import pprint
 import itertools
+import copy
 import warnings
 
 import numpy as np
@@ -136,53 +137,70 @@ def interpolate_CDF(scores, x_i, min_edge, max_edge):
 
 def prepare_methods(scores, bins, methods=None, verbose=1):
 
-    if methods is None:  # Run all methods
-        methods = {method: True for method in _ALL_METHODS_}
+    methods_ = copy.deepcopy(methods)  # Prevent issue with repeated runs
+    if isinstance(methods_, str):
+        method_name = methods_
+        if method_name.lower() == 'all':
+            methods_ = {method: True for method in _ALL_METHODS_}
+        elif method_name.capitalize() in _ALL_METHODS_:
+            methods_ = {method_name.capitalize(): True}
+        else:
+            warnings.warn(f'Unknown method passed: {methods_}. Running all methods...')
+            methods_ = {method: True for method in _ALL_METHODS_}
+    elif isinstance(methods_, (list, set)):
+        methods_ = {method: True for method in methods_}
+    elif methods_ is None:  # Run all methods
+        methods_ = {method: True for method in _ALL_METHODS_}
+    else:
+        warnings.warn(f'Unknown method passed: {methods_} ({type(methods_)}). Running all methods...')
+        methods_ = {method: True for method in _ALL_METHODS_}
 
-    if "Excess" in methods:
-        if not isinstance(methods["Excess"], dict):
-            methods["Excess"] = {}
+    if "Excess" in methods_:
+        if not isinstance(methods_["Excess"], dict):
+            methods_["Excess"] = {}
 
-        # TODO: CHECK!!! This should be the "healthy" reference population
-        methods["Excess"].setdefault("median", np.median(scores["Ref2"]))
-        methods["Excess"].setdefault("adj_factor", 1)
+        # This should be the "healthy" non-cases reference population
+        methods_["Excess"].setdefault("median", np.median(scores["Ref2"]))
+        methods_["Excess"].setdefault("adj_factor", 1)
 
-    if "Means" in methods:
-        if not isinstance(methods["Means"], dict):
-            methods["Means"] = {"mu_1": np.mean(scores["Ref1"]),
-                                "mu_2": np.mean(scores["Ref2"])}
+    if "Means" in methods_:
+        if not isinstance(methods_["Means"], dict):
+            methods_["Means"] = {"mu_1": np.mean(scores["Ref1"]),
+                                 "mu_2": np.mean(scores["Ref2"])}
 
-    if "EMD" in methods:
-        if not isinstance(methods["EMD"], dict):
-            methods["EMD"] = {}
-            methods["EMD"]["max_EMD"] = bins["max"] - bins["min"]
+    if "EMD" in methods_:
+        if not isinstance(methods_["EMD"], dict):
+            methods_["EMD"] = {}
+            methods_["EMD"]["max_EMD"] = bins["max"] - bins["min"]
 
             # Interpolate the cdfs at the same points for comparison
             CDF_1 = interpolate_CDF(scores["Ref1"], bins['centers'],
                                     bins['min'], bins['max'])
-            methods["EMD"]["CDF_1"] = CDF_1
+            methods_["EMD"]["CDF_1"] = CDF_1
 
             CDF_2 = interpolate_CDF(scores["Ref2"], bins['centers'],
                                     bins['min'], bins['max'])
-            methods["EMD"]["CDF_2"] = CDF_2
+            methods_["EMD"]["CDF_2"] = CDF_2
 
             # EMDs computed with interpolated CDFs
-            methods["EMD"]["EMD_1_2"] = sum(abs(CDF_1 - CDF_2))
+            methods_["EMD"]["EMD_1_2"] = sum(abs(CDF_1 - CDF_2))
 
-    if "KDE" in methods:
-        if not isinstance(methods["KDE"], dict):
-            methods["KDE"] = {}
-        methods["KDE"].setdefault("kernel", "gaussian")
-        methods["KDE"].setdefault("bandwidth", bins["width"])
+    if "KDE" in methods_:
+        if not isinstance(methods_["KDE"], dict):
+            methods_["KDE"] = {}
+        methods_["KDE"].setdefault("kernel", "gaussian")
+        methods_["KDE"].setdefault("bandwidth", bins["width"])
+        # methods_["KDE"].setdefault("atol", 0)
+        # methods_["KDE"].setdefault("rtol", 1e-4)
 
-        if "model" not in methods["KDE"]:
+        if "model" not in methods_["KDE"]:
             # kdes = fit_kernels(scores, methods["KDE"]["bandwidth"], methods["KDE"]["kernel"])
             # kde_1 = kdes["Ref1"]  # [methods["KDE"]["kernel"]]
             # kde_2 = kdes["Ref2"]  # [methods["KDE"]["kernel"]]
-            kde_1 = fit_kernel(scores["Ref1"], methods["KDE"]["bandwidth"],
-                               methods["KDE"]["kernel"])
-            kde_2 = fit_kernel(scores["Ref2"], methods["KDE"]["bandwidth"],
-                               methods["KDE"]["kernel"])
+            kde_1 = fit_kernel(scores["Ref1"], methods_["KDE"]["bandwidth"],
+                               methods_["KDE"]["kernel"])
+            kde_2 = fit_kernel(scores["Ref2"], methods_["KDE"]["bandwidth"],
+                               methods_["KDE"]["kernel"])
 
             # Assigning a default value to amp initialises them
             # x := Bin centres
@@ -192,16 +210,17 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
             def dist_2(x, amp_2=1):
                 return amp_2 * np.exp(kde_2.score_samples(x[:, np.newaxis]))
 
-            methods["KDE"]["model"] = lmfit.Model(dist_1) + lmfit.Model(dist_2)
+            # The model assumes a linear combination of the two reference distributions only
+            methods_["KDE"]["model"] = lmfit.Model(dist_1) + lmfit.Model(dist_2)
 
-        if "params" not in methods["KDE"]:
-            methods["KDE"]["params"] = methods["KDE"]["model"].make_params()
-            methods["KDE"]["params"]["amp_1"].value = 1
-            methods["KDE"]["params"]["amp_1"].min = 0
-            methods["KDE"]["params"]["amp_2"].value = 1
-            methods["KDE"]["params"]["amp_2"].min = 0
+        if "params" not in methods_["KDE"]:
+            methods_["KDE"]["params"] = methods_["KDE"]["model"].make_params()
+            methods_["KDE"]["params"]["amp_1"].value = 1
+            methods_["KDE"]["params"]["amp_1"].min = 0
+            methods_["KDE"]["params"]["amp_2"].value = 1
+            methods_["KDE"]["params"]["amp_2"].min = 0
 
-    return methods
+    return methods_
 
 
 def correct_estimate(df_pe):
@@ -360,7 +379,8 @@ def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
     return point_estimate(bs, Ref1, Ref2, bins, methods)
 
 
-def analyse_mixture(scores, bins='fd', methods=None, n_boot=1000, boot_size=-1, n_mix=0,
+def analyse_mixture(scores, bins='fd', methods='all', 
+                    n_boot=1000, boot_size=-1, n_mix=0,
                     alpha=0.05, true_p1=None, correction=False,
                     n_jobs=1, seed=None, verbose=1, logfile=''):
 
@@ -388,12 +408,12 @@ def analyse_mixture(scores, bins='fd', methods=None, n_boot=1000, boot_size=-1, 
         hist, bins = estimate_bins(scores)
         bins = bins[bin_method]
     # Methods defaults to all if None is passed
-    methods = prepare_methods(scores, bins, methods=methods, verbose=verbose)
+    methods_ = prepare_methods(scores, bins, methods=methods, verbose=verbose)
 
-    columns = [method for method in _ALL_METHODS_ if method in methods]
+    columns = [method for method in _ALL_METHODS_ if method in methods_]
 
     # Get initial estimate of proportions
-    pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods)
+    pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods_)
     if verbose > 1:
         pprint(pe_initial)
     if true_p1:
@@ -425,11 +445,11 @@ def analyse_mixture(scores, bins='fd', methods=None, n_boot=1000, boot_size=-1, 
             if n_jobs == 1 or n_jobs is None:
                 # NOTE: These results are identical to when n_jobs==1 in the
                 # parallel section however it takes about 25% less time per iteration
-                results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size, seed=None)
+                results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods_, boot_size, seed=None)
                            for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
             else:
                 with Parallel(n_jobs=n_jobs) as parallel:
-                    results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods, boot_size, seed=b_seed)
+                    results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods_, boot_size, seed=b_seed)
                                        for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
             # Put into dataframe
             pe_boot = pd.DataFrame.from_records(results, columns=columns)
@@ -442,7 +462,7 @@ def analyse_mixture(scores, bins='fd', methods=None, n_boot=1000, boot_size=-1, 
             for method, prop_Ref1 in tqdm(pe_initial.items(), desc="Method",
                                           dynamic_ncols=True, disable=disable):
                 single_method = {}
-                single_method[method] = methods[method]
+                single_method[method] = methods_[method]
                 mix_results = []
 
                 for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=disable):
