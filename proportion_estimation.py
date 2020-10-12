@@ -64,7 +64,7 @@ def estimate_bins(data, bin_range=None, verbose=0):
                 bin_range = (min(all_scores), max(all_scores))
             if verbose > 1:
                 _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
-                print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]".format(method, group, len(bin_edges)-1, bin_edges[1]-bin_edges[0], bin_edges[0], bin_edges[-1]))
+                print(f" {method:>7} | {group:>4} | {len(bin_edges)-1:>3} | {bin_edges[1]-bin_edges[0]:<7.5f} | [{bin_edges[0]:5.3}, {bin_edges[-1]:5.3}]")
                 # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
 
         h_r, edges_r = np.histogram(all_refs, bins=method,
@@ -415,6 +415,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
     # Get initial estimate of proportions
     pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods_)
     if verbose > 1:
+        print('Initial point estimates:')
         pprint(pe_initial)
     if true_p1:
         if verbose > 1:
@@ -428,8 +429,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
         else:
             nprocs = n_jobs
         if verbose > 0:
-            print('Running {} bootstraps with {} processors...'
-                  .format(n_boot, nprocs), flush=True)
+            print(f'Running {n_boot} bootstraps with {nprocs} processors...',
+                  flush=True)
             disable = False
         else:
             disable = True
@@ -459,13 +460,27 @@ def analyse_mixture(scores, bins='fd', methods='all',
             sample_size = len(Mix)
             results = {}
 
+            diable_method_bar = True
+            diable_mix_bar = True
+            disable_boot_bar = True
+            if verbose > 0:
+                diable_method_bar = False
+                if verbose > 1:
+                    diable_mix_bar = False
+                    if verbose > 2:
+                        disable_boot_bar = False
+            if verbose == -1:
+                diable_method_bar = False
+                diable_mix_bar = False
+                disable_boot_bar = False
+
             for method, prop_Ref1 in tqdm(pe_initial.items(), desc="Method",
-                                          dynamic_ncols=True, disable=disable):
+                                          dynamic_ncols=True, disable=diable_method_bar):
                 single_method = {}
                 single_method[method] = methods_[method]
                 mix_results = []
 
-                for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=disable):
+                for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=diable_mix_bar):
 
                     assert(0.0 <= prop_Ref1 <= 1.0)
                     n_Ref1 = int(round(sample_size * prop_Ref1))
@@ -482,7 +497,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
                                              for b_seed in tqdm(boot_seeds,
                                                                 desc="Bootstraps",
                                                                 dynamic_ncols=True,
-                                                                disable=disable))
+                                                                disable=disable_boot_bar))
 
                     mix_results.append(boot_list)
 
