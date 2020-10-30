@@ -814,8 +814,9 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
         if si == len(sizes)-1:  # Top row
             ax_mix.legend()
         else:
-            # Remove legend and label yaxis instead
-            ax_mix.get_legend().set_visible(False)
+            if ax_mix.get_legend():
+                # Remove legend and label yaxis instead
+                ax_mix.get_legend().set_visible(False)
 
         # Remove y axis
         # Set ticks at the ground truth values and do not trim
