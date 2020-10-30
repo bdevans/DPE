@@ -57,7 +57,7 @@ sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
 alpha = 0.05
-CI_METHOD = "experimental"  # "stderr" # "centile" "jeffreys"
+CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # normal : asymptotic normal approximation
 # agresti_coull : Agresti-Coull interval
 # beta : Clopper-Pearson interval based on Beta distribution
@@ -150,7 +150,7 @@ def load_accuracy(out_dir, label):
     return point_estimates, boots_estimates, PROPORTIONS, SAMPLE_SIZES
 
 
-def get_error_bars(df_pe, correction=False, average=np.mean, alpha=0.05, ci_method="centile"):
+def get_error_bars(df_pe, correction=False, average=np.mean, alpha=0.05, ci_method="bca"):
     """df: columns are method names"""
 
     #methods = list(df.columns)
@@ -445,7 +445,7 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
 
 
 def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
-                    ax=None, limits=None, alpha=0.05, ci_method='jeffreys',
+                    ax=None, limits=None, alpha=0.05, ci_method='bca',
                     violins=True, legend=True, orient='v'):
 
     # c = sns.color_palette()[-3]  # 'gray'
@@ -632,7 +632,7 @@ def construct_mixture(Ref1, Ref2, p1, size):
 
 def plot_selected_violins(scores, bins, df_point, df_boots, methods, 
                           p_stars, sizes, out_dir, data_label, selected_mix=0,
-                          add_ci=True, alpha=0.05, ci_method="jeffreys",
+                          add_ci=True, alpha=0.05, ci_method="bca",
                           correction=False):
 
     c = sns.color_palette()[-3]  # 'gray'

@@ -18,6 +18,7 @@ import warnings
 
 import numpy as np
 import scipy as sp
+from scipy.stats import norm
 import pandas as pd
 import lmfit
 from joblib import Parallel, delayed, cpu_count
@@ -277,17 +278,69 @@ def correct_estimate(df_pe):
 
 
 def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
-                        alpha=0.05, ci_method="experimental"):
+                        alpha=0.05, ci_method="bca"):
     """Calculate confidence intervals for a point estimate.
     
     By default we use the alpha quantile of the distribution of the N_M * N_B
     bootstrapped p_C values, where alpha = 0.05.
+
+    Parameters
+    ----------
+    values : array
+        The array of bootstrapped p_c estimates (for a particular method).
+    initial : float, optional
+        An optional estimate from the original mixture (for a particular method). 
+    correction : None or bool, optional
+        A flag to correct the `experimental` CI method. 
+    average : function, optional
+        The function used to calculate the average estimate across bootstraps. 
+    alpha : float, optional
+        The percentile to use for the confidence intervals (default = 0.05). 
+        The returned values are (alpha/2, 1-alpha/2) percentile confidence 
+        intervals.
+    ci_method : str, optional
+        The name of the method used to calculate the confidence intervals. 
     """
 
     n_obs = len(values)
     average_value = average(values)
 
-    if ci_method == 'experimental':
+    if ci_method.lower() == 'bca':
+        # Adapted from https://github.com/cgevans/scikits-bootstrap
+        # TODO: Replace with this external library for more robust checks
+        
+        # print("Using BCa method...")
+        # Esitamate the bias correction value (the median bias transformed into normal deviates)
+        z0 = norm.ppf(np.sum(values < average_value, axis=0) / n_obs)
+
+        # Statistics of the jackknife distribution
+        indices = np.arange(n_obs)
+        jack_values = [average(values[indices != ind]) for ind in range(n_obs)]
+        jack_mean = np.mean(jack_values)
+
+        # Temporarily kill numpy warnings:
+        oldnperr = np.seterr(invalid='ignore')
+        # Acceleration value
+        a = np.sum((jack_mean - jack_values)**3) / (6 * np.sum((jack_mean - jack_values)**2)**1.5)
+        if np.any(np.isnan(a)):
+            nanind = np.nonzero(np.isnan(a))
+            warnings.warn(f"BCa acceleration values for indexes {nanind} were \
+                            undefined. Statistic values were likely all equal. \
+                            Affected CI will be inaccurate.")
+        
+        alphas = np.array([alpha/2, 1-alpha/2])
+
+        zs = z0 + norm.ppf(alphas).reshape(alphas.shape+(1,)*z0.ndim)
+        avals = norm.cdf(z0 + zs/(1-a*zs))
+        np.seterr(**oldnperr)
+
+        values = values.to_numpy()
+        values.sort(axis=0)
+        nvals = np.round((n_obs-1)*avals)
+        nvals = np.nan_to_num(nvals).astype('int')
+        ci_low, ci_upp = values[nvals]
+
+    elif ci_method.lower() == 'experimental':
         assert initial is not None and 0.0 <= initial <= 1.0
         if correction:
             err_low, err_upp = np.percentile(values-initial, [100*alpha/2, 100*(1-alpha/2)])
@@ -295,9 +348,9 @@ def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
         else:
             # TODO: Refactor
             ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
-    elif ci_method == 'centile':
+    elif ci_method.lower() == 'centile':
         ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
-    elif ci_method == 'stderr':
+    elif ci_method.lower() == 'stderr':
         p = average_value
         # NOTE: This currently allows CIs outside [0, 1]
         err = np.sqrt(p*(1-p)/n_obs) * sp.stats.norm.ppf(1-alpha/2)
