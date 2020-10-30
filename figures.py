@@ -66,6 +66,8 @@ CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # binom_test : experimental, inversion of binom_test
 # http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
 
+application_xlims = {'Diabetes': None, 'Coeliac': (0, 0.3)}
+
 # TODO: Reimplement this
 adjust_excess = False
 KDE_kernel = 'gaussian'
@@ -1276,6 +1278,8 @@ if __name__ == "__main__":
                             ax=ax_ci_ex, limits=None, ci_method=CI_METHOD, 
                             initial=False, legend=False, violins=True, orient='h')
 
+            if application_xlims[data_label]:
+                ax_ci_ex.set_xlim(*application_xlims[data_label])
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
         fig_ex.savefig(os.path.join(fig_dir, 'application_{}.svg'.format(data_label)), transparent=True)
 
