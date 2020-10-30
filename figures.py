@@ -960,7 +960,7 @@ if __name__ == "__main__":
     fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
     # exit()
 
-    for data_label, data in [#("Diabetes", load_diabetes_data('T1GRS')),
+    for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                             #  ("Renal", load_renal_data()),
                              ("Coeliac", load_coeliac_data())]:
 
