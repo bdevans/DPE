@@ -983,7 +983,7 @@ if __name__ == "__main__":
             df_pe = pe.analyse_mixture(scores, bins, methods,
                                        n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
                                        alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
-                                       logfile="{}/pe_{}.log".format(out_dir, data_label))
+                                       logfile=f"{out_dir}/pe_{data_label}.log")
 
             elapsed = time.time() - t
             print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
@@ -1028,10 +1028,10 @@ if __name__ == "__main__":
         # n_boot = 5
 
         # Generate multiple mixes
-        point_estimates_res_file = '{}/pe_stack_analysis_point_{}.pkl'.format(out_dir, data_label)
-        boot_estimates_res_file = '{}/pe_stack_analysis_{}.pkl'.format(out_dir, data_label)
+        point_estimates_res_file = f'{out_dir}/pe_stack_analysis_point_{data_label}.pkl'
+        boot_estimates_res_file = f'{out_dir}/pe_stack_analysis_{data_label}.pkl'
         if FRESH_DATA:  # or True:
-            print("Running mixture analysis with {} scores...".format(data_label), flush=True)
+            print(f"Running mixture analysis with {data_label} scores...", flush=True)
             t = time.time()  # Start timer
 
             # Split the references distributions to ensure i.i.d. data for 
@@ -1051,17 +1051,17 @@ if __name__ == "__main__":
 
             size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
             for s, size in enumerate(size_bar):
-                size_bar.set_description("Size = {:6,}".format(size))
+                size_bar.set_description(f"Size = {size:6,}")
                 Mixtures = {mix: {} for mix in range(n_seeds)}
 
                 for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):
-                    mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, mix, size, data_label)
+                    mix_dist_file = f'{out_dir}/mix{mix}_size{size}_{data_label}.pkl'
 
                     prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
                     for p, p_star in enumerate(prop_bar):
-                        prop_bar.set_description(" p1* = {:6.2f}".format(p_star))
+                        prop_bar.set_description(f" p1* = {p_star:6.2f}")
 
-                        violin_scores['Mix'] = construct_mixture(scores['Ref1'], scores['Ref2'], p_star, size)
+                        violin_scores['Mix'] = construct_mixture(hold_out_scores['Ref1'], hold_out_scores['Ref2'], p_star, size)
                         Mixtures[mix][p_star] = violin_scores['Mix']
                         df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                    n_boot=n_boot, boot_size=size,
@@ -1084,7 +1084,9 @@ if __name__ == "__main__":
                         df_boots['p1*'] = p_star * np.ones(n_bootstraps)
                         df_boots['Mix'] = mix * np.ones(n_bootstraps, dtype=int)
                         df_boots["Boot"] = list(range(n_bootstraps))
-                        df_boots = df_boots.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix', "Boot"], value_name='Estimate')
+                        df_boots = df_boots.melt(var_name='Method',
+                                                 id_vars=['p1*', 'Size', 'Mix', "Boot"],
+                                                 value_name='Estimate')
                         dfs_boot.append(df_boots)
 
                     df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
@@ -1093,22 +1095,22 @@ if __name__ == "__main__":
             df_point = pd.concat(dfs_point, ignore_index=True)
             df_est = pd.concat(dfs_boot, ignore_index=True)
             elapsed = time.time() - t
-            print('Elapsed time = {}\n'.format(SecToStr(elapsed)))
+            print(f'Elapsed time = {SecToStr(elapsed)}\n')
 
             # Save results
             df_point.to_pickle(point_estimates_res_file)
             df_est.to_pickle(boot_estimates_res_file)
         else:
-            print("Loading mixture analysis with {} scores...".format(data_label), flush=True)
+            print(f"Loading mixture analysis with {data_label} scores...", flush=True)
             if os.path.isfile(point_estimates_res_file):
                 df_point = pd.read_pickle(point_estimates_res_file)
             else:
-                warnings.warn("Missing data file: {}".format(point_estimates_res_file))
+                warnings.warn(f"Missing data file: {point_estimates_res_file}")
                 break
             if os.path.isfile(boot_estimates_res_file):
                 df_est = pd.read_pickle(boot_estimates_res_file)
             else:
-                warnings.warn("Missing data file: {}".format(boot_estimates_res_file))
+                warnings.warn(f"Missing data file: {boot_estimates_res_file}")
                 break
 
 
