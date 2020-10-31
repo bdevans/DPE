@@ -1034,9 +1034,18 @@ if __name__ == "__main__":
             print("Running mixture analysis with {} scores...".format(data_label), flush=True)
             t = time.time()  # Start timer
 
-            violin_scores = {}
-            violin_scores['Ref1'] = scores['Ref1']
-            violin_scores['Ref2'] = scores['Ref2']
+            # Split the references distributions to ensure i.i.d. data for 
+            # constructing the mixtures and estimating them.
+            
+            n_RefC, n_RefN = len(scores['Ref1']), len(scores['Ref2'])
+            partition_RefC, partition_RefN = int(n_RefC/2), int(n_RefN/2)
+            inds_RefC = np.random.permutation(n_RefC)
+            inds_RefN = np.random.permutation(n_RefN)
+            hold_out_scores = {'Ref1': scores['Ref1'][inds_RefC[:partition_RefC]],
+                               'Ref2': scores['Ref2'][inds_RefN[:partition_RefN]]}
+            violin_scores = {'Ref1': scores['Ref1'][inds_RefC[partition_RefC:]],
+                             'Ref2': scores['Ref2'][inds_RefN[partition_RefN:]]}
+
             dfs_point = []
             dfs_boot = []
 
