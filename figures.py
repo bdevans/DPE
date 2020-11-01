@@ -956,6 +956,7 @@ if __name__ == "__main__":
     # rng = np.random.RandomState(42)
     np.seterr(divide='ignore', invalid='ignore')
 
+    # Plot ROC curves
     fig, axes = plt.subplots(2, 3, sharex=False, sharey=False, figsize=(18, 12))
     # fig, axes = plt.subplots(3,3)
     (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T1GRS')
@@ -1047,7 +1048,6 @@ if __name__ == "__main__":
 
             # Split the references distributions to ensure i.i.d. data for 
             # constructing the mixtures and estimating them.
-            
             n_RefC, n_RefN = len(scores['Ref1']), len(scores['Ref2'])
             partition_RefC, partition_RefN = int(n_RefC/2), int(n_RefN/2)
             inds_RefC = np.random.permutation(n_RefC)
