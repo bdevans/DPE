@@ -31,7 +31,7 @@ from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 # ---------------------------- Define constants ------------------------------
 
 # METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
-FRESH_DATA = False  # CAUTION!
+FRESH_DATA = True  # False  # CAUTION!
 # out_dir = "results_test"
 # out_dir = "results_100_100"
 # out_dir = "results/m1000_b0"
