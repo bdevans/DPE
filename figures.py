@@ -661,31 +661,31 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
     print(palette)
 
     fig_select = plt.figure(figsize=(12, 3*len(sizes)))
-    gs = plt.GridSpec(nrows=len(sizes), ncols=2, width_ratios=[3, 2],
-                      hspace=0.15, wspace=0.005,
-                      left=0.10, right=0.97, bottom=0.08, top=0.98)
+    gs = plt.GridSpec(nrows=len(sizes), ncols=2, width_ratios=[2, 3],
+                      hspace=0.15, wspace=0.15,
+                      left=0.05, right=0.96, bottom=0.08, top=0.97)
 
     for si, size in enumerate(sizes):
 #        ax_vio = fig_select.add_subplot(gs[-(si+1), :-1])
 #        ax_mix = fig_select.add_subplot(gs[-(si+1), -1])
-        mix_dist_file = '{}/mix{}_size{}_{}.pkl'.format(out_dir, selected_mix, size, data_label)
+        mix_dist_file = f'{out_dir}/mix{selected_mix}_size{size}_{data_label}.pkl'
         if not os.path.isfile(mix_dist_file):
-            warnings.warn("File not found: {}".format(mix_dist_file))
+            warnings.warn(f"File not found: {mix_dist_file}")
             return
         df_mixes = pd.read_pickle(mix_dist_file)
 
         if si == 0:
             # Save base axes
-            ax_vio = fig_select.add_subplot(gs[-(si+1), :-1])
+            ax_vio = fig_select.add_subplot(gs[-(si+1), 1:])
             ax_vio_base = ax_vio
 #            sns.plt.xlim(0, 1)
 #            vio_xlabs = ax_vio_base.get_xticklabels()
-            ax_mix = fig_select.add_subplot(gs[-(si+1), -1])
+            ax_mix = fig_select.add_subplot(gs[-(si+1), 0])
             ax_mix_base = ax_mix
         else:
-            ax_vio = fig_select.add_subplot(gs[-(si+1), :-1], sharex=ax_vio_base)
+            ax_vio = fig_select.add_subplot(gs[-(si+1), 1:], sharex=ax_vio_base)
             plt.setp(ax_vio.get_xticklabels(), visible=False)
-            ax_mix = fig_select.add_subplot(gs[-(si+1), -1], sharex=ax_mix_base)
+            ax_mix = fig_select.add_subplot(gs[-(si+1), 0], sharex=ax_mix_base)
             plt.setp(ax_mix.get_xticklabels(), visible=False)
 
         # Plot constructed mixture distributions
@@ -723,11 +723,16 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=FutureWarning)
     #            g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2)
-                sns.violinplot(x='Estimate', y='Method', data=df_b, ax=ax_vio, orient='h', cut=0, linewidth=2, color=palette[p+1], inner=None)
+                sns.violinplot(x='Estimate', y='Method', data=df_b, ax=ax_vio,
+                               orient='h', cut=0, linewidth=2, inner=None,
+                               color=palette[p+1], saturation=0.7)
 
 #            handles, labels = g.get_legend_handles_labels()
 #            g.legend(handles, labels[:len(methods)], title="Method")
-            ax_vio.set_ylabel(r"$n={:,}$".format(size))  # , rotation='horizontal')
+            # ax_vio.set_ylabel(r"$n={:,}$".format(size))  # , rotation='horizontal')
+            ax_vio.yaxis.set_label_position("right")
+            # ax_vio.yaxis.tick_right()
+            ax_vio.set_ylabel("")
             ax_vio.set_xlabel("")
 #            ax_vio.set_xticklabels([])
             # Remove y axis
@@ -815,15 +820,21 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=palette[p+1],
                                 markersize=12, lw=2, capsize=12, capthick=2,
                                 markeredgecolor=(0.45, 0.45, 0.45),
-                                label="Confidence Intervals ({:3.1%})".format(1-alpha))
+                                label=f"Confidence Intervals ({1-alpha:3.1%})")
 
                 if correction:
-                    ax_vio.plot(x, y, '*', markersize=12, c=palette[p+1], markeredgecolor=(0.45, 0.45, 0.45), label="Corrected", zorder=20)
-
+                    ax_vio.plot(x, y, '*', c=palette[p+1], markersize=12, markeredgecolor=(0.45, 0.45, 0.45), label="Corrected", zorder=20)
+                else:
+                    ax_vio.plot(x, y, 'o', c=palette[p+1], markersize=9, markeredgecolor=(0.45, 0.45, 0.45), zorder=20)  # label=r"$\hat{p}_C$", 
+                    ax_vio.plot(x, y, '.', c=(0.45, 0.45, 0.45), markersize=2, markeredgecolor=(0.45, 0.45, 0.45), label=r"$\hat{p}_C$", zorder=30)
 
 
         if si == len(sizes)-1:  # Top row
-            ax_mix.legend()
+            handles, labels = ax_mix.get_legend_handles_labels()
+            # sort both labels and handles by labels
+            labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
+            ax_mix.legend(handles, labels)
+            # ax_mix.legend()
         else:
             if ax_mix.get_legend():
                 # Remove legend and label yaxis instead
@@ -848,6 +859,8 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
         sns.despine(ax=ax_mix, top=True, bottom=False, left=True, right=True, trim=True)
         ax_mix.set_yticks([])
         ax_mix.set_yticklabels([])
+        # ax_mix.set_ylabel("")
+        ax_mix.set_ylabel(r"$n={:,}$".format(size), fontweight='heavy', fontsize=16)
 #    g.invert_yaxis()
     # ax_vio_base.set_xlabel(r"Estimated prevalence ($\hat{p}_C$)")  # $p_1$
     ax_vio_base.set_xlabel("Mixture prevalence")
@@ -856,8 +869,8 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
 #    plt.tight_layout()
-    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}_{}.png'.format(selected_mix, data_label)))
-    fig_select.savefig(os.path.join(fig_dir, 'violin_selection_{}_{}.svg'.format(selected_mix, data_label)), transparent=True)
+    fig_select.savefig(os.path.join(fig_dir, f'violin_selection_{selected_mix}_{data_label}.png'))
+    fig_select.savefig(os.path.join(fig_dir, f'violin_selection_{selected_mix}_{data_label}.svg'), transparent=True)
 
 
 def plot_ROC(scores, bins, title=None, ax=None):
