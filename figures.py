@@ -106,6 +106,7 @@ mpl.rc('figure', titlesize=14)  # fontsize of the figure title
 mpl.rc('lines', linewidth=2)
 mpl.rc('figure', dpi=100)
 mpl.rc('savefig', dpi=600)
+mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationWarning
 
 
 def SecToStr(sec):
