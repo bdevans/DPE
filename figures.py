@@ -1138,6 +1138,41 @@ if __name__ == "__main__":
                 break
 
 
+        # Plot worked examples
+        print(f"Plotting application with {data_label} scores...", flush=True)
+        fig_ex = plt.figure(figsize=(12, 6))
+        gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
+                          left=0.07, right=0.98, bottom=0.10, top=0.98)
+
+        # sns.set_style("ticks")
+        with sns.axes_style("ticks"):
+            ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
+            plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+
+        # with sns.axes_style("whitegrid"):
+        with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
+            ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
+            plot_bootstraps(df_pe, correction=correction, prop_Ref1=prop_Ref1, 
+                            ax=ax_ci_ex, limits=application_xlims[data_label], 
+                            ci_method=CI_METHOD, initial=False, legend=False, 
+                            violins=True, orient='h')
+            # if application_xlims[data_label]:
+            #     ax_ci_ex.set_xlim(*application_xlims[data_label])
+
+        fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
+        fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
+
+
+        # Plot selected violins
+        print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
+        plot_mixes = [0]
+        for mix in plot_mixes:  #range(n_seeds):
+            plot_selected_violins(scores, bins, df_point, df_est, methods, p_stars, sizes,
+                                  out_dir, data_label, selected_mix=mix,
+                                  add_ci=True, alpha=0.05, ci_method=CI_METHOD,
+                                  correction=correction)
+
+
 
         # Plot selected violins
         if False:
@@ -1198,14 +1233,7 @@ if __name__ == "__main__":
                 g.invert_yaxis()
             fig_stack.savefig(os.path.join(fig_dir, 'violin_stacks_{}.png'.format(data_label)))
 
-        # Plot selected violins
-        print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
-        plot_mixes = [0]
-        for mix in plot_mixes:  #range(n_seeds):
-            plot_selected_violins(scores, bins, df_point, df_est, methods, p_stars, sizes,
-                                  out_dir, data_label, selected_mix=mix,
-                                  add_ci=True, alpha=0.05, ci_method=CI_METHOD,
-                                  correction=correction)
+
 
         # Plot error bars
         if False:
@@ -1295,29 +1323,6 @@ if __name__ == "__main__":
             ax_base.set_xlabel("Genetic Risk Score")
             fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
-        # Plot worked examples
-        print(f"Plotting application with {data_label} scores...", flush=True)
-        fig_ex = plt.figure(figsize=(12, 6))
-        gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
-                          left=0.07, right=0.98, bottom=0.10, top=0.98)
-
-        # sns.set_style("ticks")
-        with sns.axes_style("ticks"):
-            ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
-            plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
-
-        # with sns.axes_style("whitegrid"):
-        with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
-            ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
-            plot_bootstraps(df_pe, correction=correction, prop_Ref1=prop_Ref1, 
-                            ax=ax_ci_ex, limits=application_xlims[data_label], 
-                            ci_method=CI_METHOD, initial=False, legend=False, 
-                            violins=True, orient='h')
-            # if application_xlims[data_label]:
-            #     ax_ci_ex.set_xlim(*application_xlims[data_label])
-
-        fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
-        fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
 
         # Plot distributions around the estimated proportion with given sample_size from the characterisation data
         # if prop_Ref1 is not None:
