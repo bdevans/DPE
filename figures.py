@@ -346,7 +346,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
             cax = grid.cbar_axes[0]
             cax.colorbar(hm, ticks=shading_ticks)  # , extend='both')  # TODO: Fix!
             cax.toggle_label(True)
-            cax.axis[cax.orientation].set_label("Average Deviation from $p_C^*$")
+            cax.axis[cax.orientation].set_label("Average Deviation from $p_C$")
 
         # Plot deviation across mixtures
         # ax_dev = fig.add_subplot(gs[1, m])
@@ -442,7 +442,8 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
 
     # if len(indep_vars) > 1:
     #     Use jointplot
-    ax.set_xlabel("GRS")
+    # ax.set_xlabel("GRS")
+    ax.set_xlabel("Genetic Risk Score")
     ax.legend()
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
@@ -491,7 +492,7 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
             ax.yaxis.tick_right()
 
     if prop_Ref1:  # Add ground truth
-        truth_label = r"$\tilde{{p}}_C: {:4.3}$".format(prop_Ref1)
+        truth_label = r"$p_C = {:4.3}$".format(prop_Ref1)
         if orient == 'v':
             ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--', c='#aaaaaa',
                        label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
@@ -597,12 +598,14 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
 
     if orient == 'v':
         ax.yaxis.tick_left()
-        ax.set_ylabel("$p_C$", {"rotation": "horizontal"})  # "$p_1$"
+        # ax.set_ylabel("$p_C$", {"rotation": "horizontal"})  # "$p_1$"
+        ax.set_ylabel("Mixture prevalence", {"rotation": "horizontal"})
         ax.set_ylim(0, 1)
         # ax.set_xticks([])  # Remove ticks for method labels
     elif orient == 'h':
         ax.xaxis.tick_bottom()
-        ax.set_xlabel("$p_C$")  # "$p_1$"
+        # ax.set_xlabel("$p_C$")  # "$p_1$"
+        ax.set_xlabel("Mixture prevalence")
         ax.set_xlim(0, 1)
         # ax.set_yticks([])  # Remove ticks for method labels
     #plt.setp(ax, yticks=yticks)
@@ -682,16 +685,13 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
             warnings.simplefilter("ignore", category=FutureWarning)
             sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True}, # hist=True, norm_hist=True, kde=False)#,
-                         label=r"$p_C^*=0.0\ (R_N)$", ax=ax_mix, color=palette[0])
-                         # label=r"$p_1^*=0.0\ (R_2)$", ax=ax_mix, color=palette[0])
+                         label=r"$p_C=0.0\ (R_N)$", ax=ax_mix, color=palette[0])
             for p, p_star in enumerate(p_stars):
                 sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
-                             label=r"$p_C^*={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
-                             # label=r"$p_1^*={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
+                             label=r"$p_C={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
             sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True},
-                         label=r"$p_C^*=1.0\ (R_C)$", ax=ax_mix, color=palette[len(p_stars)+1])
-                         # label=r"$p_1^*=1.0\ (R_1)$", ax=ax_mix, color=palette[len(p_stars)+1])
+                         label=r"$p_C=1.0\ (R_C)$", ax=ax_mix, color=palette[len(p_stars)+1])
 
         # Plot violins of bootstrapped estimates
         for p, p_star in enumerate(p_stars):
@@ -841,8 +841,10 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
         ax_mix.set_yticks([])
         ax_mix.set_yticklabels([])
 #    g.invert_yaxis()
-    ax_vio_base.set_xlabel("Estimated prevalence ($p_C$)")  # $p_1$
-    ax_mix_base.set_xlabel("GRS")
+    # ax_vio_base.set_xlabel(r"Estimated prevalence ($\hat{p}_C$)")  # $p_1$
+    ax_vio_base.set_xlabel("Mixture prevalence")
+    # ax_mix_base.set_xlabel("GRS")
+    ax_mix_base.set_xlabel("Genetic Risk Score")
 #    ax_vio_base.set_xticks()
 #    plt.setp(ax_vio.get_xticklabels(), visible=True)
 #    plt.tight_layout()
@@ -1268,7 +1270,8 @@ if __name__ == "__main__":
                 else:
                     warnings.warn("Missing data file: {}".format(mix_dist_file))
                     break
-            ax_base.set_xlabel("GRS")
+            # ax_base.set_xlabel("GRS")
+            ax_base.set_xlabel("Genetic Risk Score")
             fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
         # Plot worked examples
