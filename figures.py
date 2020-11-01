@@ -45,14 +45,11 @@ FRESH_DATA = False  # CAUTION!
 out_dir = "results/s1000_m0_b0"
 fig_dir = os.path.join(out_dir, "figs")
 
-verbose = False
 
-
-# seed = 4242
 seed = 420
 n_boot = 100
 n_mix = 100
-correction = False  # True  # Applies to the 'experimental' confidence intervals method
+correction = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
@@ -67,6 +64,7 @@ CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
 
 application_xlims = {'Diabetes': None, 'Coeliac': (0, 0.3)}
+verbose = False
 
 # TODO: Reimplement this
 adjust_excess = False
