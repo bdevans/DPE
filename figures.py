@@ -401,10 +401,12 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         ax_dev.set_xticklabels([str(tick) for tick in xticks])
         if m % len(pe._ALL_METHODS_) == 3:
             # print(method)
+            # cax = mpl.colorbar.Colorbar(ax, hm)
             cax = grid.cbar_axes[1]
             cax.colorbar(hm)  # , extend='max')  # TODO: Fix!
             cax.toggle_label(True)
             cax.axis[cax.orientation].set_label("Model variability")
+
 
     # grid.axes_llc.set_xlim(extent[:2])
     # grid.axes_llc.set_ylim(extent[2:])
