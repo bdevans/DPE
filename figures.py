@@ -579,24 +579,30 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
     # ax.errorbar(x=x, y=y, yerr=errors, fmt='s', markersize=5, c='w', lw=8, capsize=12, capthick=8)
 
 #    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
-    error_label = "{:3.1%} CI".format(1-alpha)
+    error_label = f"{1-alpha:3.1%} CI"
 #    if correction:
 #        error_label += " (Corrected)"
 
     if orient == 'v':
-        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=3, capsize=14, capthick=6)
-
         ax.errorbar(x=x, y=y, yerr=errors, fmt='none', markersize=14, c=c, lw=2, markeredgecolor=c_edge,
-                    capsize=12, capthick=2, label=error_label)
+                    capsize=12, capthick=2, label=error_label, zorder=10)
+
+        # Add grey border around error bars
+        ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=3, capsize=14, capthick=6)
     elif orient == 'h':
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=1.25, markeredgecolor=c_edge,
+                    capsize=12, capthick=1, label=error_label, zorder=10)
+        
+        # Add grey border around error bars
         ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=2, capsize=14, capthick=4)
 
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=1.25, markeredgecolor=c_edge,
-                    capsize=12, capthick=1, label=error_label)  # , zorder=10
 
     if correction:
         # ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
         ax.plot(x, y, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
+    else:
+        ax.plot(x, y, 'o', markersize=6, c=c, markeredgecolor=c_edge, zorder=20)
+        ax.plot(x, y, '.', markersize=2, c=c_edge, markeredgecolor=c_edge, label=r"$\hat{p}_C$", zorder=30)
 
     if orient == 'v':
         ax.yaxis.tick_left()
