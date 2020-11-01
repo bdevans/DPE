@@ -105,7 +105,7 @@ mpl.rc('legend', fontsize=11)   # legend fontsize
 mpl.rc('figure', titlesize=14)  # fontsize of the figure title
 mpl.rc('lines', linewidth=2)
 mpl.rc('figure', dpi=100)
-mpl.rc('savefig', dpi=300)
+mpl.rc('savefig', dpi=600)
 
 
 def SecToStr(sec):
