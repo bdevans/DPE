@@ -31,22 +31,20 @@ from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 # ---------------------------- Define constants ------------------------------
 
 # METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
-FRESH_DATA = True  # False  # CAUTION!
+
 # out_dir = "results_test"
 # out_dir = "results_100_100"
 # out_dir = "results/m1000_b0"
 # out_dir = "results/m1000_b10"
-
 # out_dir = "results/m100_b1000"
 # out_dir = "results/m10_b100"
-#out_dir = "results/m100_b100"
-
+# out_dir = "results/m100_b100"
 # out_dir = "results/m1000_b100"
 out_dir = "results/s1000_m0_b0"
 fig_dir = os.path.join(out_dir, "figs")
 
-
-seed = 420
+FRESH_DATA = True  # False  # CAUTION!
+seed = 42
 n_boot = 100
 n_mix = 100
 correction = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
