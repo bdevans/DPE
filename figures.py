@@ -1007,7 +1007,8 @@ if __name__ == "__main__":
 
             df_pe = pe.analyse_mixture(scores, bins, methods,
                                        n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
-                                       alpha=alpha, true_p1=prop_Ref1, n_jobs=-1,
+                                       alpha=alpha, true_p1=prop_Ref1, 
+                                       correction=correction, n_jobs=-1,  # Previously correction defaulted to False
                                        logfile=f"{out_dir}/pe_{data_label}.log")
 
             elapsed = time.time() - t
@@ -1091,6 +1092,7 @@ if __name__ == "__main__":
                                                    n_boot=n_boot, boot_size=size,
                                                    n_mix=n_mix,
                                                    alpha=alpha, true_p1=p_star,
+                                                   correction=correction,  # Previously correction defaulted to False
                                                    n_jobs=-1, verbose=0)
                         df_point = df_cm.iloc[[0]].copy()
                         df_point['Size'] = size
