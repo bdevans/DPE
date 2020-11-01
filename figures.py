@@ -1275,7 +1275,7 @@ if __name__ == "__main__":
             fig_mixes.savefig(os.path.join(fig_dir, 'constructions_{}.png'.format(data_label)))
 
         # Plot worked examples
-        print("Plotting application with {} scores...".format(data_label), flush=True)
+        print(f"Plotting application with {data_label} scores...", flush=True)
         fig_ex = plt.figure(figsize=(12, 6))
         gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
                           left=0.07, right=0.98, bottom=0.10, top=0.98)
@@ -1288,15 +1288,15 @@ if __name__ == "__main__":
         # with sns.axes_style("whitegrid"):
         with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
             ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
-            #plot_bootstraps(df_pe, prop_Ref1, ax_ci, ylims=(0, 0.12))
             plot_bootstraps(df_pe, correction=correction, prop_Ref1=prop_Ref1, 
-                            ax=ax_ci_ex, limits=None, ci_method=CI_METHOD, 
-                            initial=False, legend=False, violins=True, orient='h')
+                            ax=ax_ci_ex, limits=application_xlims[data_label], 
+                            ci_method=CI_METHOD, initial=False, legend=False, 
+                            violins=True, orient='h')
+            # if application_xlims[data_label]:
+            #     ax_ci_ex.set_xlim(*application_xlims[data_label])
 
-            if application_xlims[data_label]:
-                ax_ci_ex.set_xlim(*application_xlims[data_label])
-        fig_ex.savefig(os.path.join(fig_dir, 'application_{}.png'.format(data_label)))
-        fig_ex.savefig(os.path.join(fig_dir, 'application_{}.svg'.format(data_label)), transparent=True)
+        fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
+        fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
 
         # Plot distributions around the estimated proportion with given sample_size from the characterisation data
         # if prop_Ref1 is not None:
