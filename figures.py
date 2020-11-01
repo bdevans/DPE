@@ -1140,9 +1140,9 @@ if __name__ == "__main__":
 
         # Plot worked examples
         print(f"Plotting application with {data_label} scores...", flush=True)
-        fig_ex = plt.figure(figsize=(12, 6))
+        fig_ex = plt.figure(figsize=(12, 4))
         gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
-                          left=0.07, right=0.98, bottom=0.10, top=0.98)
+                          left=0.10, right=0.95, bottom=0.12, top=0.96)
 
         # sns.set_style("ticks")
         with sns.axes_style("ticks"):
