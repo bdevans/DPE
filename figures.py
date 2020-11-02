@@ -458,11 +458,15 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
 
     if not ax:
         f, ax = plt.subplots()
-    if limits:
-        if orient == 'v':
-            ax.set_ylim(limits)
-        if orient == 'h':
-            ax.set_xlim(limits)
+    if limits is None:
+        limits = (0, 1)
+    else:
+        assert isinstance(limits, (tuple, list))
+    # if limits:
+    #     if orient == 'v':
+    #         ax.set_ylim(limits)
+    #     if orient == 'h':
+    #         ax.set_xlim(limits)
 
     df_point = df_pe.iloc[0, :]
     df_bs = df_pe.iloc[1:, :]
@@ -604,13 +608,15 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
         ax.yaxis.tick_left()
         # ax.set_ylabel("$p_C$", {"rotation": "horizontal"})  # "$p_1$"
         ax.set_ylabel("Mixture prevalence", {"rotation": "horizontal"})
-        ax.set_ylim(0, 1)
+        ax.set_ylim(*limits)
+        # ax.set_ylim(0, 1)
         # ax.set_xticks([])  # Remove ticks for method labels
     elif orient == 'h':
         ax.xaxis.tick_bottom()
         # ax.set_xlabel("$p_C$")  # "$p_1$"
         ax.set_xlabel("Mixture prevalence")
-        ax.set_xlim(0, 1)
+        ax.set_xlim(*limits)
+        # ax.set_xlim(0, 1)
         # ax.set_yticks([])  # Remove ticks for method labels
     #plt.setp(ax, yticks=yticks)
     #ax.yaxis.set_ticks_position('right')
