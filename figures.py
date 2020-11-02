@@ -43,7 +43,7 @@ from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 out_dir = "results/s1000_m0_b0"
 fig_dir = os.path.join(out_dir, "figs")
 
-FRESH_DATA = True  # False  # CAUTION!
+FRESH_DATA = False  # CAUTION!
 seed = 42
 n_boot = 100
 n_mix = 100
