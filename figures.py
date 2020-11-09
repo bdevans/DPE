@@ -170,7 +170,7 @@ def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_me
             centres[m] = df_pe.iloc[0, m]
             # boot_values = df_pe.iloc[1:, m]
 
-        ci_low, ci_upp = pe.calc_conf_intervals(boot_values, correction=False,  #initial=centre,
+        ci_low, ci_upp = pe.calc_conf_intervals(boot_values, correct_bias=False,  #initial=centre,
                                                 average=average, alpha=alpha,
                                                 ci_method=ci_method)
         errors[0, m] = centres[m] - ci_low
