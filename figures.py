@@ -10,12 +10,10 @@ Generate manuscript figures.
 
 import os
 import time
-# from collections import OrderedDict
 import warnings
 
 import pandas as pd
 import numpy as np
-# import scipy as sp
 from sklearn.metrics import roc_curve, auc
 import seaborn as sns
 import matplotlib as mpl
@@ -37,11 +35,10 @@ n_mix = 100
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
-
 verbose = False
 
 # Set method details
-alpha = 0.05
+alpha = 0.05  # Alpha for confidence intervals
 CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # normal : asymptotic normal approximation
 # agresti_coull : Agresti-Coull interval
@@ -50,7 +47,7 @@ CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # jeffreys : Jeffreys Bayesian Interval
 # binom_test : experimental, inversion of binom_test
 # http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
-correct_bias = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
+correct_bias = False  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 # TODO: Reimplement this
 adjust_excess = False
 KDE_kernel = 'gaussian'
@@ -65,19 +62,8 @@ output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
 
 LINEAR_COLOURBAR = True
 ABSOLUTE_ERROR = False
-# LABELS = ['Means', 'Excess', 'EMD', 'KDE']
-# COLOURS = ['r', 'g', 'b', 'k']
 average = np.mean
 deviation = np.std
-
-# METRICS = ['T1GRS', 'T2GRS']
-
-
-# ----------------------------------------------------------------------------
-
-#with warnings.catch_warnings():
-#    warnings.filterwarnings("ignore", category=DeprecationWarning)
-# warnings.filterwarnings("ignore", message="The 'normed' kwarg is deprecated")
 
 # TODO: Move to __main__
 #    mpl.style.use('seaborn')
@@ -94,6 +80,11 @@ mpl.rc('lines', linewidth=2)
 mpl.rc('figure', dpi=100)
 mpl.rc('savefig', dpi=600)
 mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationWarning
+
+# Suppress warnings
+#with warnings.catch_warnings():
+#    warnings.filterwarnings("ignore", category=DeprecationWarning)
+# warnings.filterwarnings("ignore", message="The 'normed' kwarg is deprecated")
 
 # Create output directories
 # out_dir = "results_test"
@@ -113,6 +104,7 @@ out_dir = os.path.join("results", f"n{sample_size}_m{n_mix}_b{n_boot}_s{seed}")
 fig_dir = os.path.join(out_dir, "figs")
 os.makedirs(fig_dir, exist_ok=True)
 
+# ----------------------------------------------------------------------------
 
 def SecToStr(sec):
     m, s = divmod(sec, 60)
