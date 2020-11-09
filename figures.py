@@ -30,19 +30,6 @@ from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 
 # ---------------------------- Define constants ------------------------------
 
-# METHODS_ORDER = ["Excess", "Means", "EMD", "KDE"]
-
-# out_dir = "results_test"
-# out_dir = "results_100_100"
-# out_dir = "results/m1000_b0"
-# out_dir = "results/m1000_b10"
-# out_dir = "results/m100_b1000"
-# out_dir = "results/m10_b100"
-# out_dir = "results/m100_b100"
-# out_dir = "results/m1000_b100"
-out_dir = "results/s1000_m0_b0"
-fig_dir = os.path.join(out_dir, "figs")
-
 FRESH_DATA = True  # False  # CAUTION!
 seed = 42
 n_boot = 1000
@@ -107,6 +94,23 @@ mpl.rc('lines', linewidth=2)
 mpl.rc('figure', dpi=100)
 mpl.rc('savefig', dpi=600)
 mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationWarning
+
+# Create output directories
+# out_dir = "results_test"
+# out_dir = "results_100_100"
+# out_dir = "results/m1000_b0"
+# out_dir = "results/m1000_b10"
+# out_dir = "results/m100_b1000"
+# out_dir = "results/m10_b100"
+# out_dir = "results/m100_b100"
+# out_dir = "results/m1000_b100"
+# out_dir = "results/s1000_m0_b0"
+if seed is None:
+    seed = np.random.randint(np.iinfo(np.int32).max)
+assert 0 <= seed < np.iinfo(np.int32).max
+out_dir = os.path.join("results", f"n{sample_size}_m{n_mix}_b{n_boot}_s{seed}")
+fig_dir = os.path.join(out_dir, "figs")
+os.makedirs(fig_dir, exist_ok=True)
 
 
 def SecToStr(sec):
