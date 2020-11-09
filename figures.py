@@ -47,10 +47,13 @@ FRESH_DATA = True  # False  # CAUTION!
 seed = 42
 n_boot = 1000
 n_mix = 100
-correct_bias = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
+
+verbose = False
+
+# Set method details
 alpha = 0.05
 CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # normal : asymptotic normal approximation
@@ -60,21 +63,18 @@ CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # jeffreys : Jeffreys Bayesian Interval
 # binom_test : experimental, inversion of binom_test
 # http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
-
-output_diabetes_rocs = False
-output_application = {'Diabetes': False, 'Renal': False, 'Coeliac': True}
-application_xlims = {'Diabetes': None, 'Renal': None, 'Coeliac': (0, 0.3)}
-output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
-output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
-verbose = False
-
+correct_bias = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 # TODO: Reimplement this
 adjust_excess = False
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
-# Grid Search Plots
 # Configure plots
+output_diabetes_rocs = False
+output_application = {'Diabetes': False, 'Renal': False, 'Coeliac': True}
+application_xlims = {'Diabetes': None, 'Renal': None, 'Coeliac': (0, 0.3)}
+output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
+output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
 
 LINEAR_COLOURBAR = True
 ABSOLUTE_ERROR = False
