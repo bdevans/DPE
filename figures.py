@@ -105,6 +105,7 @@ mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationW
 # out_dir = "results/m100_b100"
 # out_dir = "results/m1000_b100"
 # out_dir = "results/s1000_m0_b0"
+characterisation_dir = "results/characterisation"
 if seed is None:
     seed = np.random.randint(np.iinfo(np.int32).max)
 assert 0 <= seed < np.iinfo(np.int32).max
@@ -136,10 +137,10 @@ def plot_kernels(scores, bins):
     return (fig, axes)
 
 
-def load_accuracy(out_dir, label):
+def load_accuracy(data_dir, label):
 
-    PROPORTIONS = np.load('{}/proportions_{}.npy'.format(out_dir, label))
-    SAMPLE_SIZES = np.load('{}/sample_sizes_{}.npy'.format(out_dir, label))
+    PROPORTIONS = np.load(f'{data_dir}/proportions_{label}.npy')
+    SAMPLE_SIZES = np.load(f'{data_dir}/sample_sizes_{label}.npy')
     # PROPORTIONS_Ref2 = PROPORTIONS_Ref1[::-1]
 
     # Dictionary of p1 errors
@@ -147,8 +148,8 @@ def load_accuracy(out_dir, label):
     boots_estimates = {}
 
     for method in pe._ALL_METHODS_:
-        point_file = '{}/point_{}_{}.npy'.format(out_dir, method, label)
-        boots_file = '{}/boots_{}_{}.npy'.format(out_dir, method, label)
+        point_file = f'{data_dir}/point_{method}_{label}.npy'
+        boots_file = f'{data_dir}/boots_{method}_{label}.npy'
         if os.path.isfile(point_file):
             point_estimates[method] = np.load(point_file)
         if os.path.isfile(boots_file):
@@ -1074,7 +1075,7 @@ if __name__ == "__main__":
             #    exec(open("./bootstrap.py").read())
 
             # Load bootstraps of accurarcy data
-            (point_estimates, boots_estimates, proportions, sample_sizes) = load_accuracy(out_dir, data_label)
+            (point_estimates, boots_estimates, proportions, sample_sizes) = load_accuracy(characterisation_dir, data_label)
 
             # Plot point estimates of p1
             if bool(point_estimates):
