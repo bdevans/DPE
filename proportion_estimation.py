@@ -280,7 +280,7 @@ def correct_estimate(df_pe):
     return pd.DataFrame(corrected, index=[-1], columns=df_pe.columns)
 
 
-def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
+def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean,
                         alpha=0.05, ci_method="bca"):
     """Calculate confidence intervals for a point estimate.
     
@@ -293,7 +293,7 @@ def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
         The array of bootstrapped p_c estimates (for a particular method).
     initial : float, optional
         An optional estimate from the original mixture (for a particular method). 
-    correction : None or bool, optional
+    correct_bias : None or bool, optional
         A flag to correct the `experimental` CI method. 
     average : function, optional
         The function used to calculate the average estimate across bootstraps. 
@@ -345,7 +345,7 @@ def calc_conf_intervals(values, initial=None, correction=True, average=np.mean,
 
     elif ci_method.lower() == 'experimental':
         assert initial is not None and 0.0 <= initial <= 1.0
-        if correction:
+        if correct_bias:
             err_low, err_upp = np.percentile(values-initial, [100*alpha/2, 100*(1-alpha/2)])
             ci_low, ci_upp = initial-err_upp, initial-err_low
         else:
@@ -488,7 +488,7 @@ def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
 
 def analyse_mixture(scores, bins='fd', methods='all', 
                     n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_p1=None, correction=False,
+                    alpha=0.05, true_p1=None, correct_bias=False,
                     n_jobs=1, seed=None, verbose=1, logfile=''):
     """Analyse a mixture distribution and estimate the proportions of two
     reference distributions of which it is assumed to be comprised.
@@ -526,7 +526,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
     true_p1 : float
         Optionally pass the true proportion for showing the comparison with
         estimated proportion(s).
-    correction : bool
+    correct_bias : bool
         A boolean flag specifing whether to apply the bootstrap correction
         method or not. Default: `False`.
     n_jobs : int
@@ -549,7 +549,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         point estimate. The remaining `n_boot * n_mix` rows are the
         bootstrapped estimates. Each column is the name of the estimation method.
 
-    Alternatively if `correction == True`:
+    Alternatively if `correct_bias == True`:
     (df_pe, df_correct) : tuple
         A tuple of the proportion estimates and the corrected proportion
         estimates as dataframes.
@@ -561,8 +561,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
     if seed is not None:
         np.random.seed(seed)
 
-    if correction and n_mix + n_boot == 0:
-        warnings.warn("No bootstraps - Ignoring correction!")
+    if correct_bias and n_mix + n_boot == 0:
+        warnings.warn("No bootstraps - Ignoring bias correction!")
 
     if 'pC' in scores and 'Ref1' not in scores:
         scores['Ref1'] = scores['pC']  # Proportion of cases
@@ -693,7 +693,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
             index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
             df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
 
-        if correction:
+        if correct_bias:
             df_correct = correct_estimate(df_pe)
     else:
         df_pe = pd.DataFrame(pe_initial, index=[0], columns=columns)
@@ -712,6 +712,6 @@ def analyse_mixture(scores, bins='fd', methods='all',
             lf.write(report)
             lf.write("\n")
 
-    if correction:
+    if correct_bias:
         return df_pe, df_correct
     return df_pe

@@ -47,7 +47,7 @@ FRESH_DATA = True  # False  # CAUTION!
 seed = 42
 n_boot = 1000
 n_mix = 100
-correction = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
+correct_bias = False  # True  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
@@ -153,7 +153,7 @@ def load_accuracy(out_dir, label):
     return point_estimates, boots_estimates, PROPORTIONS, SAMPLE_SIZES
 
 
-def get_error_bars(df_pe, correction=False, average=np.mean, alpha=0.05, ci_method="bca"):
+def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_method="bca"):
     """df: columns are method names"""
 
     #methods = list(df.columns)
@@ -166,7 +166,7 @@ def get_error_bars(df_pe, correction=False, average=np.mean, alpha=0.05, ci_meth
 
         boot_values = df_pe.iloc[1:, m]
 
-        if correction:
+        if correct_bias:
             centres[m] = 2 * df_pe.iloc[0, m] - np.mean(boot_values)
             boot_values = 2 * df_pe.iloc[0, m] - boot_values
         else:
@@ -450,7 +450,7 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
+def plot_bootstraps(df_pe, correct_bias=None, initial=True, prop_Ref1=None,
                     ax=None, limits=None, alpha=0.05, ci_method='bca',
                     violins=True, legend=True, orient='v'):
 
@@ -475,7 +475,7 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
     df_point = df_pe.iloc[0, :]
     df_bs = df_pe.iloc[1:, :]
     # TODO: Think...
-#    if correction:
+#    if correct_bias:
 #        df_correct = pe.correct_estimate(df_pe)
 
 
@@ -521,9 +521,9 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
 #        x, y = df_point.iloc[0].values, ax.get_yticks()
 #        means = x
 
-    errors, centres = get_error_bars(df_pe, correction=correction)
+    errors, centres = get_error_bars(df_pe, correct_bias=correct_bias)
 
-    if correction:
+    if correct_bias:
         if orient == 'v':
             x, y = ax.get_xticks(), centres
             x_init, y_init = x, df_point
@@ -551,7 +551,7 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
         elif orient == 'h':
             x, y = df_pe.iloc[0].values, ax.get_yticks()
 
-#    if correction:
+#    if correct_bias:
 #        # Plot initial estimate
 #        ax.plot(x, y, 'o', markersize=12, c=(0.25, 0.25, 0.25))
 #        ax.plot(x, y, 'o', markersize=8, c=c, label="Initial")
@@ -563,7 +563,7 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
 #        # initial = df_point.iloc[0][method]  # Avoid chained indexing
 #        # initial = df_point.iloc[0, midx]
 #
-#        if correction:
+#        if correct_bias:
 #            # Plot initial estimate
 #            ax.plot(x, y, fmt='x', markersize=12, c=(0.25, 0.25, 0.25))
 #            ax.plot(x, y, fmt='x', markersize=8, c=c, label="Initial")
@@ -584,7 +584,7 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
 
 #    error_label = "Confidence Intervals ({:3.1%})".format(1-alpha)
     error_label = f"{1-alpha:3.1%} CI"
-#    if correction:
+#    if correct_bias:
 #        error_label += " (Corrected)"
 
     if orient == 'v':
@@ -601,7 +601,7 @@ def plot_bootstraps(df_pe, correction=None, initial=True, prop_Ref1=None,
         ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=2, capsize=14, capthick=4)
 
 
-    if correction:
+    if correct_bias:
         # ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
         ax.plot(x, y, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
     else:
@@ -653,7 +653,7 @@ def construct_mixture(Ref1, Ref2, p1, size):
 def plot_selected_violins(scores, bins, df_point, df_boots, methods, 
                           p_stars, sizes, out_dir, data_label, selected_mix=0,
                           add_ci=True, alpha=0.05, ci_method="bca",
-                          correction=False):
+                          correct_bias=False):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
@@ -804,10 +804,10 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 
                 df_b_piv = df_b_piv[df_p_piv.columns]  # Manually sort before merge
                 df_pe = pd.concat([df_p_piv, df_b_piv], ignore_index=True)
-                errors, centres = get_error_bars(df_pe, correction=correction)
+                errors, centres = get_error_bars(df_pe, correct_bias=correct_bias)
 
 
-                if correction:
+                if correct_bias:
                     x, y = centres, ax_vio.get_yticks()
                     x_init, y_init = np.squeeze(df_p_piv), y
 
@@ -828,7 +828,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
                                 markeredgecolor=(0.45, 0.45, 0.45),
                                 label=f"Confidence Intervals ({1-alpha:3.1%})")
 
-                if correction:
+                if correct_bias:
                     ax_vio.plot(x, y, '*', c=palette[p+1], markersize=12, markeredgecolor=(0.45, 0.45, 0.45), label="Corrected", zorder=20)
                 else:
                     ax_vio.plot(x, y, 'o', c=palette[p+1], markersize=9, markeredgecolor=(0.45, 0.45, 0.45), zorder=20)  # label=r"$\hat{p}_C$", 
@@ -1021,7 +1021,7 @@ if __name__ == "__main__":
                 df_pe = pe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
                                         alpha=alpha, true_p1=prop_Ref1, 
-                                        correction=correction, n_jobs=-1,  # Previously correction defaulted to False
+                                        correct_bias=correct_bias, n_jobs=-1,  # Previously correct_bias defaulted to False
                                         logfile=f"{out_dir}/pe_{data_label}.log")
 
                 elapsed = time.time() - t
@@ -1052,7 +1052,7 @@ if __name__ == "__main__":
             # with sns.axes_style("whitegrid"):
             with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
                 ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
-                plot_bootstraps(df_pe, correction=correction, prop_Ref1=prop_Ref1, 
+                plot_bootstraps(df_pe, correct_bias=correct_bias, prop_Ref1=prop_Ref1, 
                                 ax=ax_ci_ex, limits=application_xlims[data_label], 
                                 ci_method=CI_METHOD, initial=False, legend=False, 
                                 violins=True, orient='h')
@@ -1136,7 +1136,7 @@ if __name__ == "__main__":
                                                     n_boot=n_boot, boot_size=size,
                                                     n_mix=n_mix,
                                                     alpha=alpha, true_p1=p_star,
-                                                    correction=correction,  # Previously correction defaulted to False
+                                                    correct_bias=correct_bias,  # Previously correct_bias defaulted to False
                                                     n_jobs=-1, verbose=0)
                             df_point = df_cm.iloc[[0]].copy()
                             df_point['Size'] = size
@@ -1191,7 +1191,7 @@ if __name__ == "__main__":
                 plot_selected_violins(scores, bins, df_point, df_est, methods, p_stars, sizes,
                                     out_dir, data_label, selected_mix=mix,
                                     add_ci=True, alpha=0.05, ci_method=CI_METHOD,
-                                    correction=correction)
+                                    correct_bias=correct_bias)
 
 
 
@@ -1378,7 +1378,7 @@ if __name__ == "__main__":
                 else:
                     legend = False
 
-                plot_bootstraps(df_pe, correction, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
+                plot_bootstraps(df_pe, correct_bias, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 
