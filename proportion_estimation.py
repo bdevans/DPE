@@ -199,6 +199,13 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
         if not isinstance(methods_["Means"], dict):
             methods_["Means"] = {"mu_1": np.mean(scores["Ref1"]),
                                  "mu_2": np.mean(scores["Ref2"])}
+        
+        mu_1, mu_2 = methods_["Means"]["mu_1"], methods_["Means"]["mu_2"]
+        mix_mean = scores["Mix"].mean()
+        if mix_mean < min(mu_1, mu_2) or mix_mean > max(mu_1, mu_2):
+            warnings.warn(f"The mixture mean ({mix_mean:.3}) lies outside of "
+                          "the range of reference means [{mu_1:.3}, {mu_2:.3}]"
+                          " so is unsuitable for this mixture analysis.")
 
     if "EMD" in methods_:
         if not isinstance(methods_["EMD"], dict):
