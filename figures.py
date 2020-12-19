@@ -743,7 +743,8 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 #            ax_vio.set_yticks([])
 #            ax_vio.set_yticklabels([])
 #            ax_vio.get_yticklabels().set_visible(False)
-            ax_vio.set(xlim=(0, 1))
+            # ax_vio.set(xlim=(0, 1))
+            ax_vio.set(xlim=(-0.02, 1.02))
 
             if add_ci:  # Add confidence intervals
 #                # The true value will be within these bars for 95% of samples (not measures)
