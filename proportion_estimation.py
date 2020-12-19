@@ -593,6 +593,19 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     columns = [method for method in _ALL_METHODS_ if method in methods_]
 
+    if logfile is not None:
+        if logfile == '':
+            logfile = "proportion_estimates.log"
+        with open(logfile, 'w') as lf:
+            lf.write("Distribution Summaries\n")
+            lf.write("======================\n\n")
+            lf.write(f"       | {'Mix':^7s} | {'R_C':^7s} | {'R_N':^7s} \n")
+            lf.write("=====================================\n")
+            lf.write(f"     n | {len(Mix):^7,} | {len(Ref1):^7,} | {len(Ref2):^7,} \n")
+            lf.write(f"  Mean | {np.mean(Mix):^7.3} | {np.mean(Ref1):^7.3f} | {np.mean(Ref2):^7.3f} \n")
+            lf.write(f"Median | {np.median(Mix):^7.3} | {np.median(Ref1):^7.3f} | {np.median(Ref2):^7.3f} \n")
+            lf.write("\n\n")
+
     # Get initial estimate of proportions
     pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods_)
     if verbose > 1:
@@ -713,9 +726,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         print("\n" + report + "\n")
 
     if logfile is not None:
-        if logfile == '':
-            logfile = "proportion_estimates.log"
-        with open(logfile, 'w') as lf:
+        with open(logfile, 'a') as lf:
             lf.write(report)
             lf.write("\n")
 
