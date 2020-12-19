@@ -48,7 +48,7 @@ CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # binom_test : experimental, inversion of binom_test
 # http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
 correct_bias = False  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
-# TODO: Reimplement this
+# TODO: Reimplement this or remove?
 adjust_excess = False
 KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
@@ -448,8 +448,8 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
 
 
 def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
-                    ax=None, limits=None, alpha=0.05, ci_method='bca',
-                    violins=True, legend=True, orient='v'):
+                    ax=None, limits=None, alpha=0.05, ci_method="bca",
+                    violins=True, legend=True, orient="v"):
 
     # c = sns.color_palette()[-3]  # 'gray'
     c = '#999999'
@@ -1019,6 +1019,7 @@ if __name__ == "__main__":
                 df_pe = pe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
                                         alpha=alpha, true_pC=p_C, 
+                                        ci_method=CI_METHOD,
                                         correct_bias=correct_bias, n_jobs=-1,  # Previously correct_bias defaulted to False
                                         logfile=f"{out_dir}/pe_{data_label}.log")
 
@@ -1136,6 +1137,7 @@ if __name__ == "__main__":
                                                     n_boot=n_boot, boot_size=size,
                                                     n_mix=n_mix,
                                                     alpha=alpha, true_pC=p_star,
+                                                    ci_method=CI_METHOD,
                                                     correct_bias=correct_bias,  # Previously correct_bias defaulted to False
                                                     n_jobs=-1, verbose=0,
                                                     logfile=f"proportion_estimates_p_C_{p_star:3.2f}.log")
