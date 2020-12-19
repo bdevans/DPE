@@ -8,4 +8,5 @@ figs
 *.m
 *.ipynb
 tmp*
+scrap
 __pycache__
