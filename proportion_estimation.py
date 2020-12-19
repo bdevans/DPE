@@ -373,7 +373,7 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     return ci_low, ci_upp
 
 
-def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
+def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="experimental"):
     """Generate an proportion estimate report for each method."""
     # TODO: Incorporate ipoint estimates in report
     pe_point = df_pe.iloc[0, :]
@@ -382,8 +382,8 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
     line_width = 54
     report = []
     report.append(" {:^12} | {:^17s} | {:^17s} ".format("Method",
-                                                        "Estimated pC",   # Reference 1
-                                                        "Estimated pN"))  # Reference 2
+                                                        "Estimated p_C",   # Reference 1
+                                                        "Estimated p_N"))  # Reference 2
     report.append("="*line_width)
     for method in df_pe:  # loop over columns (i.e. methods)
         values = pe_boot[method]
@@ -408,9 +408,9 @@ def generate_report(df_pe, true_p1=None, alpha=0.05, ci_method="experimental"):
                 report.append(" Corrected    | {:<17.5f} | {:<17.5f} "
                               .format(corrected_est, 1-corrected_est))
         report.append("-"*line_width)
-    if true_p1:
+    if true_pC:
         report.append(" {:12} | {:<17.5f} | {:<17.5f} "
-                      .format("Ground Truth", true_p1, 1-true_p1))
+                      .format("Ground Truth", true_pC, 1-true_pC))
         report.append("="*line_width)
     # report.append("\n")
     return "\n".join(report)
@@ -495,7 +495,7 @@ def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
 
 def analyse_mixture(scores, bins='fd', methods='all', 
                     n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_p1=None, correct_bias=False,
+                    alpha=0.05, true_pC=None, correct_bias=False,
                     n_jobs=1, seed=None, verbose=1, logfile=''):
     """Analyse a mixture distribution and estimate the proportions of two
     reference distributions of which it is assumed to be comprised.
@@ -530,8 +530,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
     alpha : float
         The alpha value for calculating confidence intervals from bootstrap
         distributions. Default: `0.05`.
-    true_p1 : float
-        Optionally pass the true proportion for showing the comparison with
+    true_pC : float
+        Optionally pass the true proportion of cases for comparing to the 
         estimated proportion(s).
     correct_bias : bool
         A boolean flag specifing whether to apply the bootstrap correction
@@ -611,9 +611,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
     if verbose > 1:
         print('Initial point estimates:')
         pprint(pe_initial)
-    if true_p1:
+    if true_pC:
         if verbose > 1:
-            print("Ground truth: {:.5f}".format(true_p1))
+            print(f"Ground truth: {true_pC:.5f}")
     # pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
     # pe_initial.to_dict(orient='records')  # Back to dictionary
 
@@ -720,7 +720,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
-        report = generate_report(df_pe, true_p1=true_p1, alpha=alpha)
+        report = generate_report(df_pe, true_pC=true_pC, alpha=alpha)
 
     if verbose > 0:
         print("\n" + report + "\n")

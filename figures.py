@@ -707,7 +707,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
         # Plot violins of bootstrapped estimates
         for p, p_star in enumerate(p_stars):
 
-            # Add annotations for p1*
+            # Add annotations for p_C
             ax_vio.axvline(x=p_star, ymin=0, ymax=1, ls='--', lw=3, zorder=0, color=palette[p+1])
                        #label="Ground Truth: {:3.2}".format(p_star))
 
@@ -718,7 +718,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 
 
             # Select estimates at p_star and size for all methods
-            df_b = df_boots[np.isclose(p_star, df_est['p1*']) &
+            df_b = df_boots[np.isclose(p_star, df_est["p_C"]) &
                             (df_est['Size'] == size) &
                             (df_est["Mix"] == selected_mix)]
 
@@ -757,12 +757,12 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 #
 #                    mean_est = df_means.loc[method, 'Estimate']
 #
-#                    initial = df_point[np.isclose(p_star, df_point['p1*'])
+#                    initial = df_point[np.isclose(p_star, df_point["p_C"])
 #                                       & (df_point['Size'] == size)
 #                                       & (df_point["Mix"] == selected_mix)][method].values[0]
 #
 #                    df_piv = df_b.pivot_table(values="Estimate",
-#                                            index=["p1*", "Size", "Mix", "Boot"],
+#                                            index=["p_C", "Size", "Mix", "Boot"],
 #                                            columns="Method")
 #
 #                    ci_low, ci_upp = pe.calc_conf_intervals(df_piv[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
@@ -790,14 +790,14 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
                 ##### NEW METHOD #####
 
                 # Estract point estimates for the particular hyperparameters
-                df_p = df_point[np.isclose(p_star, df_point['p1*'])
+                df_p = df_point[np.isclose(p_star, df_point["p_C"])
                                 & (df_point['Size'] == size)
                                 & (df_point["Mix"] == selected_mix)]
 
-                df_p_piv = df_p.drop(columns=["p1*", "Size", "Mix"])
+                df_p_piv = df_p.drop(columns=["p_C", "Size", "Mix"])
 
                 df_b_piv = df_b.pivot_table(values="Estimate",
-                                            index=["p1*", "Size", "Mix", "Boot"],
+                                            index=["p_C", "Size", "Mix", "Boot"],
                                             columns="Method")
 
                 df_b_piv = df_b_piv[df_p_piv.columns]  # Manually sort before merge
@@ -1018,7 +1018,7 @@ if __name__ == "__main__":
 
                 df_pe = pe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
-                                        alpha=alpha, true_p1=prop_Ref1, 
+                                        alpha=alpha, true_pC=prop_Ref1, 
                                         correct_bias=correct_bias, n_jobs=-1,  # Previously correct_bias defaulted to False
                                         logfile=f"{out_dir}/pe_{data_label}.log")
 
@@ -1128,22 +1128,22 @@ if __name__ == "__main__":
 
                         prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
                         for p, p_star in enumerate(prop_bar):
-                            prop_bar.set_description(f" p1* = {p_star:6.2f}")
+                            prop_bar.set_description(f" p_C = {p_star:6.2f}")
 
                             violin_scores['Mix'] = construct_mixture(hold_out_scores['Ref1'], hold_out_scores['Ref2'], p_star, size)
                             Mixtures[mix][p_star] = violin_scores['Mix']
                             df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                     n_boot=n_boot, boot_size=size,
                                                     n_mix=n_mix,
-                                                    alpha=alpha, true_p1=p_star,
+                                                    alpha=alpha, true_pC=p_star,
                                                     correct_bias=correct_bias,  # Previously correct_bias defaulted to False
                                                     n_jobs=-1, verbose=0,
                                                     logfile=f"proportion_estimates_p_C_{p_star:3.2f}.log")
                             df_point = df_cm.iloc[[0]].copy()
                             df_point['Size'] = size
-                            df_point['p1*'] = p_star
+                            df_point["p_C"] = p_star
                             df_point['Mix'] = mix
-                            # df_point = df_point.melt(var_name='Method', id_vars=['p1*', 'Size', 'Mix'], value_name='Estimate')
+                            # df_point = df_point.melt(var_name='Method', id_vars=["p_C", 'Size', 'Mix'], value_name='Estimate')
                             dfs_point.append(df_point)
 
                             df_boots = df_cm.iloc[1:, :].copy()
@@ -1152,11 +1152,11 @@ if __name__ == "__main__":
                             else:
                                 n_bootstraps_total = n_boot
                             df_boots['Size'] = size * np.ones(n_bootstraps_total, dtype=int)
-                            df_boots['p1*'] = p_star * np.ones(n_bootstraps_total)
+                            df_boots["p_C"] = p_star * np.ones(n_bootstraps_total)
                             df_boots['Mix'] = mix * np.ones(n_bootstraps_total, dtype=int)
                             df_boots["Boot"] = list(range(n_bootstraps_total))
                             df_boots = df_boots.melt(var_name='Method',
-                                                    id_vars=['p1*', 'Size', 'Mix', "Boot"],
+                                                    id_vars=["p_C", 'Size', 'Mix', "Boot"],
                                                     value_name='Estimate')
                             dfs_boot.append(df_boots)
 
@@ -1209,8 +1209,8 @@ if __name__ == "__main__":
             ax_vio = fig_vio.add_subplot(111)
 
             for p, p_star in enumerate(p_stars):
-                # df = df_est[np.isclose(p_star, df_est['p1*']) & np.isclose(mix, df_est['Mix'])]
-                df = df_est[np.isclose(p_star, df_est['p1*']) & (df_est['Mix'] == mix)]
+                # df = df_est[np.isclose(p_star, df_est["p_C"]) & np.isclose(mix, df_est['Mix'])]
+                df = df_est[np.isclose(p_star, df_est["p_C"]) & (df_est['Mix'] == mix)]
                 # df.sort_values(by='Size', ascending=False, inplace=True)
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore", category=FutureWarning)
@@ -1246,7 +1246,7 @@ if __name__ == "__main__":
 
                 ax_stack.set_xlim((0, 1))
                 for p, p_star in enumerate(p_stars):
-                    df = df_est[np.isclose(p_star, df_est['p1*'])]  # & np.isclose(size, df_vio['Size'])]
+                    df = df_est[np.isclose(p_star, df_est["p_C"])]  # & np.isclose(size, df_vio['Size'])]
                     # df.sort_values(by='Size', ascending=False, inplace=True)
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", category=FutureWarning)
@@ -1270,7 +1270,7 @@ if __name__ == "__main__":
             # ax_ci = fig_err.add_subplot(111)
             for s, size in enumerate(sizes):
                 for p, p_star in enumerate(p_stars):
-                    df = df_est[(df_est.Size == size) & np.isclose(df_est['p1*'], p_star)]
+                    df = df_est[(df_est.Size == size) & np.isclose(df_est["p_C"], p_star)]
                     df_means = df.groupby('Method').mean()
                     # Add confidence intervals
                     errors = np.zeros(shape=(2, len(methods)))
@@ -1390,7 +1390,7 @@ if __name__ == "__main__":
                 for b in [1000, 100, 10, 1]:
                     for s, size in enumerate(sizes):
                         for p, p_star in enumerate(p_stars):
-                            df_ps = df_mix[np.isclose(p_star, df_mix['p1*'])
+                            df_ps = df_mix[np.isclose(p_star, df_mix["p_C"])
                                            & (df_mix['Size'] == size)]
 
                             for m, method in enumerate(methods):
@@ -1407,7 +1407,7 @@ if __name__ == "__main__":
                 df = pd.concat(frames, ignore_index=True)
 
                 with sns.axes_style("whitegrid"):
-                    g = sns.catplot(x="Bootstraps", y="Error", hue="Method", col="p1*", row="Size", row_order=sizes[::-1], data=df, kind="violin") #, margin_titles=True) #, ax=ax_err)
+                    g = sns.catplot(x="Bootstraps", y="Error", hue="Method", col="p_C", row="Size", row_order=sizes[::-1], data=df, kind="violin") #, margin_titles=True) #, ax=ax_err)
                     g.set(ylim=(-0.5, 0.5)).despine(left="True")
                     # g.despine(left="True")
 
