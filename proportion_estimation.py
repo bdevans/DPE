@@ -296,7 +296,7 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     Parameters
     ----------
     values : array
-        The array of bootstrapped p_c estimates (for a particular method).
+        The array of bootstrapped p_C estimates (for a particular method).
     initial : float, optional
         An optional estimate from the original mixture (for a particular method). 
     correct_bias : None or bool, optional
