@@ -21,7 +21,7 @@ if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
 seed = 42
-p_D = 0.5
+p_C = 0.5
 n_boot = 1000
 sample_size = 1000  # -1
 n_mix = 100
@@ -35,21 +35,21 @@ datasets["Diabetes"] = ds.load_diabetes_data("T1GRS")
 for tag, data in datasets.items():
 
     scores, bins, means, medians, _ = data
-    Ref_D, Ref_C = scores["Ref1"], scores["Ref2"]
-    assert(0.0 <= p_D <= 1.0)
-    n_D = int(round(sample_size * p_D))
-    n_C = sample_size - n_D
+    R_C, R_N = scores["R_C"], scores["R_N"]
+    assert(0.0 <= p_C <= 1.0)
+    n_C = int(round(sample_size * p_C))
+    n_N = sample_size - n_C
 
     # Construct mixture
-    mixture = np.concatenate((np.random.choice(Ref_D, n_D, replace=True),
-                              np.random.choice(Ref_C, n_C, replace=True)))
+    mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
+                              np.random.choice(R_N, n_N, replace=True)))
     np.savetxt(os.path.join(out_dir, "{}_mixture.csv".format(tag)), mixture)
     scores["Mix"] = mixture
 
     t = time.time()  # Start timer
     results = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
                                  boot_size=sample_size, n_mix=n_mix, alpha=alpha,
-                                 true_p1=p_D, n_jobs=-1, seed=seed, verbose=1)
+                                 true_pC=p_C, n_jobs=-1, seed=seed, verbose=1)
 
     results.to_csv(os.path.join(out_dir, "{}_bootstraps.csv".format(tag)), header=True)
     elapsed = time.time() - t

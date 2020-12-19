@@ -8,7 +8,6 @@ Module to analyse an unknown mixture population.
 @author: ben
 """
 
-# TODO: Rename {Ref1: R_C, Ref2: R_N}
 # TODO: Move point_estimate and bootstrap_mixture to top level and hide other functions
 
 from pprint import pprint
@@ -134,7 +133,7 @@ def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
     The amplitude of each reference population is adjust iteratively using the
     Levenberg-Marquardt (least squares) algorithm by default, to optimise
     the fit to the mixture population. The amplitudes are then normalised to 
-    give the proportion of Ref1 (cases) within the mixture.
+    give the proportion of R_C (cases) within the mixture.
     """
 
     # model = methods["model"]
@@ -144,9 +143,9 @@ def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
     # kde_mix = fit_kernel(Mix, bw=bins['width'], kernel=kernel)  # TODO
     res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
                         x=x_KDE, params=params_mix, method=method)
-    amp_Ref1 = res_mix.params['amp_1'].value
-    amp_Ref2 = res_mix.params['amp_2'].value
-    return amp_Ref1 / (amp_Ref1 + amp_Ref2)
+    amp_R_C = res_mix.params['amp_1'].value
+    amp_R_N = res_mix.params['amp_2'].value
+    return amp_R_C / (amp_R_C + amp_R_N)
 
 
 def interpolate_CDF(scores, x_i, min_edge, max_edge):
@@ -192,19 +191,19 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
             methods_["Excess"] = {}
 
         # This should be the "healthy" non-cases reference population
-        methods_["Excess"].setdefault("median", np.median(scores["Ref2"]))
+        methods_["Excess"].setdefault("median", np.median(scores["R_N"]))
         methods_["Excess"].setdefault("adj_factor", 1)
 
     if "Means" in methods_:
         if not isinstance(methods_["Means"], dict):
-            methods_["Means"] = {"mu_1": np.mean(scores["Ref1"]),
-                                 "mu_2": np.mean(scores["Ref2"])}
+            methods_["Means"] = {"mu_C": np.mean(scores["R_C"]),
+                                 "mu_N": np.mean(scores["R_N"])}
         
-        mu_1, mu_2 = methods_["Means"]["mu_1"], methods_["Means"]["mu_2"]
+        mu_C, mu_N = methods_["Means"]["mu_C"], methods_["Means"]["mu_N"]
         mix_mean = scores["Mix"].mean()
-        if mix_mean < min(mu_1, mu_2) or mix_mean > max(mu_1, mu_2):
+        if mix_mean < min(mu_C, mu_N) or mix_mean > max(mu_C, mu_N):
             warnings.warn(f"The mixture mean ({mix_mean:.3}) lies outside of "
-                          "the range of reference means [{mu_1:.3}, {mu_2:.3}]"
+                          "the range of reference means [{mu_C:.3}, {mu_N:.3}]"
                           " so is unsuitable for this mixture analysis.")
 
     if "EMD" in methods_:
@@ -213,11 +212,11 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
             methods_["EMD"]["max_EMD"] = bins["max"] - bins["min"]
 
             # Interpolate the cdfs at the same points for comparison
-            CDF_1 = interpolate_CDF(scores["Ref1"], bins['centers'],
+            CDF_1 = interpolate_CDF(scores["R_C"], bins['centers'],
                                     bins['min'], bins['max'])
             methods_["EMD"]["CDF_1"] = CDF_1
 
-            CDF_2 = interpolate_CDF(scores["Ref2"], bins['centers'],
+            CDF_2 = interpolate_CDF(scores["R_N"], bins['centers'],
                                     bins['min'], bins['max'])
             methods_["EMD"]["CDF_2"] = CDF_2
 
@@ -234,11 +233,11 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
 
         if "model" not in methods_["KDE"]:
             # kdes = fit_kernels(scores, methods["KDE"]["bandwidth"], methods["KDE"]["kernel"])
-            # kde_1 = kdes["Ref1"]  # [methods["KDE"]["kernel"]]
-            # kde_2 = kdes["Ref2"]  # [methods["KDE"]["kernel"]]
-            kde_1 = fit_kernel(scores["Ref1"], methods_["KDE"]["bandwidth"],
+            # kde_1 = kdes["R_C"]  # [methods["KDE"]["kernel"]]
+            # kde_2 = kdes["R_N"]  # [methods["KDE"]["kernel"]]
+            kde_1 = fit_kernel(scores["R_C"], methods_["KDE"]["bandwidth"],
                                methods_["KDE"]["kernel"])
-            kde_2 = fit_kernel(scores["Ref2"], methods_["KDE"]["bandwidth"],
+            kde_2 = fit_kernel(scores["R_N"], methods_["KDE"]["bandwidth"],
                                methods_["KDE"]["kernel"])
 
             # Assigning a default value to amp initialises them
@@ -416,12 +415,12 @@ def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="experimental"):
     return "\n".join(report)
 
 
-def point_estimate(RM, Ref1, Ref2, bins, methods=None):
+def point_estimate(RM, R_C, R_N, bins, methods=None):
     """Estimate the proportion of two reference populations comprising
     an unknown mixture.
 
-    The returned proportions are with respect to Ref_1, the disease group.
-    The proportion of Ref_2, p_2, is assumed to be 1 - p_1.
+    The returned proportions are with respect to R_C, the cases.
+    The proportion of R_N, p_N, is assumed to be 1 - p_C.
     """
 
     # bins = kwargs['bins']
@@ -431,7 +430,7 @@ def point_estimate(RM, Ref1, Ref2, bins, methods=None):
     if "Excess" in methods:
         # Calculate the proportion of another population w.r.t. the excess
         # number of cases from the mixture's assumed majority population.
-        # Ref1: disease; Ref2: healthy
+        # R_C: cases (disease); R_N: non-cases (healthy)
 
         number_low = len(RM[RM <= methods["Excess"]["median"]])
         number_high = len(RM[RM > methods["Excess"]["median"]])
@@ -443,15 +442,15 @@ def point_estimate(RM, Ref1, Ref2, bins, methods=None):
     # --------------------- Difference of Means method --------------------
     if "Means" in methods:
 
-        mu_1, mu_2 = methods["Means"]["mu_1"], methods["Means"]["mu_2"]
-        if mu_1 > mu_2:
-            p1_est = (RM.mean() - mu_2) / (mu_1 - mu_2)
+        mu_C, mu_N = methods["Means"]["mu_C"], methods["Means"]["mu_N"]
+        if mu_C > mu_N:
+            p_C_est = (RM.mean() - mu_N) / (mu_C - mu_N)
         else:
-            p1_est = (mu_2 - RM.mean()) / (mu_2 - mu_1)
+            p_C_est = (mu_N - RM.mean()) / (mu_N - mu_C)
 
         # TODO: Check!
-        # p1_est = abs((RM.mean() - mu2) / (mu1 - mu2))
-        results['Means'] = np.clip(p1_est, 0.0, 1.0)
+        # p_C_est = abs((RM.mean() - mu_N) / (mu_C - mu_N))
+        results['Means'] = np.clip(p_C_est, 0.0, 1.0)
 
     # ----------------------------- EMD method ----------------------------
     if "EMD" in methods:
@@ -471,14 +470,14 @@ def point_estimate(RM, Ref1, Ref2, bins, methods=None):
         # kde_mix = fit_kernel(Mix, bw=bins['width'], kernel=kernel)
         # res_mix = model.fit(np.exp(kde_mix.score_samples(x_KDE[:, np.newaxis])),
         #                     x=x_KDE, params=params_mix, method=method)
-        # amp_Ref1 = res_mix.params['amp_1'].value
-        # amp_Ref2 = res_mix.params['amp_2'].value
-        # results['KDE'] = amp_Ref1 / (amp_Ref1 + amp_Ref2)
+        # amp_R_C = res_mix.params['amp_1'].value
+        # amp_R_N = res_mix.params['amp_2'].value
+        # results['KDE'] = amp_R_C / (amp_R_C + amp_R_N)
 
     return results
 
 
-def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
+def bootstrap_mixture(Mix, R_C, R_N, bins, methods, boot_size=-1, seed=None):
     """Generate a bootstrap of the mixture distribution and return an estimate
     of its proportion."""
 
@@ -490,7 +489,7 @@ def bootstrap_mixture(Mix, Ref1, Ref2, bins, methods, boot_size=-1, seed=None):
     else:
         bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
 
-    return point_estimate(bs, Ref1, Ref2, bins, methods)
+    return point_estimate(bs, R_C, R_N, bins, methods)
 
 
 def analyse_mixture(scores, bins='fd', methods='all', 
@@ -504,8 +503,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
     ----------
     scores : dict
         A required dictionary of the form,
-        `{‘Ref1’: array_of_ref_1_scores,
-          ‘Ref2’: array_of_ref_2_scores,
+        `{‘R_C’: array_of_cases_scores,
+          ‘R_N’: array_of_non-cases_scores,
           ‘Mix’: array_of_mix_scores}`.
     bins : str
         A string specifying the binning method:
@@ -571,13 +570,14 @@ def analyse_mixture(scores, bins='fd', methods='all',
     if correct_bias and n_mix + n_boot == 0:
         warnings.warn("No bootstraps - Ignoring bias correction!")
 
-    if 'pC' in scores and 'Ref1' not in scores:
-        scores['Ref1'] = scores['pC']  # Proportion of cases
-    if 'pN' in scores and 'Ref2' not in scores:
-        scores['Ref2'] = scores['pN']  # Proportion of non-cases
+    # Boilerplate for backwards compatibility
+    if "Ref1" in scores and "R_C" not in scores:
+        scores["R_C"] = scores["Ref1"]  # Distribution of cases
+    if "Ref2" in scores and "R_N" not in scores:
+        scores["R_N"] = scores["Ref2"]  # Distribution of non-cases
 
-    Ref1 = scores['Ref1']
-    Ref2 = scores['Ref2']
+    R_C = scores['R_C']
+    R_N = scores['R_N']
     Mix = scores['Mix']
 
     if bins is None:
@@ -601,13 +601,13 @@ def analyse_mixture(scores, bins='fd', methods='all',
             lf.write("======================\n\n")
             lf.write(f"       | {'Mix':^7s} | {'R_C':^7s} | {'R_N':^7s} \n")
             lf.write("=====================================\n")
-            lf.write(f"     n | {len(Mix):^7,} | {len(Ref1):^7,} | {len(Ref2):^7,} \n")
-            lf.write(f"  Mean | {np.mean(Mix):^7.3} | {np.mean(Ref1):^7.3f} | {np.mean(Ref2):^7.3f} \n")
-            lf.write(f"Median | {np.median(Mix):^7.3} | {np.median(Ref1):^7.3f} | {np.median(Ref2):^7.3f} \n")
+            lf.write(f"     n | {len(Mix):^7,} | {len(R_C):^7,} | {len(R_N):^7,} \n")
+            lf.write(f"  Mean | {np.mean(Mix):^7.3} | {np.mean(R_C):^7.3f} | {np.mean(R_N):^7.3f} \n")
+            lf.write(f"Median | {np.median(Mix):^7.3} | {np.median(R_C):^7.3f} | {np.median(R_N):^7.3f} \n")
             lf.write("\n\n")
 
     # Get initial estimate of proportions
-    pe_initial = point_estimate(Mix, Ref1, Ref2, bins, methods_)
+    pe_initial = point_estimate(Mix, R_C, R_N, bins, methods_)
     if verbose > 1:
         print('Initial point estimates:')
         pprint(pe_initial)
@@ -640,11 +640,11 @@ def analyse_mixture(scores, bins='fd', methods='all',
             if n_jobs == 1 or n_jobs is None:
                 # NOTE: These results are identical to when n_jobs==1 in the
                 # parallel section however it takes about 25% less time per iteration
-                results = [bootstrap_mixture(Mix, Ref1, Ref2, bins, methods_, boot_size, seed=None)
+                results = [bootstrap_mixture(Mix, R_C, R_N, bins, methods_, boot_size, seed=None)
                            for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
             else:
                 with Parallel(n_jobs=n_jobs) as parallel:
-                    results = parallel(delayed(bootstrap_mixture)(Mix, Ref1, Ref2, bins, methods_, boot_size, seed=b_seed)
+                    results = parallel(delayed(bootstrap_mixture)(Mix, R_C, R_N, bins, methods_, boot_size, seed=b_seed)
                                        for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable))
             # Put into dataframe
             pe_boot = pd.DataFrame.from_records(results, columns=columns)
@@ -677,17 +677,17 @@ def analyse_mixture(scores, bins='fd', methods='all',
                 for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=diable_mix_bar):
 
                     assert(0.0 <= prop_Ref1 <= 1.0)
-                    n_Ref1 = int(round(sample_size * prop_Ref1))
-                    n_Ref2 = sample_size - n_Ref1
+                    n_C = int(round(sample_size * prop_Ref1))
+                    n_N = sample_size - n_C
 
                     # Construct mixture
-                    mixture = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                                              np.random.choice(Ref2, n_Ref2, replace=True)))
+                    mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
+                                              np.random.choice(R_N, n_N, replace=True)))
 
                     # Spawn threads
                     with Parallel(n_jobs=nprocs) as parallel:
                         # Parallelise over mixtures
-                        boot_list = parallel(delayed(bootstrap_mixture)(mixture, Ref1, Ref2, bins, single_method, boot_size, seed=b_seed)
+                        boot_list = parallel(delayed(bootstrap_mixture)(mixture, R_C, R_N, bins, single_method, boot_size, seed=b_seed)
                                              for b_seed in tqdm(boot_seeds,
                                                                 desc="Bootstraps",
                                                                 dynamic_ncols=True,

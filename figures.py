@@ -133,7 +133,7 @@ def load_accuracy(data_dir, label):
 
     PROPORTIONS = np.load(f'{data_dir}/proportions_{label}.npy')
     SAMPLE_SIZES = np.load(f'{data_dir}/sample_sizes_{label}.npy')
-    # PROPORTIONS_Ref2 = PROPORTIONS_Ref1[::-1]
+    # PROPORTIONS_R_N = PROPORTIONS_R_C[::-1]
 
     # Dictionary of p1 errors
     point_estimates = {}
@@ -421,13 +421,13 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
 
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
-        sns.distplot(scores['Ref1'], bins=bins['edges'], norm_hist=norm,
-                     label="$R_C: n={:,}$".format(len(scores['Ref1'])),
-                     # label="$R_1: n={:,}$".format(len(scores['Ref1'])),
+        sns.distplot(scores['R_C'], bins=bins['edges'], norm_hist=norm,
+                     label="$R_C: n={:,}$".format(len(scores['R_C'])),
+                     # label="$R_1: n={:,}$".format(len(scores['R_C'])),
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[-1])
-        sns.distplot(scores['Ref2'], bins=bins['edges'], norm_hist=norm,
-                     label="$R_N: n={:,}$".format(len(scores['Ref2'])),
-                     # label="$R_2: n={:,}$".format(len(scores['Ref2'])),
+        sns.distplot(scores['R_N'], bins=bins['edges'], norm_hist=norm,
+                     label="$R_N: n={:,}$".format(len(scores['R_N'])),
+                     # label="$R_2: n={:,}$".format(len(scores['R_N'])),
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[0])
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=norm,
                      label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])),
@@ -447,7 +447,7 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_pe, correct_bias=None, initial=True, prop_Ref1=None,
+def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
                     ax=None, limits=None, alpha=0.05, ci_method='bca',
                     violins=True, legend=True, orient='v'):
 
@@ -494,14 +494,14 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, prop_Ref1=None,
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()
 
-    if prop_Ref1:  # Add ground truth
-        truth_label = r"$p_C = {:4.3}$".format(prop_Ref1)
+    if p_C:  # Add ground truth
+        truth_label = r"$p_C = {:4.3}$".format(p_C)
         if orient == 'v':
-            ax.axhline(y=prop_Ref1, xmin=0, xmax=1, ls='--', c='#aaaaaa',
-                       label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
+            ax.axhline(y=p_C, xmin=0, xmax=1, ls='--', c='#aaaaaa',
+                       label=truth_label)  # "Ground Truth: {:4.3}".format(p_C))
         elif orient == 'h':
-            ax.axvline(x=prop_Ref1, ymin=0, ymax=1, ls='--', c='#aaaaaa',
-                       label=truth_label)  # "Ground Truth: {:4.3}".format(prop_Ref1))
+            ax.axvline(x=p_C, ymin=0, ymax=1, ls='--', c='#aaaaaa',
+                       label=truth_label)  # "Ground Truth: {:4.3}".format(p_C))
 
     # Add confidence intervals # TODO: Refactor
 #    if orient == 'v':
@@ -637,13 +637,13 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, prop_Ref1=None,
         plt.savefig(os.path.join(fig_dir, 'boxes_{}.png'.format(data_label)))
 
 
-def construct_mixture(Ref1, Ref2, p1, size):
+def construct_mixture(R_C, R_N, p1, size):
     assert(0.0 <= p1 <= 1.0)
-    n_Ref1 = int(round(size * p1))
-    n_Ref2 = size - n_Ref1
+    n_C = int(round(size * p1))
+    n_N = size - n_C
 
-    mix = np.concatenate((np.random.choice(Ref1, n_Ref1, replace=True),
-                          np.random.choice(Ref2, n_Ref2, replace=True)))
+    mix = np.concatenate((np.random.choice(R_C, n_C, replace=True),
+                          np.random.choice(R_N, n_N, replace=True)))
     return mix
 
 
@@ -694,13 +694,13 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
         # Plot constructed mixture distributions
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=FutureWarning)
-            sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True,
+            sns.distplot(scores["R_N"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True}, # hist=True, norm_hist=True, kde=False)#,
                          label=r"$p_C=0.0\ (R_N)$", ax=ax_mix, color=palette[0])
             for p, p_star in enumerate(p_stars):
                 sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
                              label=r"$p_C={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
-            sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True,
+            sns.distplot(scores["R_C"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True},
                          label=r"$p_C=1.0\ (R_C)$", ax=ax_mix, color=palette[len(p_stars)+1])
 
@@ -890,7 +890,7 @@ def plot_ROC(scores, bins, title=None, ax=None):
 
     # scores, bins
     # method = 'fd'
-    # all_refs = [*scores["Ref1"], *scores["Ref2"]]
+    # all_refs = [*scores["R_C"], *scores["R_N"]]
     # # probas_, edges_r = np.histogram(all_refs, bins=method, range=(bins["min"], bins["max"]), density=True)
     # probas_, edges_a = np.histogram(all_refs, bins=bins["edges"], density=True)
 
@@ -900,28 +900,28 @@ def plot_ROC(scores, bins, title=None, ax=None):
     # x=FPR, y=TPR
     density = False
     # p = 1. * np.arange(len(all_refs)) / (len(all_refs) - 1)
-    hist_1, _ = np.histogram(scores["Ref1"], bins=bins["edges"], density=density)
-    hist_2, _ = np.histogram(scores["Ref2"], bins=bins["edges"], density=density)
-    if scores["Ref1"].mean() > scores["Ref2"].mean():
+    hist_1, _ = np.histogram(scores["R_C"], bins=bins["edges"], density=density)
+    hist_2, _ = np.histogram(scores["R_N"], bins=bins["edges"], density=density)
+    if scores["R_C"].mean() > scores["R_N"].mean():
         hist_p = hist_1
         hist_n = hist_2
     else:
         hist_p = hist_2
         hist_n = hist_1
 
-    cum_p = np.cumsum(hist_p)  # Ref1 := cases := positive
+    cum_p = np.cumsum(hist_p)  # R_C := cases := positive
     cond_P = hist_p.sum()
     # print(hist_c)
     # print(cum_c)
     tp = cond_P - cum_p  # Must subtract from P since cumsum grows the opposite way
     
-    cum_n = np.cumsum(hist_n)  # Ref2 := non-cases := negative
+    cum_n = np.cumsum(hist_n)  # R_N := non-cases := negative
     cond_N = hist_n.sum()
     # print(hist_n)
     # print(cum_n)
     tn = cum_n
 
-    # if scores["Ref1"].mean() > scores["Ref2"].mean():
+    # if scores["R_C"].mean() > scores["R_N"].mean():
     #     tp = np.flip(tp)
     #     tn = np.flip(tn)
 
@@ -977,16 +977,16 @@ if __name__ == "__main__":
         # Plot ROC curves
         fig, axes = plt.subplots(2, 3, sharex=False, sharey=False, figsize=(18, 12))
         # fig, axes = plt.subplots(3,3)
-        (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T1GRS')
-        # scores['Ref1'] = np.append(scores['Ref1'], np.random.randn(100000)*0.1+0.8)
+        (scores, bins, means, medians, p_C) = load_diabetes_data('T1GRS')
+        # scores['R_C'] = np.append(scores['R_C'], np.random.randn(100000)*0.1+0.8)
         plot_ROC(scores, bins, title='Diabetes: T1GRS', ax=axes[0, 0])
         plot_distributions(scores, bins, 'Diabetes: T1GRS', norm=True, despine=False, ax=axes[1, 0])
-        (scores, bins, means, medians, prop_Ref1) = load_diabetes_data('T2GRS')
-        # scores['Ref1'] = np.append(scores['Ref1'], np.random.randn(100000)+5)
+        (scores, bins, means, medians, p_C) = load_diabetes_data('T2GRS')
+        # scores['R_C'] = np.append(scores['R_C'], np.random.randn(100000)+5)
         plot_ROC(scores, bins, title='Diabetes: T2GRS', ax=axes[0, 1])
         plot_distributions(scores, bins, 'Diabetes: T2GRS', norm=True, despine=False, ax=axes[1, 1])
-        (scores, bins, means, medians, prop_Ref1) = load_renal_data()
-        # scores['Ref1'] = np.append(scores['Ref1'], np.random.randn(100000)+10)
+        (scores, bins, means, medians, p_C) = load_renal_data()
+        # scores['R_C'] = np.append(scores['R_C'], np.random.randn(100000)+10)
         plot_ROC(scores, bins, title='Renal', ax=axes[0, 2])
         plot_distributions(scores, bins, 'Renal', norm=True, despine=False, ax=axes[1, 2])
         fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
@@ -1005,7 +1005,7 @@ if __name__ == "__main__":
                             #  ("Renal", load_renal_data()),
                              ("Coeliac", load_coeliac_data())]:
 
-        (scores, bins, means, medians, prop_Ref1) = data
+        (scores, bins, means, medians, p_C) = data
 
 
         if output_application[data_label]:
@@ -1018,7 +1018,7 @@ if __name__ == "__main__":
 
                 df_pe = pe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
-                                        alpha=alpha, true_pC=prop_Ref1, 
+                                        alpha=alpha, true_pC=p_C, 
                                         correct_bias=correct_bias, n_jobs=-1,  # Previously correct_bias defaulted to False
                                         logfile=f"{out_dir}/pe_{data_label}.log")
 
@@ -1050,7 +1050,7 @@ if __name__ == "__main__":
             # with sns.axes_style("whitegrid"):
             with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
                 ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
-                plot_bootstraps(df_pe, correct_bias=correct_bias, prop_Ref1=prop_Ref1, 
+                plot_bootstraps(df_pe, correct_bias=correct_bias, p_C=p_C, 
                                 ax=ax_ci_ex, limits=application_xlims[data_label], 
                                 ci_method=CI_METHOD, initial=False, legend=False, 
                                 violins=True, orient='h')
@@ -1106,14 +1106,14 @@ if __name__ == "__main__":
 
                 # Split the references distributions to ensure i.i.d. data for 
                 # constructing the mixtures and estimating them.
-                n_RefC, n_RefN = len(scores['Ref1']), len(scores['Ref2'])
-                partition_RefC, partition_RefN = n_RefC//2, n_RefN//2
-                inds_RefC = np.random.permutation(n_RefC)
-                inds_RefN = np.random.permutation(n_RefN)
-                hold_out_scores = {'Ref1': scores['Ref1'][inds_RefC[:partition_RefC]],
-                                'Ref2': scores['Ref2'][inds_RefN[:partition_RefN]]}
-                violin_scores = {'Ref1': scores['Ref1'][inds_RefC[partition_RefC:]],
-                                'Ref2': scores['Ref2'][inds_RefN[partition_RefN:]]}
+                n_R_C, n_R_N = len(scores['R_C']), len(scores['R_N'])
+                partition_R_C, partition_R_N = n_R_C//2, n_R_N//2
+                inds_R_C = np.random.permutation(n_R_C)
+                inds_R_N = np.random.permutation(n_R_N)
+                hold_out_scores = {'R_C': scores['R_C'][inds_R_C[:partition_R_C]],
+                                'R_N': scores['R_N'][inds_R_N[:partition_R_N]]}
+                violin_scores = {'R_C': scores['R_C'][inds_R_C[partition_R_C:]],
+                                'R_N': scores['R_N'][inds_R_N[partition_R_N:]]}
 
                 dfs_point = []
                 dfs_boot = []
@@ -1130,7 +1130,7 @@ if __name__ == "__main__":
                         for p, p_star in enumerate(prop_bar):
                             prop_bar.set_description(f" p_C = {p_star:6.2f}")
 
-                            violin_scores['Mix'] = construct_mixture(hold_out_scores['Ref1'], hold_out_scores['Ref2'], p_star, size)
+                            violin_scores['Mix'] = construct_mixture(hold_out_scores['R_C'], hold_out_scores['R_N'], p_star, size)
                             Mixtures[mix][p_star] = violin_scores['Mix']
                             df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                     n_boot=n_boot, boot_size=size,
@@ -1326,12 +1326,12 @@ if __name__ == "__main__":
 
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore", category=FutureWarning)
-                        sns.distplot(scores["Ref1"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
+                        sns.distplot(scores["R_C"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True}) # hist=True, norm_hist=True, kde=False)#,
                                      # label=r"$R_1$", ax=ax_mixes)
                         for p, p_star in enumerate(p_stars):
                             sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
                                          label=r"$p_1^*={}$".format(p_star), ax=ax_mixes)  # \tilde{{M}}: n={},
-                        sns.distplot(scores["Ref2"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
+                        sns.distplot(scores["R_N"], bins=bins['edges'], hist=False, kde=True, kde_kws={"shade": True})#,
                                      # label=r"$R_2$", ax=ax_mixes)
 
                     ax_mixes.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
@@ -1353,10 +1353,10 @@ if __name__ == "__main__":
 
 
         # Plot distributions around the estimated proportion with given sample_size from the characterisation data
-        # if prop_Ref1 is not None:
+        # if p_C is not None:
         #     errors[]
-        # if prop_Ref1 is None:
-        #     prop_Ref1 = np.mean()
+        # if p_C is None:
+        #     p_C = np.mean()
 
         test_bootstrap_convergence = False
         if test_bootstrap_convergence:
@@ -1379,7 +1379,7 @@ if __name__ == "__main__":
                 else:
                     legend = False
 
-                plot_bootstraps(df_pe, correct_bias, prop_Ref1, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
+                plot_bootstraps(df_pe, correct_bias, p_C, axes[b], limits=(0, 1), ci_method=CI_METHOD, alpha=alpha, legend=legend, orient='h')
 
             fig.savefig(os.path.join(fig_dir, "boot_size_{}.png".format(data_label)))
 

@@ -11,11 +11,7 @@ import pandas as pd
 #import seaborn as sns
 
 
-"""Change to R_H (Healthy reference population) and R_D (Disease reference population)
---> p_D := prevalence"""
-
-
-"""Ref1 := cases; Ref2 := non-cases; Mix := mixture"""
+"""R_C := cases; R_N := non-cases; Mix := mixture"""
 
 
 def load_diabetes_data(metric):
@@ -29,7 +25,7 @@ def load_diabetes_data(metric):
         # bin_min = 0.095
         # bin_max = 0.350
 
-        # TODO: Derive this from the scores (this is close to but not equal to the Ref1_median)
+        # TODO: Derive this from the scores (this is close to but not equal to the R_C_median)
         median = 0.23137931525707245  # Type 2 population (0.231468353)
 
     elif metric == 'T2GRS':
@@ -49,24 +45,24 @@ def load_diabetes_data(metric):
 
     scores = {}
     means = {}
-    prop_Ref1 = None
+    p_C = None
 
     # Arrays of metric scores for each group
-    scores = {'Ref1': data.loc[data['group'] == 1, metric].values,
-              'Ref2': data.loc[data['group'] == 2, metric].values,
+    scores = {'R_C': data.loc[data['group'] == 1, metric].values,
+              'R_N': data.loc[data['group'] == 2, metric].values,
               'Mix': data.loc[data['group'] == 3, metric].values}
     # Try creating a "ground truth" by combining both reference populations
               # 'Mix': np.r_[data.loc[data['group'] == 1, metric].values,
               #              data.loc[data['group'] == 2, metric].values]}
 
     # if metric == 'T1GRS':
-    #     prop_Ref1 = len(scores['Ref1'])/(len(scores['Ref1']) + len(scores['Ref2']))
+    #     p_C = len(scores['R_C'])/(len(scores['R_C']) + len(scores['R_N']))
 
-    means = {'Ref1': scores['Ref1'].mean(),
-             'Ref2': scores['Ref2'].mean()}
+    means = {'R_C': scores['R_C'].mean(),
+             'R_N': scores['R_N'].mean()}
 
-    medians = {"Ref1": np.median(scores["Ref1"]),
-               "Ref2": median}
+    medians = {"R_C": np.median(scores["R_C"]),
+               "R_N": median}
 
     # --------------------------- Bin the data -------------------------------
 #    N = data.count()[0]
@@ -93,7 +89,7 @@ def load_diabetes_data(metric):
     # print("=====================")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
-    return scores, bins[binning_method], means, medians, prop_Ref1
+    return scores, bins[binning_method], means, medians, p_C
 
 
 def load_renal_data():
@@ -109,13 +105,13 @@ def load_renal_data():
     # headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
     dataset = 'data/renal_final_data_mixture_2_type_1_1.xls'
     headers = {"T2GRS": "T2GRS", "Group": "group"}
-    prop_Ref1 = 0.0758
-    binning_method = 'fd'  # TODO: Take max over Ref1, Ref2?
+    p_C = 0.0758
+    binning_method = 'fd'  # TODO: Take max over R_C, R_N?
 
     # New "enriched" data set
     # dataset = 'data/renal_data_new.csv'
     # headers = {'T2_GRS': 'T2GRS', "Group (1 t2, 2 control, 3 mixture)": 'group'}
-    # prop_Ref1 = 0.1053
+    # p_C = 0.1053
 
     # bin_width = 0.128  # 0.1
     # bin_min = 4.7
@@ -131,26 +127,26 @@ def load_renal_data():
     means = {}
 
     # Arrays of metric scores for each group
-#    scores = {#'Ref1': data.loc[data['group'] == 1, metric].sample(n=100000).values,
-##              'Ref1': data.loc[data['group'] == 1, metric].values,
-#              'Ref1': data.loc[data['group'] == 2, metric].values,
-##              'Ref2': data.loc[data['group'] == 1, metric].sample(n=100000).values,
-#              'Ref2': data.loc[data['group'] == 1, metric].sample(n=10000, random_state=42).values,
-#              # 'Ref2': data.loc[data['group'] == 2, metric].values,
+#    scores = {#'R_C': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+##              'R_C': data.loc[data['group'] == 1, metric].values,
+#              'R_C': data.loc[data['group'] == 2, metric].values,
+##              'R_N': data.loc[data['group'] == 1, metric].sample(n=100000).values,
+#              'R_N': data.loc[data['group'] == 1, metric].sample(n=10000, random_state=42).values,
+#              # 'R_N': data.loc[data['group'] == 2, metric].values,
 #              'Mix': data.loc[data['group'] == 3, metric].values}
 
     prev_data = pd.read_csv('data/renal_data.csv')
     prev_data.rename(columns={'t2d_grs_77': 'T2GRS', 'group': 'group'}, inplace=True)
 
-    scores = {'Ref1': data.loc[data['group'] == 1, metric].values,
-              'Ref2': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=42).values,
+    scores = {'R_C': data.loc[data['group'] == 1, metric].values,
+              'R_N': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=42).values,
               'Mix': data.loc[data['group'] == 2, metric].values}
 
-    means = {'Ref1': scores['Ref1'].mean(),
-             'Ref2': scores['Ref2'].mean()}
+    means = {'R_C': scores['R_C'].mean(),
+             'R_N': scores['R_N'].mean()}
 
-    medians = {"Ref1": np.median(scores['Ref1']),
-               "Ref2": np.median(scores['Ref2'])}
+    medians = {"R_C": np.median(scores['R_C']),
+               "R_N": np.median(scores['R_N'])}
 
     # --------------------------- Bin the data -------------------------------
 #    N = data.count()[0]
@@ -169,7 +165,7 @@ def load_renal_data():
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
-    return scores, bins[binning_method], means, medians, prop_Ref1
+    return scores, bins[binning_method], means, medians, p_C
 
 
 def load_coeliac_data():
@@ -180,27 +176,27 @@ def load_coeliac_data():
     '''
 
     dataset = 'data/new_data_control_1_cases_2_mixture_3.csv'
-    prop_Ref1 = 0.139  # Not ground truth - 13.9% report a diagnosis of coeliac so our analysis shows there is no undiagnosed coeliac within a gluten free cohort
+    p_C = 0.139  # Not ground truth - 13.9% report a diagnosis of coeliac so our analysis shows there is no undiagnosed coeliac within a gluten free cohort
     binning_method = 'fd'
 
     data = pd.read_csv(dataset, header=None, names=['GRS', 'group'])
     data.dropna(inplace=True)  # Remove empty entries
 
-    scores = {'Ref1': data.loc[data['group'] == 2, 'GRS'].values,
-              'Ref2': data.loc[data['group'] == 1, 'GRS'].values,
+    scores = {'R_C': data.loc[data['group'] == 2, 'GRS'].values,
+              'R_N': data.loc[data['group'] == 1, 'GRS'].values,
               'Mix': data.loc[data['group'] == 3, 'GRS'].values}
 
-    means = {'Ref1': scores['Ref1'].mean(),
-             'Ref2': scores['Ref2'].mean()}
+    means = {'R_C': scores['R_C'].mean(),
+             'R_N': scores['R_N'].mean()}
 
-    medians = {"Ref1": np.median(scores['Ref1']),
-               "Ref2": np.median(scores['Ref2'])}
+    medians = {"R_C": np.median(scores['R_C']),
+               "R_N": np.median(scores['R_N'])}
 
     print("Coeliac Data")
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
-    return scores, bins[binning_method], means, medians, prop_Ref1
+    return scores, bins[binning_method], means, medians, p_C
 
 
 # Let's use FD!
