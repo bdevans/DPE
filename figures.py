@@ -1134,7 +1134,8 @@ if __name__ == "__main__":
                                                     n_mix=n_mix,
                                                     alpha=alpha, true_p1=p_star,
                                                     correct_bias=correct_bias,  # Previously correct_bias defaulted to False
-                                                    n_jobs=-1, verbose=0)
+                                                    n_jobs=-1, verbose=0,
+                                                    logfile=f"proportion_estimates_p_C_{p_star:3.2f}.log")
                             df_point = df_cm.iloc[[0]].copy()
                             df_point['Size'] = size
                             df_point['p1*'] = p_star
