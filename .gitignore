@@ -5,6 +5,10 @@ data_*
 *results*/
 figs/
 tmp*
+scrap
+*.tar
+*.gz
+*.bz2
 *.xls
 *.png
 TODO*
