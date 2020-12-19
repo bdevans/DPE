@@ -372,7 +372,7 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     return ci_low, ci_upp
 
 
-def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="experimental"):
+def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="bca"):
     """Generate an proportion estimate report for each method."""
     # TODO: Incorporate ipoint estimates in report
     pe_point = df_pe.iloc[0, :]
@@ -401,7 +401,7 @@ def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="experimental"):
 
             report.append(" C.I. ({:3.1%}) | {:<8.5f},{:>8.5f} | {:<8.5f},{:>8.5f} "
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-            if ci_method == "experimental":
+            if ci_method.lower() == "experimental":
                 bias = point_est - np.mean(values)
                 corrected_est = point_est + bias
                 report.append(" Corrected    | {:<17.5f} | {:<17.5f} "
@@ -494,7 +494,7 @@ def bootstrap_mixture(Mix, R_C, R_N, bins, methods, boot_size=-1, seed=None):
 
 def analyse_mixture(scores, bins='fd', methods='all', 
                     n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_pC=None, correct_bias=False,
+                    alpha=0.05, true_pC=None, ci_method="bca", correct_bias=False,
                     n_jobs=1, seed=None, verbose=1, logfile=''):
     """Analyse a mixture distribution and estimate the proportions of two
     reference distributions of which it is assumed to be comprised.
@@ -529,6 +529,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
     alpha : float
         The alpha value for calculating confidence intervals from bootstrap
         distributions. Default: `0.05`.
+    ci_method : str
+        The name of the method used to calculate the confidence intervals.
+        Defaults: `bca`.
     true_pC : float
         Optionally pass the true proportion of cases for comparing to the 
         estimated proportion(s).
@@ -720,7 +723,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
-        report = generate_report(df_pe, true_pC=true_pC, alpha=alpha)
+        report = generate_report(df_pe, true_pC=true_pC, alpha=alpha, ci_method=ci_method)
 
     if verbose > 0:
         print("\n" + report + "\n")
