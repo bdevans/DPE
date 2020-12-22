@@ -495,9 +495,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
     ----------
     scores : dict
         A required dictionary of the form,
-        `{‘R_C’: array_of_cases_scores,
-          ‘R_N’: array_of_non-cases_scores,
-          ‘Mix’: array_of_mix_scores}`.
+        `{'R_C': array_of_cases_scores,
+          'R_N': array_of_non-cases_scores,
+          'Mix': array_of_mixture_scores}`.
     bins : str
         A string specifying the binning method:
         `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`.
