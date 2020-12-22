@@ -4,18 +4,18 @@ channels:
   - conda-forge
 dependencies:
   - python=3.8
-  # - pip
+  - pip
   - numpy>=1.7
   - scipy
   - pandas
   - scikit-learn
   - xlrd
-  - scikit-plot
+  # - scikit-plot
   - matplotlib>=3.3
   - seaborn
   - lmfit
-  - emcee
-  - corner
+  # - emcee
+  # - corner
   - statsmodels
   # - dill
   - joblib>=0.13
@@ -23,3 +23,6 @@ dependencies:
   # - h5py
   # - numexpr
   - tqdm
+  - pip:
+    - KDEpy
+    # - fastkde
