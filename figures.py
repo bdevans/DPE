@@ -963,10 +963,10 @@ if __name__ == "__main__":
 
         if output_application[data_label]:
 
-            res_file = '{}/pe_results_{}.pkl'.format(out_dir, data_label)
+            res_file = os.path.join(out_dir, f"pe_results_{data_label}.pkl")
 
             if FRESH_DATA:  # or True:
-                print("Running mixture analysis on {} scores...".format(data_label), flush=True)
+                print(f"Running mixture analysis on {data_label} scores...", flush=True)
                 t = time.time()  # Start timer
 
                 df_pe = pe.analyse_mixture(scores, bins, methods,
@@ -974,19 +974,19 @@ if __name__ == "__main__":
                                         alpha=alpha, true_pC=p_C, 
                                         ci_method=CI_METHOD,
                                         correct_bias=correct_bias, n_jobs=-1,  # Previously correct_bias defaulted to False
-                                        logfile=f"{out_dir}/pe_{data_label}.log")
+                                        logfile=os.path.join(out_dir, f"pe_{data_label}.log"))
 
                 elapsed = time.time() - t
-                print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
+                print(f'Elapsed time = {elapsed:.3f} seconds\n')
 
                 # Save results
                 df_pe.to_pickle(res_file)
             else:
-                print("Loading {} analysis...".format(data_label), flush=True)
+                print(f"Loading {data_label} analysis...", flush=True)
                 if os.path.isfile(res_file):
                     df_pe = pd.read_pickle(res_file)
                 else:
-                    warnings.warn("Missing data file: {}".format(res_file))
+                    warnings.warn(f"Missing data file: {res_file}")
                     break
 
 
@@ -1052,8 +1052,8 @@ if __name__ == "__main__":
             # n_boot = 5
 
             # Generate multiple mixes
-            point_estimates_res_file = f'{out_dir}/pe_stack_analysis_point_{data_label}.pkl'
-            boot_estimates_res_file = f'{out_dir}/pe_stack_analysis_{data_label}.pkl'
+            point_estimates_res_file = os.path.join(out_dir, f"pe_stack_analysis_point_{data_label}.pkl")
+            boot_estimates_res_file = os.path.join(out_dir, f"pe_stack_analysis_{data_label}.pkl")
             if FRESH_DATA:  # or True:
                 print(f"Running mixture analysis with {data_label} scores...", flush=True)
                 t = time.time()  # Start timer
@@ -1077,8 +1077,8 @@ if __name__ == "__main__":
                     size_bar.set_description(f"Size = {size:6,}")
                     Mixtures = {mix: {} for mix in range(n_seeds)}
 
-                    for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):
-                        mix_dist_file = f'{out_dir}/mix{mix}_size{size}_{data_label}.pkl'
+                    for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):  # Redundant loop
+                        mix_dist_file = os.path.join(out_dir, f"mix{mix}_size{size}_{data_label}.pkl")
 
                         prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
                         for p, p_star in enumerate(prop_bar):
@@ -1093,7 +1093,7 @@ if __name__ == "__main__":
                                                     ci_method=CI_METHOD,
                                                     correct_bias=correct_bias,  # Previously correct_bias defaulted to False
                                                     n_jobs=-1, verbose=0,
-                                                    logfile=f"proportion_estimates_p_C_{p_star:3.2f}.log")
+                                                    logfile=os.path.join(out_dir, f"pe_{data_label}_size_{size:05d}_p_C_{p_star:3.2f}.log"))
                             df_point = df_cm.iloc[[0]].copy()
                             df_point['Size'] = size
                             df_point["p_C"] = p_star
