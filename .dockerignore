@@ -1,12 +1,15 @@
 data_previous
 *results*
-figs
+old_figs
 # .*
 .ropeproject
+.spyproject
 .ipynb_checkpoints
 .DS_Store
 *.m
 *.ipynb
+*.png
+*.svg
 tmp*
 scrap
 __pycache__
