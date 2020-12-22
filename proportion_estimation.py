@@ -534,8 +534,10 @@ def analyse_mixture(scores, bins='fd', methods='all',
         Number of bootstrap jobs to run in parallel. Default: `1`.
         Set `n_jobs = -1` runs on all CPUs.
     seed : int
-        An optional value to seed the random number generator with for
-        reproducibility (in the range [0, (2^32)-1]).
+        An optional value to seed the random number generator with 
+        (in the range [0, (2^32)-1]) for reproducibility of sampling used for
+        confidence intervals.
+        Defaults: `None`.
     verbose : int
         Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to
         turn off all console output except the progress bars.
