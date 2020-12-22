@@ -408,7 +408,7 @@ def point_estimate(RM, R_C, R_N, bins, methods=None):
     """Estimate the proportion of two reference populations comprising
     an unknown mixture.
 
-    The returned proportions are with respect to R_C, the cases.
+    The returned proportions, \hat{p}_C, are with respect to R_C, the cases.
     The proportion of R_N, p_N, is assumed to be 1 - p_C.
     """
 
@@ -423,23 +423,23 @@ def point_estimate(RM, R_C, R_N, bins, methods=None):
 
         number_low = len(RM[RM <= methods["Excess"]["median"]])
         number_high = len(RM[RM > methods["Excess"]["median"]])
-        p1_est = abs(number_high - number_low) / len(RM)
+        p_hat_C = abs(number_high - number_low) / len(RM)
 
-        p1_est *= methods["Excess"]["adj_factor"]
-        results['Excess'] = np.clip(p1_est, 0.0, 1.0)
+        p_hat_C *= methods["Excess"]["adj_factor"]
+        results['Excess'] = np.clip(p_hat_C, 0.0, 1.0)
 
     # --------------------- Difference of Means method --------------------
     if "Means" in methods:
 
         mu_C, mu_N = methods["Means"]["mu_C"], methods["Means"]["mu_N"]
-        if mu_C > mu_N:
-            p_C_est = (RM.mean() - mu_N) / (mu_C - mu_N)
+        if mu_C > mu_N:  # This should be the case
+            p_hat_C = (RM.mean() - mu_N) / (mu_C - mu_N)
         else:
-            p_C_est = (mu_N - RM.mean()) / (mu_N - mu_C)
+            p_hat_C = (mu_N - RM.mean()) / (mu_N - mu_C)
 
         # TODO: Check!
-        # p_C_est = abs((RM.mean() - mu_N) / (mu_C - mu_N))
-        results['Means'] = np.clip(p_C_est, 0.0, 1.0)
+        # p_hat_C = abs((RM.mean() - mu_N) / (mu_C - mu_N))
+        results['Means'] = np.clip(p_hat_C, 0.0, 1.0)
 
     # ----------------------------- EMD method ----------------------------
     if "EMD" in methods:
@@ -666,7 +666,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
                 diable_mix_bar = False
                 disable_boot_bar = False
 
-            for method, prop_Ref1 in tqdm(pe_initial.items(), desc="Method",
+            for method, p_hat_C in tqdm(pe_initial.items(), desc="Method",
                                           dynamic_ncols=True, disable=diable_method_bar):
                 single_method = {}
                 single_method[method] = methods_[method]
@@ -674,8 +674,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
                 for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=diable_mix_bar):
 
-                    assert(0.0 <= prop_Ref1 <= 1.0)
-                    n_C = int(round(sample_size * prop_Ref1))
+                    assert(0.0 <= p_hat_C <= 1.0)
+                    n_C = int(round(sample_size * p_hat_C))
                     n_N = sample_size - n_C
 
                     # Construct mixture
