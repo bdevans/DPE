@@ -24,6 +24,7 @@ from joblib import Parallel, delayed, cpu_count
 from tqdm import tqdm, trange
 from statsmodels.stats.proportion import proportion_confint
 from sklearn.neighbors import KernelDensity
+from sklearn.metrics import auc
 # with warnings.catch_warnings():
 #     warnings.simplefilter("ignore", category=DeprecationWarning)
 #     from sklearn.neighbors import KernelDensity
@@ -33,6 +34,8 @@ from sklearn.neighbors import KernelDensity
 
 # TODO: Try replacing with scipy.optimize.curve_fit to reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
+
+from utilities import get_fpr_tpr
 
 
 _ALL_METHODS_ = ["Excess", "Means", "EMD", "KDE"]
@@ -597,11 +600,20 @@ def analyse_mixture(scores, bins='fd', methods='all',
         with open(logfile, 'w') as lf:
             lf.write("Distribution Summaries\n")
             lf.write("======================\n\n")
-            lf.write(f"       | {'Mix':^7s} | {'R_C':^7s} | {'R_N':^7s} \n")
-            lf.write("=====================================\n")
-            lf.write(f"     n | {len(Mix):^7,} | {len(R_C):^7,} | {len(R_N):^7,} \n")
-            lf.write(f"  Mean | {np.mean(Mix):^7.3} | {np.mean(R_C):^7.3f} | {np.mean(R_N):^7.3f} \n")
-            lf.write(f"Median | {np.median(Mix):^7.3} | {np.median(R_C):^7.3f} | {np.median(R_N):^7.3f} \n")
+            lf.write(f"        | {'Mix':^7s} | {'R_C':^7s} | {'R_N':^7s} \n")
+            lf.write("======================================\n")
+            lf.write(f"      n | {len(Mix):^7,} | {len(R_C):^7,} | {len(R_N):^7,} \n")
+            lf.write(f"   Mean | {np.mean(Mix):^7.3} | {np.mean(R_C):^7.3f} | {np.mean(R_N):^7.3f} \n")
+            lf.write(f" Median | {np.median(Mix):^7.3} | {np.median(R_C):^7.3f} | {np.median(R_N):^7.3f} \n")
+            lf.write(f" StdDev | {np.std(Mix):^7.3f} | {np.std(R_C):^7.3f} | {np.std(R_N):^7.3f} \n")
+            lf.write("\n")
+            lf.write(f"Bins: {bins['min']:.2f}:{bins['width']:.2f}:{bins['max']:.2f} (n={bins['n']:,}, method='{bin_method}')\n")
+            lf.write(f"ROC AUC = {auc(*get_fpr_tpr(scores, bins)):4.2f}\n")
+            lf.write("\n")
+            lf.write("Sampling arguments\n")
+            lf.write("==================\n\n")
+            lf.write(f"n_mix = {n_mix}; n_boot = {n_boot}; boot_size = {boot_size}\n")
+            lf.write(f"CI method = '{ci_method}'; alpha = {alpha}; seed = {seed}\n")
             lf.write("\n\n")
 
     # Get initial estimate of proportions
