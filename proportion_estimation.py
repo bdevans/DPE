@@ -388,12 +388,12 @@ def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="bca"):
         if n_boot > 1:
             ci_low1, ci_upp1 = calc_conf_intervals(values, initial=point_est,
                                                    average=np.mean, alpha=alpha,
-                                                   ci_method=ci_method)
+                                                   ci_method=ci_method)  # TODO: Use correct_bias?
             ci_low2, ci_upp2 = 1-ci_upp1, 1-ci_low1
 
             report.append(" C.I. ({:3.1%}) | {:<8.5f},{:>8.5f} | {:<8.5f},{:>8.5f} "
                           .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-            if ci_method.lower() == "experimental":
+            if ci_method.lower() == "experimental":  # TODO: Remove or combine with above?
                 bias = point_est - np.mean(values)
                 corrected_est = point_est + bias
                 report.append(" Corrected    | {:<17.5f} | {:<17.5f} "
@@ -415,7 +415,6 @@ def point_estimate(RM, R_C, R_N, bins, methods=None):
     The proportion of R_N, p_N, is assumed to be 1 - p_C.
     """
 
-    # bins = kwargs['bins']
     results = {}
 
     # ------------------------- Subtraction method ------------------------
