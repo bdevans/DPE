@@ -14,7 +14,7 @@ import warnings
 
 import pandas as pd
 import numpy as np
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import auc  # roc_curve,
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -23,6 +23,7 @@ from statsmodels.stats.proportion import proportion_confint
 import tqdm
 
 import proportion_estimation as pe
+from utilities import get_fpr_tpr
 from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 
 
@@ -888,57 +889,9 @@ def plot_ROC(scores, bins, title=None, ax=None):
         fig, ax = plt.subplots()
     plt.sca(ax)
 
-    # scores, bins
-    # method = 'fd'
-    # all_refs = [*scores["R_C"], *scores["R_N"]]
-    # # probas_, edges_r = np.histogram(all_refs, bins=method, range=(bins["min"], bins["max"]), density=True)
-    # probas_, edges_a = np.histogram(all_refs, bins=bins["edges"], density=True)
-
-
-    # TPR = TP / P
-    # FPR = FP / N
-    # x=FPR, y=TPR
-    density = False
-    # p = 1. * np.arange(len(all_refs)) / (len(all_refs) - 1)
-    hist_1, _ = np.histogram(scores["R_C"], bins=bins["edges"], density=density)
-    hist_2, _ = np.histogram(scores["R_N"], bins=bins["edges"], density=density)
-    if scores["R_C"].mean() > scores["R_N"].mean():
-        hist_p = hist_1
-        hist_n = hist_2
-    else:
-        hist_p = hist_2
-        hist_n = hist_1
-
-    cum_p = np.cumsum(hist_p)  # R_C := cases := positive
-    cond_P = hist_p.sum()
-    # print(hist_c)
-    # print(cum_c)
-    tp = cond_P - cum_p  # Must subtract from P since cumsum grows the opposite way
-    
-    cum_n = np.cumsum(hist_n)  # R_N := non-cases := negative
-    cond_N = hist_n.sum()
-    # print(hist_n)
-    # print(cum_n)
-    tn = cum_n
-
-    # if scores["R_C"].mean() > scores["R_N"].mean():
-    #     tp = np.flip(tp)
-    #     tn = np.flip(tn)
-
-    # print(bins['centers'])
-    # print(tp)
-    # print(tn)
-
-    # Assume mean(GRS_c) > mean(GRS_n)
-    tpr = tp / cond_P
-    fpr = 1 - (tn / cond_N)
-    # print(tpr)
-    # print(fpr)
-
-    # fpr, tpr, thresholds = roc_curve(y, probas_[:, 1])
-    # fpr = np.r_[0, fpr]
-    # tpr = np.r_[0, tpr]
+    fpr, tpr = get_fpr_tpr(scores, bins)
     roc_auc = auc(fpr, tpr)
+
     ax.plot(fpr, tpr, lw=1, label=f'AUC = {roc_auc:.2f}')
     ax.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Chance')
 
@@ -953,7 +906,7 @@ def plot_ROC(scores, bins, title=None, ax=None):
     plt.legend(loc="lower right")
     ax.set(aspect="equal")
 
-    return roc_auc
+    return ax
 
 # NOTE: KDEs are very expensive when large arrays are passed to score_samples
 # Increasing the tolerance: atol and rtol speeds the process up significantly

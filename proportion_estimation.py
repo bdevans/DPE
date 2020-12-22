@@ -109,16 +109,6 @@ def estimate_bins(data, bin_range=None, verbose=0):
     return hist, bins
 
 
-def fit_kernels(scores, bw, kernel='gaussian'):
-    """No longer used."""
-    kernels = {}
-    for label, data in scores.items():
-        X = data[:, np.newaxis]
-        kernels[label] = KernelDensity(kernel=kernel, bandwidth=bw,
-                                       atol=0, rtol=1e-4).fit(X)
-    return kernels
-
-
 def fit_kernel(scores, bw, kernel='gaussian'):  # , atol=0, rtol=1-4):
     """Fit kernel densities to the data."""
     X = scores[:, np.newaxis]
