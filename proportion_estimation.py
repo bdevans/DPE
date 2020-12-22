@@ -168,8 +168,7 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
     elif isinstance(methods_, (list, set)):
         methods_ = {method: True for method in methods_}
     elif isinstance(methods_, dict):
-        # TODO: Check at least one of _ALL_METHODS_ is present
-        pass
+        assert "Excess" in methods_ or "Means" in methods_ or "EMD" in methods_ or "KDE" in methods_
     elif methods_ is None:  # Run all methods
         methods_ = {method: True for method in _ALL_METHODS_}
     else:
