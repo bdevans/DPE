@@ -89,7 +89,9 @@ def load_diabetes_data(metric):
     # print("=====================")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
-    return scores, bins[binning_method], means, medians, p_C
+    chosen_bins = bins[binning_method]
+    chosen_bins["method"] = binning_method
+    return scores, chosen_bins, means, medians, p_C
 
 
 def load_renal_data():
@@ -165,7 +167,9 @@ def load_renal_data():
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
-    return scores, bins[binning_method], means, medians, p_C
+    chosen_bins = bins[binning_method]
+    chosen_bins["method"] = binning_method
+    return scores, chosen_bins, means, medians, p_C
 
 
 def load_coeliac_data():
@@ -196,7 +200,9 @@ def load_coeliac_data():
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
     hist, bins = estimate_bins(scores)
-    return scores, bins[binning_method], means, medians, p_C
+    chosen_bins = bins[binning_method]
+    chosen_bins["method"] = binning_method
+    return scores, chosen_bins, means, medians, p_C
 
 
 # Let's use FD!

@@ -591,6 +591,12 @@ def analyse_mixture(scores, bins='fd', methods='all',
         bin_method = bins
         hist, bins = estimate_bins(scores)
         bins = bins[bin_method]
+    
+    if "method" in bins:
+        bin_method = bins["method"]
+    else:
+        bin_method = "unknown"
+
     # Methods defaults to all if None is passed
     methods_ = prepare_methods(scores, bins, methods=methods, verbose=verbose)
 
