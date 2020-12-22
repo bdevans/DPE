@@ -855,7 +855,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 #        vio_xlabs[-1] = ''
         ax_vio.set_xticklabels(vio_xlabs)
 #        ax_vio_base.set_xticklabels()
-        sns.despine(ax=ax_vio, top=True, bottom=False, left=True, right=True, trim=False)
+        sns.despine(ax=ax_vio, top=True, bottom=False, left=True, right=True, trim=True) #trim=False)
 #        ax_vio.set_yticks([])
 #        ax_vio.set_yticklabels([])
 #        ax_mix.set_ylabel(r"$n={}$".format(size), rotation='horizontal')
