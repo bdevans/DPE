@@ -8,6 +8,7 @@ Created on Thu Jul  5 12:06:16 2018
 
 # https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
 import time
+from collections import defaultdict
 
 #%matplotlib inline
 import numpy as np
@@ -24,6 +25,145 @@ from scipy.stats.distributions import norm
 import statsmodels
 from statsmodels.nonparametric.kde import KDEUnivariate
 from statsmodels.nonparametric.kernel_density import KDEMultivariate
+
+from datasets import load_diabetes_data
+
+
+def plot_scaling(N=1000, bandwidth=0.1, rtol=0.0,
+                 Nreps=3, kwds=None, xgrid=None):
+    """
+    Plot the time scaling of KDE algorithms.
+    Either N, bandwidth, or rtol should be a 1D array.
+    """
+    if xgrid is None:
+        xgrid = np.linspace(-10, 10, 5000)
+    if kwds is None:
+        kwds=dict()
+    for name in functions:
+        if name not in kwds:
+            kwds[name] = {}
+    times = defaultdict(list)
+    
+    B = np.broadcast(N, bandwidth, rtol)
+    assert len(B.shape) == 1
+    
+    for N_i, bw_i, rtol_i in B:
+        x = np.random.normal(size=N_i)
+        kwds['Scikit-learn']['rtol'] = rtol_i
+        for name, func in functions.items():
+            t = 0.0
+            for i in range(Nreps):
+                t0 = time()
+                func(x, xgrid, bw_i, **kwds[name])
+                t1 = time()
+                t += (t1 - t0)
+            times[name].append(t / Nreps)
+            
+    fig, ax = plt.subplots(figsize=(8, 6),
+                           subplot_kw={'axisbg':'#EEEEEE',
+                                       'axisbelow':True})
+    ax.grid(color='white', linestyle='-', linewidth=2)
+    plot_kwds={'linewidth':3, 'alpha':0.5}
+    
+    if np.size(N) > 1:
+        for name in kde_funcnames:
+            ax.loglog(N, times[name], label=name, **plot_kwds)
+        ax.set_xlabel('Number of points')
+    elif np.size(bandwidth) > 1:
+        for name in kde_funcnames:
+            ax.loglog(bandwidth, times[name], label=name, **plot_kwds)
+        ax.set_xlabel('Bandwidth')
+    elif np.size(rtol) > 1:
+        for name in kde_funcnames:
+            ax.loglog(rtol, times[name], label=name, **plot_kwds)
+        ax.set_xlabel('Relative Tolerance')
+        
+    for spine in ax.spines.values():
+        spine.set_color('#BBBBBB')
+    ax.legend(loc=0)
+    ax.set_ylabel('time (seconds)')
+    ax.set_title('Execution time for KDE '
+                 '({0} evaluations)'.format(len(xgrid)))
+    
+    return times
+
+
+def plot_scaling_vs_kernel(kernels, N=1000, bandwidth=0.1, rtol=0.0,
+                           Nreps=3, kwds=None, xgrid=None):
+    """
+    Plot the time scaling for Scikit-learn kernels.
+    Either N, bandwidth, or rtol should be a 1D array.
+    """
+    if xgrid is None:
+        xgrid = np.linspace(-10, 10, 5000)
+    if kwds is None:
+        kwds=dict()
+    times = defaultdict(list)
+    
+    B = np.broadcast(N, bandwidth, rtol)
+    assert len(B.shape) == 1
+    
+    for N_i, bw_i, rtol_i in B:
+        x = np.random.normal(size=N_i)
+        for kernel in kernels:
+            kwds['kernel'] = kernel
+            kwds['rtol'] = rtol_i
+            t = 0.0
+            for i in range(Nreps):
+                t0 = time()
+                kde_sklearn(x, xgrid, bw_i, **kwds)
+                t1 = time()
+                t += (t1 - t0)
+            times[kernel].append(t / Nreps)
+            
+    fig, ax = plt.subplots(figsize=(8, 6),
+                           subplot_kw={'axisbg':'#EEEEEE',
+                                       'axisbelow':True})
+    ax.grid(color='white', linestyle='-', linewidth=2)
+    plot_kwds={'linewidth':3, 'alpha':0.5}
+    
+    if np.size(N) > 1:
+        for kernel in kernels:
+            ax.loglog(N, times[kernel], label=kernel, **plot_kwds)
+        ax.set_xlabel('Number of points')
+    elif np.size(bandwidth) > 1:
+        for kernel in kernels:
+            ax.loglog(bandwidth, times[kernel], label=kernel, **plot_kwds)
+        ax.set_xlabel('Bandwidth')
+    elif np.size(rtol) > 1:
+        for kernel in kernels:
+            ax.loglog(rtol, times[kernel], label=kernel, **plot_kwds)
+        ax.set_xlabel('Relative Tolerance')
+        
+    for spine in ax.spines.values():
+        spine.set_color('#BBBBBB')
+    ax.legend(loc=0)
+    ax.set_ylabel('time (seconds)')
+    ax.set_title('Execution time for KDE '
+                 '({0} evaluations)'.format(len(xgrid)))
+    
+    return times
+
+
+def plot_kernels():
+    """Visualize the KDE kernels available in Scikit-learn"""
+    fig, ax = plt.subplots(figsize=(8, 6),
+                           subplot_kw={'axisbg':'#EEEEEE',
+                                       'axisbelow':True})
+    ax.grid(color='white', linestyle='-', linewidth=2)
+    for spine in ax.spines.values():
+        spine.set_color('#BBBBBB')
+
+    X_src = np.zeros((1, 1))
+    x_grid = np.linspace(-3, 3, 1000)
+
+    for kernel in ['gaussian', 'tophat', 'epanechnikov',
+                   'exponential', 'linear', 'cosine']:
+        log_dens = KernelDensity(kernel=kernel).fit(X_src).score_samples(x_grid[:, None])
+        ax.plot(x_grid, np.exp(log_dens), lw=3, alpha=0.5, label=kernel)
+    ax.set_ylim(0, 1.05)
+    ax.set_xlim(-2.9, 2.9)
+    ax.legend()
 
 
 def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):
@@ -84,6 +224,7 @@ def plot_kernels():
 
 kde_funcs = [kde_statsmodels_u, kde_scipy, kde_sklearn]
 kde_funcnames = ['Statsmodels-U', 'Scipy', 'Scikit-learn']
+functions = dict(zip(kde_funcnames, kde_funcs))
 
 print("Package Versions:")
 print("  scikit-learn:", sklearn.__version__)
@@ -93,6 +234,8 @@ print()
 
 # Plot sklearn kernels
 #plot_kernels()
+
+scores, bins, means, medians, p_C = load_diabetes_data("T1GRS")
 
 # The grid we'll use for plotting
 #x_grid = np.linspace(-4.5, 3.5, 1000)
@@ -109,7 +252,7 @@ np.random.seed(0)
 fig, ax = plt.subplots(len(scores), len(kde_funcs), sharey=True, sharex=True,
                        figsize=(12, 9))
 for r, (label, data) in enumerate(scores.items()):
-    x = data  # scores["Ref1"]
+    x = data  # scores["R_C"]
 
 
 #    grid = GridSearchCV(KernelDensity(),
@@ -139,13 +282,13 @@ for r, (label, data) in enumerate(scores.items()):
 #plt.tight_layout()
 
 # sklearn
-#kde = KernelDensity(kernel=KDE_kernel, bandwidth=0.1).fit(np.random.choice(scores['Ref1'], size=30000)[:, np.newaxis])
+#kde = KernelDensity(kernel=KDE_kernel, bandwidth=0.1).fit(np.random.choice(scores['R_C'], size=30000)[:, np.newaxis])
 #kde.score_samples(scores['Mix'][:, np.newaxis])
 
 
 # Compare bandwitch calculation methods
 # Compute on the two reference populations
-x = np.r_[scores["Ref1"], scores["Ref2"]]
+x = np.r_[scores["R_C"], scores["R_N"]]
 
 
 plt.figure(figsize=(12, 9))
@@ -171,6 +314,38 @@ plt.plot(x_grid, kde.evaluate(x_grid), color='green', alpha=0.5, lw=3, label="Sc
 print("Scipy: Silverman", kde.factor)
 
 plt.legend()
+plt.savefig("kde_bw_estimation_comparison.png")
+
+plot_kernels()
+
+
+# Scaling with the Number of Points
+plot_scaling(N=np.logspace(1, 4, 10),
+             kwds={'Statsmodels-U':{'fft':False}})
+
+plot_scaling(N=np.logspace(1, 4, 10),
+             rtol=1E-4,
+             kwds={'Statsmodels-U':{'fft':True}})
+
+# Dependence on rtol
+plot_scaling(N=1E4,
+             rtol=np.logspace(-16, -1, 10),
+             bandwidth=0.2)
+
+# Dependence on Bandwidth
+plot_scaling(N=1E4, rtol=1E-4,
+             bandwidth=np.logspace(-4, 3, 10))
+
+# Dependence on Kernel
+plot_scaling_vs_kernel(kernels=['tophat', 'linear', 'exponential', 'gaussian'],
+                       bandwidth=np.logspace(-4, 3, 10),
+                       N=1E4, rtol=1E-4)
+
+plot_scaling_vs_kernel(kernels=['tophat', 'linear', 'exponential', 'gaussian'],
+                       bandwidth=0.15, N=1E4, rtol=np.logspace(-16, -1, 10))
+
+plot_scaling_vs_kernel(kernels=['tophat', 'linear', 'exponential', 'gaussian'],
+                       bandwidth=0.15, rtol=1E-4, N=np.logspace(1, 4, 10))
 
 # TODO: Try other KDE functions e.g.:
 #x = np.random.normal(0, 1, size=30)
@@ -185,3 +360,5 @@ plt.legend()
 #    plt.plot(support, kernel, color="r")
 #
 #sns.rugplot(x, color=".2", linewidth=3);
+
+
