@@ -581,10 +581,19 @@ def analyse_mixture(scores, bins='fd', methods='all',
         bin_method = 'fd'
         hist, bins = estimate_bins(scores)
         bins = bins[bin_method]
-    if isinstance(bins, str):
+    elif isinstance(bins, str):
         bin_method = bins
         hist, bins = estimate_bins(scores)
         bins = bins[bin_method]
+    elif isinstance(bins, dict):
+        assert "width" in bins
+        assert "min" in bins
+        assert "max" in bins
+        assert "edges" in bins
+        assert "centers" in bins
+        assert "n" in bins
+    else:
+        warnings.warn(f"Unexpected bins data format: {type(bins)}")
     
     if "method" in bins:
         bin_method = bins["method"]
