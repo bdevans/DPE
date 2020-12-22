@@ -51,6 +51,7 @@ for tag, data in datasets.items():
                                  boot_size=sample_size, n_mix=n_mix, alpha=alpha,
                                  true_pC=p_C, n_jobs=-1, seed=seed, verbose=1)
 
-    results.to_csv(os.path.join(out_dir, "{}_bootstraps.csv".format(tag)), header=True)
+    summary, samples = results
+    samples.to_csv(os.path.join(out_dir, "{}_bootstraps.csv".format(tag)), header=True)
     elapsed = time.time() - t
     print('Elapsed time = {:.3f} seconds\n'.format(elapsed))

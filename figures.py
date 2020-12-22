@@ -969,7 +969,7 @@ if __name__ == "__main__":
                 print(f"Running mixture analysis on {data_label} scores...", flush=True)
                 t = time.time()  # Start timer
 
-                df_pe = pe.analyse_mixture(scores, bins, methods,
+                summary, df_pe = pe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
                                         alpha=alpha, true_pC=p_C, 
                                         ci_method=CI_METHOD,
@@ -1086,7 +1086,7 @@ if __name__ == "__main__":
 
                             violin_scores['Mix'] = construct_mixture(hold_out_scores['R_C'], hold_out_scores['R_N'], p_star, size)
                             Mixtures[mix][p_star] = violin_scores['Mix']
-                            df_cm = pe.analyse_mixture(violin_scores, bins, methods,
+                            summary, df_cm = pe.analyse_mixture(violin_scores, bins, methods,
                                                     n_boot=n_boot, boot_size=size,
                                                     n_mix=n_mix,
                                                     alpha=alpha, true_pC=p_star,

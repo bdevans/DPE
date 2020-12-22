@@ -604,6 +604,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     columns = [method for method in _ALL_METHODS_ if method in methods_]
 
+    summary = {method: {"p_C": None} for method in columns}  # Reverse the nesting and add the dataframe inside?
+
     if logfile is not None:
         if logfile == '':
             logfile = "proportion_estimates.log"
@@ -628,6 +630,10 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     # Get initial estimate of proportions
     pe_initial = point_estimate(Mix, R_C, R_N, bins, methods_)
+
+    for method, p_hat_C in pe_initial.items():
+        summary[method]["p_C"] = p_hat_C
+
     if verbose > 1:
         print('Initial point estimates:')
         pprint(pe_initial)
@@ -733,8 +739,24 @@ def analyse_mixture(scores, bins='fd', methods='all',
             index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
             df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
 
+        for method in columns:
+            # Calculate confidence intervals
+            ci_low1, ci_upp1 = calc_conf_intervals(pe_boot[method], initial=pe_initial[method],
+                                                average=np.mean, alpha=alpha,
+                                                ci_method=ci_method,
+                                                correct_bias=correct_bias)  # TODO: Use correct_bias?
+            # ci_low2, ci_upp2 = 1-ci_upp1, 1-ci_low1
+            summary[method]["CI"] = (ci_low1, ci_upp1)
+
+            # Summary of bootstrapped estimates, \tilde{p}_C
+            summary[method]["mean"] = np.mean(pe_boot[method])
+            summary[method]["std"] = np.std(pe_boot[method])
+
         if correct_bias:
             df_correct = correct_estimate(df_pe)
+            for method, p_cor_C in df_correct.items():
+                summary[method]["p_cor_C"] = p_cor_C  # TODO: Remove?
+        
     else:
         df_pe = pd.DataFrame(pe_initial, index=[0], columns=columns)
 
@@ -750,6 +772,6 @@ def analyse_mixture(scores, bins='fd', methods='all',
             lf.write(report)
             lf.write("\n")
 
-    if correct_bias:
-        return df_pe, df_correct
-    return df_pe
+    # if correct_bias:
+    #     return df_pe, df_correct
+    return summary, df_pe

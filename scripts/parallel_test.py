@@ -31,7 +31,7 @@ results = pe.analyse_mixture(scores, bins, methods, n_boot=bootstraps, n_mix=n_m
                              boot_size=boot_size, alpha=alpha, true_p1=p1_star,
                              n_jobs=-1, seed=seed, verbose=1)
 
-print(results.head())
+print(results[1].head())
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
 
@@ -41,6 +41,6 @@ results = pe.analyse_mixture(scores, bins, methods, n_boot=bootstraps, n_mix=n_m
                              boot_size=boot_size, alpha=alpha, true_p1=p1_star,
                              n_jobs=1, seed=seed, verbose=1)
 
-print(results.head())
+print(results[1].head())
 elapsed = time.time() - t
 print('Elapsed time = {:.3f} seconds\n'.format(elapsed))
