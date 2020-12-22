@@ -362,7 +362,7 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
 
 
 def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="bca"):
-    """Generate an proportion estimate report for each method."""
+    """Generate a proportion estimate report for each method."""
     # TODO: Incorporate ipoint estimates in report
     pe_point = df_pe.iloc[0, :]
     pe_boot = df_pe.iloc[1:, :]
