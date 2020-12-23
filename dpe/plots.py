@@ -28,9 +28,9 @@ def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_me
         boot_values = df_pe.iloc[1:, m]
 
         if correct_bias:
-            # TODO: correct_estimate(df_pe)
-            centres[m] = 2 * df_pe.iloc[0, m] - np.mean(boot_values)  # TODO: average?
-            boot_values = 2 * df_pe.iloc[0, m] - boot_values
+            # TODO: replace with correct_estimate(df_pe)
+            centres[m] = 2 * df_pe.iloc[0, m] - np.mean(boot_values)  # TODO: check np.mean|average
+            boot_values = 2 * df_pe.iloc[0, m] - boot_values  # TODO: Check this step
         else:
             centres[m] = df_pe.iloc[0, m]
             # boot_values = df_pe.iloc[1:, m]
@@ -333,7 +333,7 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
 
 def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
                     ax=None, limits=None, alpha=0.05, ci_method="bca",
-                    violins=True, legend=True, orient="v"):
+                    violins=True, legend=True, orient="v", average=np.mean):
 
     # c = sns.color_palette()[-3]  # 'gray'
     c = '#999999'
@@ -403,7 +403,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
 #        x, y = df_point.iloc[0].values, ax.get_yticks()
 #        means = x
 
-    errors, centres = get_error_bars(df_pe, correct_bias=correct_bias)
+    errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average)
 
     if correct_bias:
         if orient == 'v':
@@ -525,7 +525,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
 def plot_selected_violins(scores, bins, df_point, df_boots, methods, 
                           p_stars, sizes, out_dir, data_label, selected_mix=0,
                           add_ci=True, alpha=0.05, ci_method="bca",
-                          correct_bias=False):  # , fig_dir=""):
+                          correct_bias=False, average=np.mean):  # , fig_dir=""):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
@@ -677,7 +677,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 
                 df_b_piv = df_b_piv[df_p_piv.columns]  # Manually sort before merge
                 df_pe = pd.concat([df_p_piv, df_b_piv], ignore_index=True)
-                errors, centres = get_error_bars(df_pe, correct_bias=correct_bias)
+                errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average)
 
 
                 if correct_bias:

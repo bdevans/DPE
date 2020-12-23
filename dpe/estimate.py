@@ -205,7 +205,7 @@ def correct_estimate(df_pe):
         if n_boot > 0:
             # bias = point_est - np.mean(pe_boot[method])
             # corrected[method] = point_est + bias
-            corrected[method] = 2 * pe_point[method] - np.mean(pe_boot[method])
+            corrected[method] = 2 * pe_point[method] - np.mean(pe_boot[method])  # TODO: check np.mean|average
     return pd.DataFrame(corrected, index=[-1], columns=df_pe.columns)
 
 

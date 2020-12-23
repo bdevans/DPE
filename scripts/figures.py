@@ -59,7 +59,7 @@ output_application = {'Diabetes': False, 'Renal': False, 'Coeliac': True}
 application_xlims = {'Diabetes': None, 'Renal': None, 'Coeliac': (0, 0.3)}
 output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
 output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
-# average = np.mean
+average = np.mean  # TODO: Check
 # deviation = np.std
 
 # TODO: Move to __main__
@@ -183,7 +183,7 @@ if __name__ == "__main__":
                 plot_bootstraps(df_pe, correct_bias=correct_bias, p_C=p_C, 
                                 ax=ax_ci_ex, limits=application_xlims[data_label], 
                                 ci_method=ci_method, initial=False, legend=False, 
-                                violins=True, orient='h')
+                                violins=True, orient='h', average=average)
                 # if application_xlims[data_label]:
                 #     ax_ci_ex.set_xlim(*application_xlims[data_label])
 
@@ -203,14 +203,14 @@ if __name__ == "__main__":
             # Plot point estimates of p1
             if bool(point_estimates):
                 print("Plotting characterisation of {} scores...".format(data_label), flush=True)
-                fig = plot_characterisation(point_estimates, proportions, sample_sizes)
+                fig = plot_characterisation(point_estimates, proportions, sample_sizes, average=average)
                 fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
                 fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.svg'.format(data_label)), transparent=True)
 
             # Plot bootstrapped estimates of p1
             if False:  # bool(boots_estimates):
                 print("Plotting bootstrapped characterisation of {} scores...".format(data_label), flush=True)
-                fig = plot_characterisation(boots_estimates, proportions, sample_sizes)
+                fig = plot_characterisation(boots_estimates, proportions, sample_sizes, average=average)
                 fig.savefig(os.path.join(fig_dir, 'boots_characterise_{}.png'.format(data_label)))
 
 
@@ -323,7 +323,7 @@ if __name__ == "__main__":
                 fig = plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, sizes,
                                     out_dir, data_label, selected_mix=mix,
                                     add_ci=True, alpha=0.05, ci_method=ci_method,
-                                    correct_bias=correct_bias)
+                                    correct_bias=correct_bias, average=average)
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.png'))
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.svg'), transparent=True)
 
@@ -420,7 +420,7 @@ if __name__ == "__main__":
                     #     errors[0, midx] = mean_est - ci_low1  # y[midx] - ci_low1
                     #     errors[1, midx] = ci_upp1 - mean_est  # ci_upp1 - y[midx]
 
-                    errors, centres = get_error_bars(df, correct_bias=correct_bias, alpha=alpha, ci_method=ci_method)  # average=average, 
+                    errors, centres = get_error_bars(df, correct_bias=correct_bias, average=average, alpha=alpha, ci_method=ci_method)
 
                     # Add white border around error bars
                     # ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c='w', lw=6, capsize=14, capthick=6)
