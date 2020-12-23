@@ -35,81 +35,10 @@ from sklearn.metrics import auc
 # TODO: Try replacing with scipy.optimize.curve_fit to reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
 
-from utilities import get_fpr_tpr
+from . utilities import estimate_bins, get_fpr_tpr
 
 
 _ALL_METHODS_ = ["Excess", "Means", "EMD", "KDE"]
-
-
-# Let's use FD!
-def estimate_bins(data, bin_range=None, verbose=0):
-    """Generate GRS bins through data-driven methods in `np.histogram`.
-    
-    These methods include:
-    ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']
-
-    For more information see: 
-    https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges
-    """
-    # TODO: Refactor to pass one method and return only that dictionary
-
-    # 'scott': n**(-1./(d+4))
-    # kdeplot also uses 'silverman' as used by scipy.stats.gaussian_kde
-    # (n * (d + 2) / 4.)**(-1. / (d + 4))
-    # with n the number of data points and d the number of dimensions
-    line_width = 49
-
-    hist = {}
-    bins = {}
-    if verbose:
-        print("  Method | Data |  n  |  width  |      range     ", flush=True)
-        print("="*line_width)
-    for method in ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']:
-        all_scores = []
-        all_refs = []
-        for group, scores in data.items():
-            all_scores.extend(scores)
-            if group != "Mix":
-                all_refs.extend(scores)
-            # else:  # Add extremes to ensure the full range is spanned
-            #     all_refs.extend([min(scores), max(scores)])
-            if bin_range is None:
-                bin_range = (min(all_scores), max(all_scores))
-            if verbose > 1:
-                _, bin_edges = np.histogram(scores, bins=method, range=bin_range)
-                print(f" {method:>7} | {group:>4} | {len(bin_edges)-1:>3} | {bin_edges[1]-bin_edges[0]:<7.5f} | [{bin_edges[0]:5.3}, {bin_edges[-1]:5.3}]")
-                # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format(group, method, bin_edges[1]-bin_edges[0], len(bin_edges)-1, bin_edges[0], bin_edges[-1]))
-
-        h_r, edges_r = np.histogram(all_refs, bins=method,
-                                    range=(min(all_scores), max(all_scores)))
-        if verbose > 1:
-            print("-"*line_width)
-            print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]"
-                  .format(method, "Refs", len(edges_r)-1, edges_r[1]-edges_r[0], edges_r[0], edges_r[-1]))
-
-        h_a, edges_a = np.histogram(all_scores, bins=method, range=bin_range)  # Return edges
-
-        if verbose:
-            if verbose > 1:
-                print("-"*line_width)
-            print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]"
-                  .format(method, "All", len(edges_a)-1, edges_a[1]-edges_a[0], edges_a[0], edges_a[-1]))
-            # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
-            if verbose > 1:
-                print("="*line_width)
-            else:
-                print("-"*line_width)
-
-        # h, edges = h_a, edges_a
-        h, edges = h_r, edges_r
-        hist[method] = h
-        bins[method] = {'width': edges[1] - edges[0],
-                        'min': edges[0],
-                        'max': edges[-1],
-                        'edges': edges,
-                        'centers': (edges[:-1] + edges[1:]) / 2,
-                        'n': len(edges) - 1}
-    return hist, bins
 
 
 def fit_kernel(scores, bw, kernel='gaussian'):  # , atol=0, rtol=1-4):
