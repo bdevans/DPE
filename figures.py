@@ -25,7 +25,7 @@ import tqdm
 # import proportion_estimation as pe
 import dpe
 from dpe.estimate import calc_conf_intervals, fit_kernel
-from dpe.utilities import get_fpr_tpr
+from dpe.utilities import get_fpr_tpr, format_seconds
 from dpe.datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
 # from dpe.config import adjust_excess, ci_method, correct_bias
 
@@ -110,10 +110,7 @@ os.makedirs(fig_dir, exist_ok=True)
 
 # ----------------------------------------------------------------------------
 
-def SecToStr(sec):
-    m, s = divmod(sec, 60)
-    h, m = divmod(m,   60)
-    return u'%d:%02d:%02d' % (h, m, s)
+
 
 
 def plot_kernels(scores, bins):
@@ -1124,7 +1121,7 @@ if __name__ == "__main__":
                 df_point = pd.concat(dfs_point, ignore_index=True)
                 df_est = pd.concat(dfs_boot, ignore_index=True)
                 elapsed = time.time() - t
-                print(f'Elapsed time = {SecToStr(elapsed)}\n')
+                print(f'Elapsed time = {format_seconds(elapsed)}\n')
 
                 # Save results
                 df_point.to_pickle(point_estimates_res_file)

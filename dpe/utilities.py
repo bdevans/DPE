@@ -45,6 +45,12 @@ class Timer:
         self.interval = 0
 
 
+def format_seconds(sec):
+    m, s = divmod(sec, 60)
+    h, m = divmod(m,   60)
+    return u'%d:%02d:%02d' % (h, m, s)
+
+
 # Let's use FD!
 def estimate_bins(data, bin_range=None, verbose=0):
     """Generate GRS bins through data-driven methods in `np.histogram`.
