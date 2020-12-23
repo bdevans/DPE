@@ -19,6 +19,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import tqdm
 
+# NOTE: Add the module path to sys.path if calling from the scripts subdirectory
+import pathlib
+import sys
+# sys.path.insert(1, "/workspaces/DPE")
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.absolute()))
+# print(sys.path)
+
 import dpe
 from dpe.utilities import construct_mixture, format_seconds, load_accuracy  # get_fpr_tpr,
 from dpe.datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)

@@ -17,6 +17,11 @@ import numpy as np
 from tqdm import tqdm
 from joblib import Parallel, delayed, cpu_count
 
+# NOTE: Add the module path to sys.path if calling from the scripts subdirectory
+import pathlib
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.absolute()))
+
 import dpe
 import dpe.datasets as ds
 from dpe.utilities import construct_mixture, format_seconds
