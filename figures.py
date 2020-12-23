@@ -878,7 +878,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
     fig_select.savefig(os.path.join(fig_dir, f'violin_selection_{selected_mix}_{data_label}.svg'), transparent=True)
 
 
-def plot_ROC(scores, bins, title=None, ax=None):
+def plot_roc(scores, bins, title=None, ax=None):
     """Plot the Reciever Operator characteristic
 
     Args:
@@ -932,15 +932,15 @@ if __name__ == "__main__":
         # fig, axes = plt.subplots(3,3)
         (scores, bins, means, medians, p_C) = load_diabetes_data('T1GRS')
         # scores['R_C'] = np.append(scores['R_C'], np.random.randn(100000)*0.1+0.8)
-        plot_ROC(scores, bins, title='Diabetes: T1GRS', ax=axes[0, 0])
+        plot_roc(scores, bins, title='Diabetes: T1GRS', ax=axes[0, 0])
         plot_distributions(scores, bins, 'Diabetes: T1GRS', norm=True, despine=False, ax=axes[1, 0])
         (scores, bins, means, medians, p_C) = load_diabetes_data('T2GRS')
         # scores['R_C'] = np.append(scores['R_C'], np.random.randn(100000)+5)
-        plot_ROC(scores, bins, title='Diabetes: T2GRS', ax=axes[0, 1])
+        plot_roc(scores, bins, title='Diabetes: T2GRS', ax=axes[0, 1])
         plot_distributions(scores, bins, 'Diabetes: T2GRS', norm=True, despine=False, ax=axes[1, 1])
         (scores, bins, means, medians, p_C) = load_renal_data()
         # scores['R_C'] = np.append(scores['R_C'], np.random.randn(100000)+10)
-        plot_ROC(scores, bins, title='Renal', ax=axes[0, 2])
+        plot_roc(scores, bins, title='Renal', ax=axes[0, 2])
         plot_distributions(scores, bins, 'Renal', norm=True, despine=False, ax=axes[1, 2])
         fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
         # exit()
