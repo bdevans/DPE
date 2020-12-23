@@ -1,7 +1,12 @@
+import os
 import time
 
 import numpy as np
 from sklearn.neighbors import KernelDensity
+
+# import dpe
+# from dpe.estimate import calc_conf_intervals
+from . config import _ALL_METHODS_
 
 
 class Timer:
@@ -165,6 +170,17 @@ def get_fpr_tpr(scores, bins):
     return fpr, tpr
 
 
+def construct_mixture(R_C, R_N, p_C, size):
+    assert(0.0 <= p_C <= 1.0)
+    n_C = int(round(size * p_C))
+    n_N = size - n_C
+
+    # Construct mixture
+    mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
+                              np.random.choice(R_N, n_N, replace=True)))
+    return mixture
+
+
 def fit_kernels(scores, bw, kernel='gaussian'):
     """No longer used."""
     kernels = {}
@@ -173,3 +189,24 @@ def fit_kernels(scores, bw, kernel='gaussian'):
         kernels[label] = KernelDensity(kernel=kernel, bandwidth=bw,
                                        atol=0, rtol=1e-4).fit(X)
     return kernels
+
+
+def load_accuracy(data_dir, label):
+
+    proportions = np.load(os.path.join(data_dir, f"proportions_{label}.npy"))
+    sample_sizes = np.load(os.path.join(data_dir, f"sample_sizes_{label}.npy"))
+    # PROPORTIONS_R_N = PROPORTIONS_R_C[::-1]
+
+    # Dictionary of p1 errors
+    point_estimates = {}
+    boots_estimates = {}
+
+    for method in _ALL_METHODS_:
+        point_file = f'{data_dir}/point_{method}_{label}.npy'
+        boots_file = f'{data_dir}/boots_{method}_{label}.npy'
+        if os.path.isfile(point_file):
+            point_estimates[method] = np.load(point_file)
+        if os.path.isfile(boots_file):
+            boots_estimates[method] = np.load(boots_file)
+
+    return point_estimates, boots_estimates, proportions, sample_sizes
