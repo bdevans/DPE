@@ -15,10 +15,8 @@ import pandas as pd
 import proportion_estimation as pe
 import datasets as ds
 
-out_dir = 'variability_data'
 out_dir = os.path.join("results", "variability_data")
-if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+os.makedirs(out_dir, exist_ok=True)
 
 seed = 42
 p_C = 0.5
