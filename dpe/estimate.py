@@ -37,9 +37,7 @@ from sklearn.metrics import auc
 # https://lmfit.github.io/lmfit-py/model.html
 
 from . utilities import estimate_bins, get_fpr_tpr
-
-
-_ALL_METHODS_ = ["Excess", "Means", "EMD", "KDE"]
+from . config import _ALL_METHODS_
 
 
 def fit_kernel(scores, bw, kernel='gaussian'):  # , atol=0, rtol=1-4):
