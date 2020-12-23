@@ -1,33 +1,48 @@
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
-// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/python-3-miniconda
 {
-	"name": "Python 3 - Miniconda",
-	"context": "..",
-	"dockerFile": "Dockerfile",
+	"name": "Miniconda (Python 3)",
+	"build": { 
+		"context": "..",
+		"dockerfile": "Dockerfile",
+		"args": {
+			"INSTALL_NODE": "false",
+			"NODE_VERSION": "lts/*"
+		}
+	},
 
-	// Use 'settings' to set *default* container specific settings.json values on container create. 
-	// You can edit these settings after create using File > Preferences > Settings > Remote.
+	// Set *default* container specific settings.json values on container create.
 	"settings": { 
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"python.pythonPath": "/opt/conda/bin/python",
+		// "python.autoComplete.extraPaths": ["/opt/conda/pkgs/**"],
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
-		"python.linting.pylintPath": "/opt/conda/bin/pylint"
+		"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+		"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+		"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+		"python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
+		"python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
+		"python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
+		"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
+		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
+		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
 	},
 
-	// Uncomment the next line if you want to publish any ports.
-	// "appPort": [],
-
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "python --version",
-
-	// Uncomment the next line to use a non-root user. On Linux, this will prevent
-	// new files getting created as root, but you may need to update the USER_UID
-	// and USER_GID in .devcontainer/Dockerfile to match your user if not 1000.
-	// "runArgs": [ "-u", "vscode" ],
-
-	// Add the IDs of extensions you want installed when the container is created in the array below.
+	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python"
-	]
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "python --version",
+	// "postCreateCommand": "python --version",
+	// "postCreateCommand": "conda list --explicit",
+	"postCreateCommand": "conda list --export",
+	// "postCreateCommand": "pip freeze",
+
+
+	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+	// "remoteUser": "vscode"
 }
