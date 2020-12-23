@@ -37,6 +37,11 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 
 # ---------------------------- Define constants ------------------------------
 
+# TODO: Check the use of averaging method np.mean|average
+# See: plots.get_error_bars, estimate.correct_estimate
+# TODO: Apply bias correction to other methods e.g. 'bca'?
+# TODO: Report or use correct_bias?
+
 FRESH_DATA = True  # False  # CAUTION!
 seed = 42
 n_boot = 10 #1000
