@@ -17,11 +17,11 @@ import numpy as np
 from scipy.optimize import curve_fit
 # from lmfit import minimize
 import lmfit
-import corner
+# import corner
 from sklearn.neighbors import KernelDensity
 from matplotlib import pyplot as plt
 
-from datasets import load_diabetes_data, load_coeliac_data
+from dpe.datasets import load_diabetes_data, load_coeliac_data
 from proportion_estimation import analyse_mixture
 from proportion_estimation import fit_kernel
 from utilities import Timer

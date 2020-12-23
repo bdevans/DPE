@@ -32,8 +32,8 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 
 FRESH_DATA = True  # False  # CAUTION!
 seed = 42
-n_boot = 1000
-n_mix = 100
+n_boot = 10 #1000
+n_mix = 10 #100
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
