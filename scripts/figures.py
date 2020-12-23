@@ -71,21 +71,7 @@ mpl.rc('figure', dpi=100)
 mpl.rc('savefig', dpi=600)
 mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationWarning
 
-# Suppress warnings
-#with warnings.catch_warnings():
-#    warnings.filterwarnings("ignore", category=DeprecationWarning)
-# warnings.filterwarnings("ignore", message="The 'normed' kwarg is deprecated")
-
 # Create output directories
-# out_dir = "results_test"
-# out_dir = "results_100_100"
-# out_dir = "results/m1000_b0"
-# out_dir = "results/m1000_b10"
-# out_dir = "results/m100_b1000"
-# out_dir = "results/m10_b100"
-# out_dir = "results/m100_b100"
-# out_dir = "results/m1000_b100"
-# out_dir = "results/s1000_m0_b0"
 characterisation_dir = os.path.join("results", "characterisation")
 if seed is None:
     seed = np.random.randint(np.iinfo(np.int32).max)
