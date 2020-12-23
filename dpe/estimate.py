@@ -57,6 +57,9 @@ def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
     give the proportion of R_C (cases) within the mixture.
     """
 
+    # NOTE: KDEs are very expensive when large arrays are passed to score_samples
+    # Increasing the tolerance: atol and rtol speeds the process up significantly
+
     # model = methods["model"]
     x_KDE = bins["centers"]
     # kde_mix = KernelDensity(kernel=kernel, bandwidth=bins['width'])

@@ -96,10 +96,6 @@ os.makedirs(fig_dir, exist_ok=True)
 
 # ----------------------------------------------------------------------------
 
-# NOTE: KDEs are very expensive when large arrays are passed to score_samples
-# Increasing the tolerance: atol and rtol speeds the process up significantly
-
-
 if __name__ == "__main__":
 
     if not os.path.exists(out_dir):
