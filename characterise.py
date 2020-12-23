@@ -17,8 +17,10 @@ import numpy as np
 from tqdm import tqdm
 from joblib import Parallel, delayed, cpu_count
 
-import proportion_estimation as pe
-import datasets as ds
+import dpe
+import dpe.datasets as ds
+from dpe.utilities import construct_mixture, format_seconds
+
 
 # ---------------------------- Define constants ------------------------------
 
@@ -40,9 +42,6 @@ proportions = np.linspace(0.0, 1.0, 101, endpoint=True)
 # sample_sizes = np.arange(100, 201, 100)
 # proportions = np.linspace(0.0, 1.0, 6, endpoint=True)
 
-# KDE_kernel = 'gaussian'
-# kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
-
 out_dir = os.path.join("results", f"s{n_samples}_m{n_mix}_b{n_boot}")
 
 # ----------------------------------------------------------------------------
@@ -54,36 +53,24 @@ if verbose and not os.path.exists(os.path.join(out_dir, "logs")):
     os.makedirs(os.path.join(out_dir, "logs"))
 
 
-def SecToStr(sec):
-    m, s = divmod(sec, 60)
-    h, m = divmod(m,   60)
-    return u'%d:%02d:%02d' % (h, m, s)
-
-
 def assess(sample_size, p_C, R_C, R_N, bins, methods, n_boot, seed=None):
     '''New method using analyse_mixture'''
 
-    assert(0.0 <= p_C <= 1.0)
-    n_C = int(round(sample_size * p_C))
-    n_N = sample_size - n_C
-
-    # Construct mixture
-    mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
-                              np.random.choice(R_N, n_N, replace=True)))
+    mixture = construct_mixture(R_C, R_N, p_C, sample_size)
 
     scores = {'R_C': R_C, 'R_N': R_N}
     scores['Mix'] = mixture
 
     if verbose:
         logfile = os.path.join(out_dir, "logs", 
-                               f'pe_s{sample_size:05}_p{p_C:.2f}_{seed}.log')
+                               f'dpe_s{sample_size:05}_p{p_C:.2f}_{seed}.log')
     else:
         logfile = None
 
-    results = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                                 boot_size=-1, n_mix=n_mix, alpha=alpha,
-                                 true_pC=p_C, n_jobs=1, seed=seed,
-                                 verbose=0, logfile=logfile)
+    results = dpe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
+                                boot_size=-1, n_mix=n_mix, alpha=alpha,
+                                true_pC=p_C, n_jobs=1, seed=seed,
+                                verbose=0, logfile=logfile)
     summary, samples = results
     point = samples.iloc[[0]]
 
@@ -131,7 +118,7 @@ if __name__ == '__main__':
         bin_width = bins['width']
         bin_edges = bins['edges']
 
-        methods = pe.prepare_methods(scores, bins)  # Get all methods
+        methods = dpe.prepare_methods(scores, bins)  # Get all methods
 
         # NOTE: There is always a point estimate in addition to any bootstraps
         n_applications = len(sample_sizes) * len(proportions) * n_samples * (1+n_boot)
@@ -183,9 +170,9 @@ if __name__ == '__main__':
                                 boots_arrays[method][s, p, m, :] = boots[method]
 
         elapsed = time.time() - t
-        print(f'Elapsed time = {SecToStr(elapsed)}\n')
+        print(f'Elapsed time = {format_seconds(elapsed)}\n')
         with open(os.path.join(out_dir, "run.log"), "a") as runlog:
-            runlog.write(f'Elapsed time = {SecToStr(elapsed)}\n')
+            runlog.write(f'Elapsed time = {format_seconds(elapsed)}\n')
             runlog.write("=======================\n\n")
 
         # Normalise by EMD 1<->2 (EMD distance between the two orignal distributions)
@@ -199,12 +186,12 @@ if __name__ == '__main__':
         results_arrays = {}
 
         for method in methods:
-            np.save(f'{out_dir}/point_{method}_{tag}', point_arrays[method])
+            np.save(os.path.join(out_dir, f"point_{method}_{tag}"), point_arrays[method])
             if n_boot:
-                np.save(f'{out_dir}/boots_{method}_{tag}', boots_arrays[method])
+                np.save(os.path.join(out_dir, f"boots_{method}_{tag}"), boots_arrays[method])
         # TODO: Save the arrays in the dictionary as a pickle file
-        np.save(f'{out_dir}/sample_sizes_{tag}', sample_sizes)
-        np.save(f'{out_dir}/proportions_{tag}', proportions)
+        np.save(os.path.join(out_dir, f"sample_sizes_{tag}"), sample_sizes)
+        np.save(os.path.join(out_dir, f"proportions_{tag}"), proportions)
 
     print(f"Analysis of methods on datasets: {list(datasets)} complete!")
     with open(os.path.join(out_dir, "run.log"), "a") as runlog:
