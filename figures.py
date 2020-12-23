@@ -97,7 +97,7 @@ mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationW
 # out_dir = "results/m100_b100"
 # out_dir = "results/m1000_b100"
 # out_dir = "results/s1000_m0_b0"
-characterisation_dir = "results/characterisation"
+characterisation_dir = os.path.join("results", "characterisation")
 if seed is None:
     seed = np.random.randint(np.iinfo(np.int32).max)
 assert 0 <= seed < np.iinfo(np.int32).max
