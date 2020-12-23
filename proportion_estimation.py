@@ -364,44 +364,32 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     return ci_low, ci_upp
 
 
-def generate_report(df_pe, true_pC=None, alpha=0.05, ci_method="bca"):
+def generate_report(summary, true_pC=None, alpha=0.05):
     """Generate a proportion estimate report for each method."""
     # TODO: Incorporate ipoint estimates in report
-    pe_point = df_pe.iloc[0, :]
-    pe_boot = df_pe.iloc[1:, :]
-    n_boot = len(pe_boot)  # len(df_pe)
+    # pe_point = df_pe.iloc[0, :]
+    # pe_boot = df_pe.iloc[1:, :]
+    # n_boot = len(pe_boot)  # len(df_pe)
     line_width = 54
     report = []
-    report.append(" {:^12} | {:^17s} | {:^17s} ".format("Method",
-                                                        "Estimated p_C",   # Reference 1
-                                                        "Estimated p_N"))  # Reference 2
+    report.append(f" {'Method':^12} | {'Estimated p_C':^17s} | {'Estimated p_N':^17s} ")
     report.append("="*line_width)
-    for method in df_pe:  # loop over columns (i.e. methods)
-        values = pe_boot[method]
-        point_est = pe_point[method]
-#        print("{:20} | {:<17.5f} | {:<17.5f} ".format(method, initial_results[method], 1-initial_results[method]))
-        report.append(" {:6} point | {:<17.5f} | {:<17.5f} ".format(method, pe_point[method], 1-pe_point[method]))
-        report.append(" {:6} (µ±σ) | {:.5f} +/- {:.3f} | {:.5f} +/- {:.3f} "
-                      .format(method, np.mean(values), np.std(values),
-                              1-np.mean(values), np.std(1-values)))  # (+/- SD)
+    for method, results in summary.items():
+        report.append(f" {method:6} point | {results['p_C']:<17.5f} | {1-results['p_C']:<17.5f} ")
+        # NOTE: std(1-values) == std(values)
+        report.append(f" {method:6} (µ±σ) | {results['mean']:.5f} +/- {results['std']:.3f} "
+                                        f"| {1-results['mean']:.5f} +/- {results['std']:.3f} ")
 
-        if n_boot > 1:
-            ci_low1, ci_upp1 = calc_conf_intervals(values, initial=point_est,
-                                                   average=np.mean, alpha=alpha,
-                                                   ci_method=ci_method)  # TODO: Use correct_bias?
-            ci_low2, ci_upp2 = 1-ci_upp1, 1-ci_low1
 
-            report.append(" C.I. ({:3.1%}) | {:<8.5f},{:>8.5f} | {:<8.5f},{:>8.5f} "
-                          .format(1-alpha, ci_low1, ci_upp1, ci_low2, ci_upp2))
-            if ci_method.lower() == "experimental":  # TODO: Remove or combine with above?
-                bias = point_est - np.mean(values)
-                corrected_est = point_est + bias
-                report.append(" Corrected    | {:<17.5f} | {:<17.5f} "
-                              .format(corrected_est, 1-corrected_est))
+        if "CI" in results:  # n_boot > 1:
+            ci_low_C, ci_upp_C = results["CI"]
+            ci_low_N, ci_upp_N = 1-ci_upp_C, 1-ci_low_C
+            report.append(f" C.I. ({1-alpha:3.1%}) | {ci_low_C:<8.5f},{ci_upp_C:>8.5f} | {ci_low_N:<8.5f},{ci_upp_N:>8.5f} ")
+            if "p_cor_C" in results:
+                report.append(f" Corrected    | {results['p_cor_C']:<17.5f} | {1-results['p_cor_C']:<17.5f} ")
         report.append("-"*line_width)
     if true_pC:
-        report.append(" {:12} | {:<17.5f} | {:<17.5f} "
-                      .format("Ground Truth", true_pC, 1-true_pC))
+        report.append(f" {'Ground Truth':12} | {true_pC:<17.5f} | {1-true_pC:<17.5f} ")
         report.append("="*line_width)
     # report.append("\n")
     return "\n".join(report)
@@ -769,7 +757,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
-        report = generate_report(df_pe, true_pC=true_pC, alpha=alpha, ci_method=ci_method)
+        report = generate_report(summary, true_pC=true_pC, alpha=alpha)
 
     if verbose > 0:
         print("\n" + report + "\n")
