@@ -9,6 +9,7 @@ Module to analyse an unknown mixture population.
 """
 
 # TODO: Move point_estimate and bootstrap_mixture to top level and hide other functions
+__all__ = ["proportion_estimation"]
 
 from pprint import pprint
 import itertools
