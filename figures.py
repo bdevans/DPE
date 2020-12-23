@@ -22,9 +22,12 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from statsmodels.stats.proportion import proportion_confint
 import tqdm
 
-import proportion_estimation as pe
-from utilities import get_fpr_tpr
-from datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
+# import proportion_estimation as pe
+import dpe
+from dpe.estimate import calc_conf_intervals, fit_kernel
+from dpe.utilities import get_fpr_tpr
+from dpe.datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
+# from dpe.config import adjust_excess, ci_method, correct_bias
 
 
 # ---------------------------- Define constants ------------------------------
@@ -40,7 +43,7 @@ verbose = False
 
 # Set method details
 alpha = 0.05  # Alpha for confidence intervals
-CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
+CI_METHOD = "bca"  # ci_method  # "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 # normal : asymptotic normal approximation
 # agresti_coull : Agresti-Coull interval
 # beta : Clopper-Pearson interval based on Beta distribution
@@ -51,7 +54,7 @@ CI_METHOD = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 correct_bias = False  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 # TODO: Reimplement this or remove?
 adjust_excess = False
-KDE_kernel = 'gaussian'
+# KDE_kernel = 'gaussian'
 # kernels = ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
 
 # Configure plots
@@ -121,7 +124,7 @@ def plot_kernels(scores, bins):
         X = data[:, np.newaxis]
         for kernel in ['gaussian', 'tophat', 'epanechnikov',
                        'exponential', 'linear', 'cosine']:
-            kde = pe.fit_kernel(data, bins['width'], kernel)
+            kde = fit_kernel(data, bins['width'], kernel)
             ax.plot(X_plot[:, 0], np.exp(kde.score_samples(X_plot)), '-',
                     label="kernel = '{0}'; bandwidth = {1}".format(kernel, bins['width']))
         ax.legend(loc='upper left')
@@ -140,7 +143,7 @@ def load_accuracy(data_dir, label):
     point_estimates = {}
     boots_estimates = {}
 
-    for method in pe._ALL_METHODS_:
+    for method in dpe._ALL_METHODS_:
         point_file = f'{data_dir}/point_{method}_{label}.npy'
         boots_file = f'{data_dir}/boots_{method}_{label}.npy'
         if os.path.isfile(point_file):
@@ -171,9 +174,9 @@ def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_me
             centres[m] = df_pe.iloc[0, m]
             # boot_values = df_pe.iloc[1:, m]
 
-        ci_low, ci_upp = pe.calc_conf_intervals(boot_values, correct_bias=False,  #initial=centre,
-                                                average=average, alpha=alpha,
-                                                ci_method=ci_method)
+        ci_low, ci_upp = calc_conf_intervals(boot_values, correct_bias=False,  #initial=centre,
+                                            average=average, alpha=alpha,
+                                            ci_method=ci_method)
         errors[0, m] = centres[m] - ci_low
         errors[1, m] = ci_upp - centres[m]
 
@@ -294,7 +297,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
     width = 0.88
     height = 0.84
     grid = AxesGrid(fig, rect=[left, bottom, width, height], aspect=False,  # similar to subplot(122)
-                    nrows_ncols=(2, len(pe._ALL_METHODS_)),
+                    nrows_ncols=(2, len(dpe._ALL_METHODS_)),
                     axes_pad=0.15,
                     label_mode="L",
                     share_all=True,
@@ -309,7 +312,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
     extent = (proportions[0]-x_half_width, proportions[-1]+x_half_width,
               sample_sizes[0]-y_half_width, sample_sizes[-1]+y_half_width)
 
-    for m, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
+    for m, method in enumerate(dpe._ALL_METHODS_):  # enumerate(methods):
 
         # Plot average accuracy across mixtures
         # ax_acc = fig.add_subplot(gs[0, m], xticklabels=[])
@@ -340,7 +343,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
         ax_acc.set_xlim(extent[:2])
         ax_acc.set_ylim(extent[2:])
         ax_acc.set_title(method)
-        if m % len(pe._ALL_METHODS_) == 3:
+        if m % len(dpe._ALL_METHODS_) == 3:
             cax = grid.cbar_axes[0]
             cax.colorbar(hm, ticks=shading_ticks)  # , extend='both')  # TODO: Fix!
             cax.toggle_label(True)
@@ -348,7 +351,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
 
         # Plot deviation across mixtures
         # ax_dev = fig.add_subplot(gs[1, m])
-        ax_dev = grid[m+len(pe._ALL_METHODS_)]
+        ax_dev = grid[m+len(dpe._ALL_METHODS_)]
         if m == 0:
             ax_dev.set_ylabel('Sample size ($n$)')
         # else:
@@ -397,7 +400,7 @@ def plot_characterisation(estimates, proportions, sample_sizes,
 #        xticklabels[0] = "0"
 #        xticklabels[-1] = "1"
         ax_dev.set_xticklabels([str(tick) for tick in xticks])
-        if m % len(pe._ALL_METHODS_) == 3:
+        if m % len(dpe._ALL_METHODS_) == 3:
             # print(method)
             # cax = mpl.colorbar.Colorbar(ax, hm)
             cax = grid.cbar_axes[1]
@@ -456,7 +459,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
     c = '#999999'
     c_edge = '#777777'
 
-    # df_bs = df_bs[pe._ALL_METHODS_]
+    # df_bs = df_bs[dpe._ALL_METHODS_]
 
     if not ax:
         f, ax = plt.subplots()
@@ -571,7 +574,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
 ##        else:
 ##            centre = df_point.iloc[0, midx]
 ##
-##        ci_low, ci_upp = pe.calc_conf_intervals(df_bs[method], initial=centre, average=np.mean, alpha=alpha, ci_method=ci_method)
+##        ci_low, ci_upp = calc_conf_intervals(df_bs[method], initial=centre, average=np.mean, alpha=alpha, ci_method=ci_method)
 ##        errors[0, midx] = means[midx] - ci_low
 ##        errors[1, midx] = ci_upp - means[midx]
 
@@ -754,7 +757,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 #                errors = np.zeros(shape=(2, len(methods)))
 #                means = []
 #                initials = []
-#                for midx, method in enumerate(pe._ALL_METHODS_):  # enumerate(methods):
+#                for midx, method in enumerate(dpe._ALL_METHODS_):  # enumerate(methods):
 #
 #                    mean_est = df_means.loc[method, 'Estimate']
 #
@@ -766,7 +769,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
 #                                            index=["p_C", "Size", "Mix", "Boot"],
 #                                            columns="Method")
 #
-#                    ci_low, ci_upp = pe.calc_conf_intervals(df_piv[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
+#                    ci_low, ci_upp = calc_conf_intervals(df_piv[method], initial=initial, average=np.mean, alpha=0.05, ci_method=CI_METHOD)
 #
 #                    means.append(mean_est)
 #                    initials.append(initial)
@@ -947,7 +950,7 @@ if __name__ == "__main__":
 
     sns.set_style("ticks")
 
-    methods = {method: True for method in pe._ALL_METHODS_}
+    methods = {method: True for method in dpe._ALL_METHODS_}
     if adjust_excess:
         adjustment_factor = 1/0.92  # adjusted for fact it underestimates by 8%
     else:
@@ -969,7 +972,7 @@ if __name__ == "__main__":
                 print(f"Running mixture analysis on {data_label} scores...", flush=True)
                 t = time.time()  # Start timer
 
-                summary, df_pe = pe.analyse_mixture(scores, bins, methods,
+                summary, df_pe = dpe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix, # boot_size=sample_size,
                                         alpha=alpha, true_pC=p_C, 
                                         ci_method=CI_METHOD,
@@ -1086,7 +1089,7 @@ if __name__ == "__main__":
 
                             violin_scores['Mix'] = construct_mixture(hold_out_scores['R_C'], hold_out_scores['R_N'], p_star, size)
                             Mixtures[mix][p_star] = violin_scores['Mix']
-                            summary, df_cm = pe.analyse_mixture(violin_scores, bins, methods,
+                            summary, df_cm = dpe.analyse_mixture(violin_scores, bins, methods,
                                                     n_boot=n_boot, boot_size=size,
                                                     n_mix=n_mix,
                                                     alpha=alpha, true_pC=p_star,
