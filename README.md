@@ -164,32 +164,40 @@ Explanation of the main function
 ```python
 def analyse_mixture(scores, bins='fd', methods='all', 
                     n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_p1=None, correction=False,
+                    alpha=0.05, true_pC=None, ci_method="bca", correct_bias=False,
                     n_jobs=1, seed=None, verbose=1, logfile=''):
 ```
 
 ### Inputs
 
-- `scores` (`dict`): A required dictionary of the form, `{‘Ref1’: array_of_ref_1_scores, ‘Ref2’: array_of_ref_2_scores, ‘Mix’: array_of_mix_scores}`.
+- `scores` (`dict`): A required dictionary of the form, `{'R_C': array_of_cases_scores, 'R_N': array_of_non-cases_scores, 'Mix': array_of_mixture_scores}`.
 - `bins` (`str`): A string specifying the binning method: `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`. Default: `‘fd’`. Alternatively, a dictionary, `{‘width’: bin_width, ‘min’, min_edge, ‘max’: max_edge, ‘edges’: array_of_bin_edges, ‘centers’: array_of_bin_centers, ‘n’: number_of_bins}`.
 - `methods` (`str`): A string with the name of the method or `'all'` to run all methods (default). Alternatively, a list of method names (strings), `["Excess", "Means", "EMD", "KDE"]`, or a dictionary of (bool) flags, `{‘Excess’: True, ‘Means’: True, ‘EMD’: True, ‘KDE’: True}`.
 - `n_boot` (`int`): Number of bootstraps of the mixture to generate. Default: `1000`.
 - `boot_size` (`int`): The size of each mixture bootstrap. Default is the same size as the mixture.
 - `n_mix` (`int`): Number of mixtures to construct based on the initial point estimate. Default: `0`.
 - `alpha` (`float`): The alpha value for calculating confidence intervals from bootstrap distributions. Default: `0.05`.
-- `true_p1` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
-`correction` (`bool`): A boolean flag specifing whether to apply the bootstrap correction method or not. Default: `False`.
+- `ci_method` (`str`): The name of the method used to calculate the confidence intervals Default: `bca`.
+- `true_pC` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
+`correct_bias` (`bool`): A boolean flag specifing whether to apply the bootstrap correction method or not. Default: `False`.
 - `n_jobs` (`int`): Number of bootstrap jobs to run in parallel. Default: `1`. (`n_jobs = -1` runs on all CPUs).
-- `seed` (`int`): An optional value to seed the random number generator with for reproducibility (in the range [0, (2^32)-1]).
+- `seed` (`int`): An optional value to seed the random number generator with (in the range [0, (2^32)-1]) for reproducibility of sampling used for confidence intervals. Defaults: `None`.
 - `verbose` (`int`): Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to turn off all console output except the progress bars.
 - `logfile` (`str`): Optional filename for the output logs. Default: `"proportion_estimates.log"`.
  
 ### Outputs
 
-- `df_pe` (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
+(summary, bootstraps) (`tuple`): A tuple consisting of the following data structures.
 
-Alternatively if `correction == True`:
-- (`df_pe`, `df_correct`) (`tuple`): a tuple of the proportion estimates and the corrected proportion estimates as dataframes. 
+- summary (`dict`): A nested dictionary with a key for each estimation method within which
+    is a dictionary with the following keys:
+    `p_C` : the prevalence estimate
+    Optionally, if bootstrapping is used:
+    `CI` : the confidence intervals around the prevalence
+    `mean` : the mean of the bootstrapped estimates
+    `std` : the standard deviation of the bootstrap estimates
+    `p_cor_C` : the correct prevalence estimate when `correct_bias == True`
+- bootstraps (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
 
 Additionally the logfile is written to the working directory.
 
