@@ -204,3 +204,49 @@ def load_coeliac_data():
     chosen_bins = bins[binning_method]
     chosen_bins["method"] = binning_method
     return scores, chosen_bins, means, medians, p_C
+
+
+def generate_dataset(p_C):
+
+    assert 0.0 <= p_C <= 1.0
+
+    n_ref_1 = 5000
+    n_ref_2 = 5000
+    n_mix = 5000
+
+    ref1 = np.random.normal(loc=1, scale=0.2, size=n_ref_1)
+    bump = int(np.ceil(0.1 * n_ref_2))
+    ref2 = np.concatenate((np.random.normal(loc=1.2, scale=0.2, size=n_ref_2-bump),
+                           np.random.normal(loc=1.6, scale=0.05, size=bump)))
+    mix_n_ref_1 = int(round(p_C * n_mix))
+    mix_n_ref_2 = n_mix - mix_n_ref_1
+    mix = np.concatenate((np.random.choice(ref1, mix_n_ref_1, replace=True),
+                          np.random.choice(ref2, mix_n_ref_2, replace=True)))
+
+    scores = {'Ref1': ref1,
+              'Ref2': ref2,
+              'Mix': mix}
+    return scores
+
+
+def save_dataset(scores, filename, codes=None):
+    if codes is None:
+        codes = {'Ref1': 1, 'Ref2': 2, 'Mix': 3}
+    groups = np.concatenate((np.ones_like(scores['Ref1'], dtype=int) * codes['Ref1'],
+                             np.ones_like(scores['Ref2'],
+                                          dtype=int) * codes['Ref2'],
+                             np.ones_like(scores['Mix'], dtype=int) * codes['Mix']))
+    grs = np.concatenate((scores['Ref1'], scores['Ref2'], scores['Mix']))
+    data = pd.DataFrame(data={'Group': groups, 'GRS': grs})
+    data.to_csv(filename, header=True, index=False)
+
+
+def load_dataset(filename, codes=None):
+    if codes is None:
+        codes = {'Ref1': 1, 'Ref2': 2, 'Mix': 3}
+    data = pd.read_csv(filename)  # , header=['Group', 'GRS'])
+    data.dropna(inplace=True)  # Remove any empty entries
+    scores = {'Ref1': data.loc[data['Group'] == codes['Ref1'], 'GRS'].values,
+              'Ref2': data.loc[data['Group'] == codes['Ref2'], 'GRS'].values,
+              'Mix': data.loc[data['Group'] == codes['Mix'], 'GRS'].values}
+    return scores
