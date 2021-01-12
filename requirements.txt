@@ -1,0 +1,16 @@
+numpy
+scipy
+pandas
+# xlrd
+scikit-learn
+lmfit >= 0.9
+# emcee
+statsmodels
+joblib >= 0.13
+psutil
+tqdm
+# Optional plotting libraries
+# scikit-plot
+# matplotlib
+# seaborn
+# corner
