@@ -171,8 +171,8 @@ def analyse_mixture(scores, bins='fd', methods='all',
 ### Inputs
 
 - `scores` (`dict`): A required dictionary of the form, `{'R_C': array_of_cases_scores, 'R_N': array_of_non-cases_scores, 'Mix': array_of_mixture_scores}`.
-- `bins` (`str`): A string specifying the binning method: `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`. Default: `‘fd’`. Alternatively, a dictionary, `{‘width’: bin_width, ‘min’, min_edge, ‘max’: max_edge, ‘edges’: array_of_bin_edges, ‘centers’: array_of_bin_centers, ‘n’: number_of_bins}`.
-- `methods` (`str`): A string with the name of the method or `'all'` to run all methods (default). Alternatively, a list of method names (strings), `["Excess", "Means", "EMD", "KDE"]`, or a dictionary of (bool) flags, `{‘Excess’: True, ‘Means’: True, ‘EMD’: True, ‘KDE’: True}`.
+- `bins` (`str`): A string specifying the binning method: `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`. Default: `'fd'`. Alternatively, a dictionary, `{'width': bin_width, 'min', min_edge, 'max': max_edge, 'edges': array_of_bin_edges, 'centers': array_of_bin_centers, 'n': number_of_bins}`.
+- `methods` (`str`): A string with the name of the method or `'all'` to run all methods (default). Alternatively, a list of method names (strings), `["Excess", "Means", "EMD", "KDE"]`, or a dictionary of (bool) flags, `{'Excess': True, 'Means': True, 'EMD': True, 'KDE': True}`.
 - `n_boot` (`int`): Number of bootstraps of the mixture to generate. Default: `1000`.
 - `boot_size` (`int`): The size of each mixture bootstrap. Default is the same size as the mixture.
 - `n_mix` (`int`): Number of mixtures to construct based on the initial point estimate. Default: `0`.
