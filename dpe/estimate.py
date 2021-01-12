@@ -402,10 +402,10 @@ def bootstrap_mixture(Mix, R_C, R_N, bins, methods, boot_size=-1, seed=None):
     return point_estimate(bs, R_C, R_N, bins, methods)
 
 
-def analyse_mixture(scores, bins='fd', methods='all', 
-                    n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_pC=None, ci_method="bca", correct_bias=False,
-                    n_jobs=1, seed=None, verbose=1, logfile=''):
+def analyse_mixture(scores, bins='fd', methods='all',
+                    n_boot=1000, boot_size=-1, n_mix=0, alpha=0.05,
+                    ci_method="bca", correct_bias=False, seed=None,
+                    n_jobs=1, verbose=1, true_pC=None, logfile=''):
     """Analyse a mixture distribution and estimate the proportions of two
     reference distributions of which it is assumed to be comprised.
 
@@ -442,23 +442,23 @@ def analyse_mixture(scores, bins='fd', methods='all',
     ci_method : str
         The name of the method used to calculate the confidence intervals.
         Default: `bca`.
-    true_pC : float
-        Optionally pass the true proportion of cases for comparing to the 
-        estimated proportion(s).
     correct_bias : bool
         A boolean flag specifing whether to apply the bootstrap correction
         method or not. Default: `False`.
-    n_jobs : int
-        Number of bootstrap jobs to run in parallel. Default: `1`.
-        Set `n_jobs = -1` runs on all CPUs.
     seed : int
         An optional value to seed the random number generator with 
         (in the range [0, (2^32)-1]) for reproducibility of sampling used for
         confidence intervals.
         Defaults: `None`.
+    n_jobs : int
+        Number of bootstrap jobs to run in parallel. Default: `1`.
+        Set `n_jobs = -1` runs on all CPUs.
     verbose : int
         Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to
         turn off all console output except the progress bars.
+    true_pC : float
+        Optionally pass the true proportion of cases for comparing to the 
+        estimated proportion(s).
     logfile : str
         Optional filename for the output logs.
         Default: `"proportion_estimates.log"`.

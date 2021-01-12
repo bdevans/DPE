@@ -178,11 +178,11 @@ def analyse_mixture(scores, bins='fd', methods='all',
 - `n_mix` (`int`): Number of mixtures to construct based on the initial point estimate. Default: `0`.
 - `alpha` (`float`): The alpha value for calculating confidence intervals from bootstrap distributions. Default: `0.05`.
 - `ci_method` (`str`): The name of the method used to calculate the confidence intervals Default: `bca`.
-- `true_pC` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
-`correct_bias` (`bool`): A boolean flag specifing whether to apply the bootstrap correction method or not. Default: `False`.
-- `n_jobs` (`int`): Number of bootstrap jobs to run in parallel. Default: `1`. (`n_jobs = -1` runs on all CPUs).
+- `correct_bias` (`bool`): A boolean flag specifing whether to apply the bootstrap correction method or not. Default: `False`.
 - `seed` (`int`): An optional value to seed the random number generator with (in the range [0, (2^32)-1]) for reproducibility of sampling used for confidence intervals. Defaults: `None`.
+- `n_jobs` (`int`): Number of bootstrap jobs to run in parallel. Default: `1`. (`n_jobs = -1` runs on all CPUs).
 - `verbose` (`int`): Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to turn off all console output except the progress bars.
+- `true_pC` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
 - `logfile` (`str`): Optional filename for the output logs. Default: `"proportion_estimates.log"`.
  
 ### Outputs
