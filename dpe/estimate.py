@@ -441,7 +441,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         distributions. Default: `0.05`.
     ci_method : str
         The name of the method used to calculate the confidence intervals.
-        Defaults: `bca`.
+        Default: `bca`.
     true_pC : float
         Optionally pass the true proportion of cases for comparing to the 
         estimated proportion(s).
