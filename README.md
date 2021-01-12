@@ -162,10 +162,10 @@ Explanation of the main function
 --------------------------------
 
 ```python
-def analyse_mixture(scores, bins='fd', methods='all', 
-                    n_boot=1000, boot_size=-1, n_mix=0,
-                    alpha=0.05, true_pC=None, ci_method="bca", correct_bias=False,
-                    n_jobs=1, seed=None, verbose=1, logfile=''):
+def analyse_mixture(scores, bins='fd', methods='all',
+                    n_boot=1000, boot_size=-1, n_mix=0, alpha=0.05,
+                    ci_method="bca", correct_bias=False, seed=None,
+                    n_jobs=1, verbose=1, true_pC=None, logfile=''):
 ```
 
 ### Inputs
