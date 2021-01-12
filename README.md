@@ -1,57 +1,221 @@
 Distribution Proportion Estimation
 ==================================
 
-Evaluation of algorithms for estimating the proportions of Type I (and Type II) diabetics in a mixture population based on genetic risk scores.
+Evaluation of algorithms for estimating the prevalence of cases in a mixture population based on genetic risk scores.
 
-Execution
----------
+This folder contains the Python 3 implementation of the proportion estimation algorithms, which was developed and run with Python 3.7.6. The following instructions assume that you have a working Python (>=3.6) installation obtained either through Anaconda (recommended) or through other means (which requires pip). 
 
-1. Run `bootstrap.py` on a multicore server. This is best done in a Docker container (using `screen` to avoid disconnection problems) as follows:
-    1. `docker build -t dpe https://git.exeter.ac.uk/bdevans/DPE.git`
-    2. `screen`
-    3. `docker run -it -v dpe:/usr/dpe/results --name dpe dpe`
-    4. To detach, press `Ctrl+a` followed by `d`
-2. Collect results and run `plots.py`.
-    1. Use `screen -r` to list the detached sessions
-    2. `screen -r 10654.pts-8.thuemorse`
-    3. `docker cp dpe:/usr/dpe/results .`
-    4. Copy the data for processing:
-        - From the client: `scp -r bde201-admin@144.173.106.18:/home/bde201-admin/results results`
-        - From the server: `scp -r results ben@144.173.111.1:/Users/ben/EXE/repos/DPE/results`
-    5. To quit a screen:
-        - When attached: `Ctrl+a` then `:quit`
-        - When detached: `screen -X -S <session #> quit`
+Installation
+------------
+
+0. Install Python >= 3.6. 
+1. Add this folder to your `PYTHONPATH`.
+2. Install the requirements using one of the provided requirements files:
+   1. If you use another Python distribution: `pip3 install -r requirements.txt`.
+   2. Or, if you use (Ana)conda: `conda env create -f environment.yml`. Then run `source activate dpe` to activate the environment. 
+
+This should take approximately 1-2 minutes to complete, depending on the speed of your internet connection and the number of dependencies already satisfied. 
+
+The examples given were tested with Python 3.7.6 on macOS 10.14.6 (18G3020) running in a Docker container (version 19.03.5, build 633a0ea). The exact packages installed with `pip` during testing are given in `frozen_dependencies.txt`. 
+
+Running the worked examples
+---------------------------
+
+Three code files are provided for review purposes:
+1. `run_examples.py` the main script for applying the proportion estimation algorithms to the example data sets.
+2. `data_utilities.py` has utilities for generating, loading and saving synthetic data sets.
+3. `proportion_estimation.py` has the main routines for estimating proportions in a mixture distribution.
+
+Once the requirements are installed (and the environment activated if necessary) run the example script with:
+
+```
+python run_examples.py
+```
+
+The proportion estimates and confidence intervals are then generated, with a plain text summary printed to the console (when verbose > 0) and written to a log file (named after the data set file with a `.log` extension). 
+
+The analysis parameters may be changed by editing the `run_examples.py` script. It is recommended to keep the total number of mixture bootstraps (`n_mix * n_boot`) below around 10,000 when using the KDE method, as this may taken a long time to finish. 
+
+Optionally, the file `generate_data.py` may be edited to change the construction parameters and generate new data sets to analyse. 
+
+Note: The population of cases is sometimes referred to as Reference 1 and the population of non-cases referred to as Reference 2. Accordingly these notations:
+R_C == Ref1, R_N == Ref2
+p_C == p1, p_N == p2
+may be used interchangeably. 
+
+### Expected Output
+
+When running with the parameters given in the manuscript (N_M = 100 N_B = 1000) on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 1h15m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time can be reduced considerably by reducing the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, the simulation time has been reduced in `run_examples.py` for demonstration purposes by reducing the number of bootstraps (N_B = 100) such that the run time is approximately 10m per data set. The output produced for the first data set is given below for N_B = 1000 so this value should be edited in `run_examples.py` to reproduce the exact results:
+
+```
+================================================================================
+Running on example dataset: p_C = 0.25
+Loading dataset: example_pC025...
+Running 100 bootstraps with 8 processors...
+Method: 100%|█████████████████████████████████████| 4/4 [09:07<00:00, 136.98s/it]
+
+    Method    |   Estimated pC    |   Estimated pN    
+======================================================
+ Excess point | 0.18200           | 0.81800           
+ Excess (µ±σ) | 0.13694 +/- 0.019 | 0.86306 +/- 0.019 
+ C.I. (95.0%) | 0.18920 , 0.26361 | 0.73639 , 0.81080 
+ Corrected    | 0.22706           | 0.77294           
+------------------------------------------------------
+ Means  point | 0.24279           | 0.75721           
+ Means  (µ±σ) | 0.24490 +/- 0.018 | 0.75510 +/- 0.018 
+ C.I. (95.0%) | 0.20469 , 0.27637 | 0.72363 , 0.79531 
+ Corrected    | 0.24069           | 0.75931           
+------------------------------------------------------
+ EMD    point | 0.24313           | 0.75687           
+ EMD    (µ±σ) | 0.24357 +/- 0.019 | 0.75643 +/- 0.019 
+ C.I. (95.0%) | 0.20500 , 0.27984 | 0.72016 , 0.79500 
+ Corrected    | 0.24269           | 0.75731           
+------------------------------------------------------
+ KDE    point | 0.24843           | 0.75157           
+ KDE    (µ±σ) | 0.24595 +/- 0.022 | 0.75405 +/- 0.022 
+ C.I. (95.0%) | 0.20809 , 0.29445 | 0.70555 , 0.79191 
+ Corrected    | 0.25090           | 0.74910           
+------------------------------------------------------
+ Ground Truth | 0.25000           | 0.75000           
+======================================================
+
+Elapsed time = 548.460 seconds
+================================================================================ 
+
+```
+
+The longer run time output from processing the `example_pC025` data set with N_M = 100 and N_B = 1000 is given below:
+
+```
+================================================================================
+Running on example dataset: p_C = 0.25
+Loading dataset: example_pC025...
+Running 1000 bootstraps with 8 processors...
+Method: 100%|█████████████████████████████████████| 4/4 [1:14:08<00:00, 1112.13s/it]
+
+    Method    |   Estimated pC    |   Estimated pN    
+======================================================
+ Excess point | 0.18200           | 0.81800           
+ Excess (µ±σ) | 0.13752 +/- 0.019 | 0.86248 +/- 0.019 
+ C.I. (95.0%) | 0.18920 , 0.26200 | 0.73800 , 0.81080 
+ Corrected    | 0.22648           | 0.77352           
+------------------------------------------------------
+ Means  point | 0.24279           | 0.75721           
+ Means  (µ±σ) | 0.24466 +/- 0.018 | 0.75534 +/- 0.018 
+ C.I. (95.0%) | 0.20485 , 0.27659 | 0.72341 , 0.79515 
+ Corrected    | 0.24093           | 0.75907           
+------------------------------------------------------
+ EMD    point | 0.24313           | 0.75687           
+ EMD    (µ±σ) | 0.24374 +/- 0.019 | 0.75626 +/- 0.019 
+ C.I. (95.0%) | 0.20468 , 0.27912 | 0.72088 , 0.79532 
+ Corrected    | 0.24252           | 0.75748           
+------------------------------------------------------
+ KDE    point | 0.24843           | 0.75157           
+ KDE    (µ±σ) | 0.24610 +/- 0.021 | 0.75390 +/- 0.021 
+ C.I. (95.0%) | 0.20822 , 0.29159 | 0.70841 , 0.79178 
+ Corrected    | 0.25075           | 0.74925           
+------------------------------------------------------
+ Ground Truth | 0.25000           | 0.75000           
+======================================================
+
+Elapsed time = 4450.042 seconds
+================================================================================ 
+
+```
+
+Additionally a `results` directory will be created with a subdirectory for each data set processed containing a `csv` file with the initial point estimates and bootstrap estimates for each method. 
+
+Reproducibility
+---------------
+
+The results are reproducible by default since a seed is set (42) for the pseudo random number generator. This seed may be changed (or set to `None` for a random seed) or set to any integer in the range [0, 2^32) to explore variations in results due to stochasticity in sampling. 
+
+Running on your data
+--------------------
+
+The main requirement is to prepare a dictionary (`dict`) containing the keys `Ref1`, `Ref2` and `Mix`. The associated values should be (one dimensional) arrays (or lists) of the GRS scores for the "Reference 1" (cases) distribution, the "Reference 2" (non-cases) distribution and the Mixture distribution respectively. 
+
+Alternatively a `csv` file may be prepared and loaded with the function `data_utilities.load_dataset(filename)` as demonstrated in the `run_examples.py` script. The `csv` file should contain the header `Group,GRS` followed by pairs of `code,score` values (one per line for each GRS score) where code is `1` for the Reference 1 distribution (cases), `2` for the Reference 2 distribution (non-cases) and `3` for the mixture distribution. 
+
+Once the GRS scores have been prepared in a suitable form, they may be passed to the `analyse_mixture()` function as demonstrated in the `run_examples.py` script. Further details about this function are given in the next section. 
+
+Pseudocode
+----------
+
+The main algorithm is as follows. Details of the specific methods may be found in the methods section of the accompanying manuscript. 
+
+bins <-- generate_bins({R_C, R_N, Mix}, method='fd')  # Freedman-Diaconis
+for method in ["Excess", "Means", "EMD", "KDE"]:
+    p_meth^i <-- get_point_estimate({R_C, R_N, Mix}, bins, method)  # Proportion of cases
+    for m in 1..N_M:  # Number of Monte Carlo mixtures
+        Mix_meth_m <-- get_monte_carlo_mixture({R_C, R_N}, p_meth^i)
+        for b in 1..N_B:  # Number of bootstraps
+            Mix_meth_m_b <-- get_bootstrap({Mix_meth_m}, bins)  # Sample with replacement
+            p_meth_m_b <-- get_point_estimate({R_C, R_N, Mix_meth_m_b},bins, method)
+        end
+    end
+    p_meth^cor <-- correct_estimate(p_meth^i, {p_m_b}_meth)  # Use the set of all bootstraps of all mixtures for each method
+    CI_meth <-- get_confidence_intervals(p_meth^cor, {p_m_b}_meth, alpha)
+end
+
+Explanation of the main function
+--------------------------------
+
+```python
+def analyse_mixture(scores, bins='fd', methods='all', 
+                    n_boot=1000, boot_size=-1, n_mix=0,
+                    alpha=0.05, true_p1=None, correction=False,
+                    n_jobs=1, seed=None, verbose=1, logfile=''):
+```
+
+### Inputs
+
+- `scores` (`dict`): A required dictionary of the form, `{‘Ref1’: array_of_ref_1_scores, ‘Ref2’: array_of_ref_2_scores, ‘Mix’: array_of_mix_scores}`.
+- `bins` (`str`): A string specifying the binning method: `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`. Default: `‘fd’`. Alternatively, a dictionary, `{‘width’: bin_width, ‘min’, min_edge, ‘max’: max_edge, ‘edges’: array_of_bin_edges, ‘centers’: array_of_bin_centers, ‘n’: number_of_bins}`.
+- `methods` (`str`): A string with the name of the method or `'all'` to run all methods (default). Alternatively, a list of method names (strings), `["Excess", "Means", "EMD", "KDE"]`, or a dictionary of (bool) flags, `{‘Excess’: True, ‘Means’: True, ‘EMD’: True, ‘KDE’: True}`.
+- `n_boot` (`int`): Number of bootstraps of the mixture to generate. Default: `1000`.
+- `boot_size` (`int`): The size of each mixture bootstrap. Default is the same size as the mixture.
+- `n_mix` (`int`): Number of mixtures to construct based on the initial point estimate. Default: `0`.
+- `alpha` (`float`): The alpha value for calculating confidence intervals from bootstrap distributions. Default: `0.05`.
+- `true_p1` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
+`correction` (`bool`): A boolean flag specifing whether to apply the bootstrap correction method or not. Default: `False`.
+- `n_jobs` (`int`): Number of bootstrap jobs to run in parallel. Default: `1`. (`n_jobs = -1` runs on all CPUs).
+- `seed` (`int`): An optional value to seed the random number generator with for reproducibility (in the range [0, (2^32)-1]).
+- `verbose` (`int`): Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to turn off all console output except the progress bars.
+- `logfile` (`str`): Optional filename for the output logs. Default: `"proportion_estimates.log"`.
+ 
+### Outputs
+
+- `df_pe` (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
+
+Alternatively if `correction == True`:
+- (`df_pe`, `df_correct`) (`tuple`): a tuple of the proportion estimates and the corrected proportion estimates as dataframes. 
+
+Additionally the logfile is written to the working directory.
+
 
 Methods
 -------
 
 We bootstrap (i.e. sample with replacement) from the available data, systematically varying sample size and mixture proportion. We then apply the following methods to yield estimates of the true proportion and from those, calculate the errors throughout the bootstrap parameter space.
 
+These methods assume that higher GRS is associated with cases. 
+
 1. Means
 
     ```python
-    proportion_of_T1 = abs((RM.mean()-T2_mean)/(T1_mean-T2_mean))
+    p_hat_C = (RM.mean() - mu_N) / (mu_C - mu_N)
+    p_hat_C = np.clip(p_hat_C, 0.0, 1.0)
     ```
 
 2. [Excess](https://www.thelancet.com/journals/landia/article/PIIS2213-8587(17)30362-5/fulltext)
 
     ```python
-    medians = {'T1GRS': 0.23137931525707245, 'T2GRS': 6.78826}
-
     number_low = len(RM[RM <= population_median])
     number_high = len(RM[RM > population_median])
-    proportion_T1 = (number_high - number_low)/len(RM)
+    p_hat_C = (number_high - number_low) / len(RM)
+    p_hat_C = np.clip(p_hat_C, 0.0, 1.0)
     ```
-    Should this be abs? With the assumptions from the Lancet it is not necessary to use abs... but I guess the definition would always be case specific (it'd depend on the relation between the two reference distributions and general population)...
-
-    a. The excess/subtraction method counts points above and below threshold `population_median`
-
-    b. The threshold is based on statistical properties of reference GRS (Wellcome Trust Case Control Consortium cohort) and statistical properties of the general population (distribution of GRS in the general population);
-
-    c. The Lancet analysis was possible because: "The type 1 genetic risk score in the general population has the same distribution [statistically ?] and median as [the type 1 genetic risk score in] the type 2 diabetes population." and "Almost all (96%) individuals with type 1 diabetes in the Wellcome Trust Case Control Consortium cohort have [the type 1] genetic risk score above the 50th centile of [the type 1 genetic risk score in] the type 2 diabetes cohort";
-
-    d. ...
-
 
 3. [EMD](https://en.wikipedia.org/wiki/Earth_mover%27s_distance)
     ```math
@@ -59,70 +223,46 @@ We bootstrap (i.e. sample with replacement) from the available data, systematica
     ```
 
     ```python
-    max_emd = bin_edges[-1] - bin_edges[0]
+    def interpolate_CDF(scores, x_i, min_edge, max_edge):
+        """Interpolate the cumulative density function of the scores at the points
+        in the array `x_i`.
+        """
 
-    # Interpolate the cdfs at the same points for comparison
-    x_T1 = [bins[tag]['min'], *sorted(T1), bins[tag]['max']]
-    y_T1 = np.linspace(0, 1, len(x_T1))
-    (iv, ii) = np.unique(x_T1, return_index=True)
-    i_CDF_1 = np.interp(bin_centers, iv, y_T1[ii])
-
-    x_T2 = [bins[tag]['min'], *sorted(T2), bins[tag]['max']]
-    y_T2 = np.linspace(0, 1, len(x_T2))
-    (iv, ii) = np.unique(x_T2, return_index=True)
-    i_CDF_2 = np.interp(bin_centers, iv, y_T2[ii])
-
-    # EMDs computed with interpolated CDFs
-    i_EMD_21 = sum(abs(i_CDF_2-i_CDF_1)) * bins[tag]['width'] / max_emd
-
-    # For each bootstrap mixture
-        # Interpolated cdf (to compute EMD)
-        x = [bins[tag]['min'], *np.sort(RM), bins[tag]['max']]
+        x = [min_edge, *sorted(scores), max_edge]
         y = np.linspace(0, 1, num=len(x), endpoint=True)
         (iv, ii) = np.unique(x, return_index=True)
-        si_CDF_3 = np.interp(bin_centers, iv, y[ii])
+        return np.interp(x_i, iv, y[ii])
 
-        # Compute EMDs
-        i_EMD_31 = sum(abs(si_CDF_3-i_CDF_1)) * bin_width / max_emd
-        i_EMD_32 = sum(abs(si_CDF_3-i_CDF_2)) * bin_width / max_emd
+    # Interpolate the cdfs at the same points for comparison
+    CDF_1 = interpolate_CDF(scores["R_C"], bins['centers'], bins['min'], bins['max'])
+    CDF_2 = interpolate_CDF(scores["R_N"], bins['centers'], bins['min'], bins['max'])
+    CDF_M = interpolate_CDF(RM, bins['centers'], bins['min'], bins['max'])
+    
+    # EMDs computed with interpolated CDFs
+    EMD_1_2 = sum(abs(CDF_1 - CDF_2))
+    EMD_M_1 = sum(abs(CDF_M - CDF_1))
+    EMD_M_2 = sum(abs(CDF_M - CDF_2))
 
-    # Normalise
-    norm_mat_EMD_31 = mat_EMD_31 / i_EMD_21
-    norm_mat_EMD_32 = mat_EMD_32 / i_EMD_21
-
-    error_EMD_T1 = average(1-EMD_31, axis=2) - PROPORTIONS_T1D
-    error_EMD_T2 = average(1-EMD_32, axis=2) - PROPORTIONS_T2D
-
-    relative_error_EMD_T1 = 100*error_EMD_T1/PROPORTIONS_T1D
-    relative_error_EMD_T2 = 100*error_EMD_T2/PROPORTIONS_T2D
-    max_relative_error_EMD = np.maximum(np.abs(relative_error_EMD_T1),
-                                        np.abs(relative_error_EMD_T2))
-
-    max_abs_error_EMD = np.maximum(np.abs(error_EMD_T1), np.abs(error_EMD_T2))
+    p_hat_C = 0.5 * (1 + (EMD_M_2 - EMD_M_1) / EMD_1_2)
     ```
 
 4. [KDE](https://lmfit.github.io/lmfit-py/model.html)
-    1. Convolve a Gaussian kernel (T1GRS bandwidth=0.005) with each datum for each reference population (T1 diabetics and T2 diabetics) to produce two distribution templates: `kde_T1` and `kde_T2`.
-    2. Create a new model which is the weighted sum of these two distributions (initialise to equal amplitudes: `amp_T1 = amp_T2 = 1`).
-    3. Convolve the same kernel with the unknown mixture data.
+    1. Convolve a Gaussian kernel (bandwidth set with FD method by default) with each datum for each reference population (`R_C` and `R_N`) to produce two distribution templates: `kde_R_C` and `kde_R_N`.
+    2. Create a new model which is the weighted sum of these two distributions (initialise to equal amplitudes: `amp_R_C = amp_R_N = 1`): `y = amp_R_C * kde_R_C + amp_R_N * kde_R_N`.
+    3. Convolve the same kernel with the unknown mixture data to form `kde_M`.
     4. Fit the combined model to the smoothed mixture allowing the amplitude of each reference distribution to vary. Optimise with the least squares algorithm.
-    5. `proportion_T1 = amp_T1/(amp_T1+amp_T2)`.
+    5. `p_hat_C = amp_R_C / (amp_R_C + amp_R_N)`.
 
     ```python
-    # Fit reference populations
-    for data, label in zip([T1, T2], labels):
-        kdes[label] = {}
-        X = data[:, np.newaxis]
-        kde = KernelDensity(kernel=kernel, bandwidth=bin_width).fit(X)
-        kdes[label] = kde
-
-    def fit_KDE(RM, model, params_mix, kernel, bins):
-        x_KDE = np.linspace(bins[tag]['min'], bins[tag]['max'], len(RM)+2)
-        mix_kde = KernelDensity(kernel=kernel, bandwidth=bins[tag]['width']).fit(RM[:, np.newaxis])
-        res_mix = model.fit(np.exp(mix_kde.score_samples(x_KDE[:, np.newaxis])), x=x_KDE, params=params_mix)
-        amp_T1 = res_mix.params['amp_T1'].value
-        amp_T2 = res_mix.params['amp_T2'].value
-        return amp_T1/(amp_T1+amp_T2)
+    def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
+        x = bins["centers"]
+        bw = bins['width']
+        kde_mix = KernelDensity(kernel=kernel, bandwidth=bw).fit(Mix[:, np.newaxis])
+        res_mix = model.fit(np.exp(kde_mix.score_samples(x[:, np.newaxis])),
+                            x=x, params=params_mix, method=method)
+        amp_R_C = res_mix.params['amp_1'].value
+        amp_R_N = res_mix.params['amp_2'].value
+        return amp_R_C / (amp_R_C + amp_R_N)
     ```
 
 Methods Summary
@@ -137,74 +277,3 @@ Methods Summary
 | Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
 |               |                       |                       | Computationally expensive. |
 
-
-Discussion points to be agreed
-------------------------------
-
-- [x] Use adjusted excess method i.e. pr_Excess /= 0.92
-- [ ] Should the Excess take as Ref2, the closest to the mixture?
-- [ ] Should the Excess flip the references for the heatmap?
-- [ ] How to calculate "pseudo ground truth" for Diabetes data
-- [ ] How to generate a single proportion from EMD method
-- [ ] Supplementary figure showing the Excess breakdown for different degrees of overlap?
-- [ ] Should the grid search plots colour +/- error?
-
-
-TODO
-----
-
-- [ ] [Remove sensitive data](https://help.github.com/articles/removing-sensitive-data-from-a-repository/) from the repository before publishing e.g. `biobank_mix_WTCC_ref.csv` including this README.
-- [ ] Why is the population_median close to but not equal to the Ref1_median?
-- [x] Summary table of pros and cons for each method
-- [ ] Apply excess and kde to mixture plots for mean and CI
-- [x] Include equation for clinical characteristics from Thomas et al. Lancet Diabetes and Endocrinology
-- [ ] Plot residuals for KDE to help identify "third" groups
-- [ ] Ensure all relevant data access forms are signed
-- [ ] Adapt EMD to be non-parametric
-- [ ] Adapt KDE to be non-parametric
-- [ ] Reference for the 8% Excess underestimate?
-- [ ] The Wellcome Trust requires that the research is made open access: https://www.exeter.ac.uk/research/openresearch/payingopenaccess/
-
-Continuous characteristics (eg, BMI) were derived by use of the mean value of the low susceptibility group (type 2 diabetes) and the mean of the high susceptibility group (combined type 1 and type 2 diabetes) to calculate a mean for the group with type 1 diabetes. For example, for BMI:
-
-```math
-\bar{x}_{T1D}^{BMI} = \frac{n_H \bar{x}_H^{BMI} - n_L \bar{x}_L^{BMI}}{n_{T1D}}
-```
-
-where $`n_H`$, $`n_L`$, and $`n_{T1D}`$ represent the number of individuals and $`\bar{x}_H^{BMI}`$, $`\bar{x}_L^{BMI}`$, and $`\bar{x}_{T1D}^{BMI}`$ represent the mean BMI of the high, low, and excess groups, respectively.
-
-Display Items
--------------
-
-1. Bootstrap figure
-2. Methods illustration (including excess) consistent layout with results
-3. Type I Diabetes: Results (error & s.d. for each method) [2x2]
-4. Violin plot or swarm in box plot (estimate with confidence intervals)
-    - Compute estimates for each method for each real data set [3x3] then fix each estimate to bootstrap around (drawing from reference populations) in order to compute CIs for each method on each data set.
-5. Table of pros and cons
-
-### Supplementary Figures
-
-1. Bootstraps (as for Fig. 3) for e.g. Depression, Menieres, Renal.
-2. Mixture histograms with estimates and confidence intervals for each method
-3. Distributions of Ref1, Ref2 and Mix for each dataset
-
-Links
------
-
-- https://joblib.readthedocs.io/en/latest/parallel.html
-- https://lmfit.github.io/lmfit-py/fitting.html
-- https://github.com/tqdm/tqdm#parameters
-- KDEs
-    * https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
-    * https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
-    * https://jakevdp.github.io/PythonDataScienceHandbook/05.13-kernel-density-estimation.html
-    * https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
-    * https://mglerner.github.io/posts/histograms-and-kernel-density-estimation-kde-2.html?p=28
-    * https://github.com/Daniel-B-Smith/KDE-for-SciPy
-- Curve fitting
-    * https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
-- Confidence Intervals
-    * http://www.statsmodels.org/dev/generated/statsmodels.stats.proportion.proportion_confint.html
-    * https://www.statisticshowto.datasciencecentral.com/probability-and-statistics/confidence-interval/#CIpopprop
-    * https://onlinecourses.science.psu.edu/stat100/node/56/
