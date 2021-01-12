@@ -1,5 +1,4 @@
 # Project directories
-# TODO: Remove sensitive data from the repository
 data/previous*
 data_*
 data/
@@ -7,6 +6,7 @@ data/
 *figs*/
 tmp*
 scrap
+Notes.md
 *.tar
 *.gz
 *.bz2
