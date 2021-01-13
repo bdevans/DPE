@@ -13,7 +13,7 @@ class Timer:
     """
     Class for timing blocks of code.
     Adapteed from http://preshing.com/20110924/timing-your-code-using-pythons-with-statement/
-    
+
     Examples
     --------
     >>> with Timer() as t:
@@ -22,7 +22,7 @@ class Timer:
     """
     # interval = 0
     def __init__(self, clock=time.perf_counter):
-        """clock: 
+        """clock:
             time.perf_counter (wall time)
             time.process_time (processor time)
         """
@@ -59,11 +59,11 @@ def format_seconds(sec):
 # Let's use FD!
 def estimate_bins(data, bin_range=None, verbose=0):
     """Generate GRS bins through data-driven methods in `np.histogram`.
-    
+
     These methods include:
     ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']
 
-    For more information see: 
+    For more information see:
     https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges
     """
     # TODO: Refactor to pass one method and return only that dictionary
@@ -78,7 +78,7 @@ def estimate_bins(data, bin_range=None, verbose=0):
     bins = {}
     if verbose:
         print("  Method | Data |  n  |  width  |      range     ", flush=True)
-        print("="*line_width)
+        print("=" * line_width)
     for method in ['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']:
         all_scores = []
         all_refs = []
@@ -98,7 +98,7 @@ def estimate_bins(data, bin_range=None, verbose=0):
         h_r, edges_r = np.histogram(all_refs, bins=method,
                                     range=(min(all_scores), max(all_scores)))
         if verbose > 1:
-            print("-"*line_width)
+            print("-" * line_width)
             print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]"
                   .format(method, "Refs", len(edges_r)-1, edges_r[1]-edges_r[0], edges_r[0], edges_r[-1]))
 
@@ -106,14 +106,14 @@ def estimate_bins(data, bin_range=None, verbose=0):
 
         if verbose:
             if verbose > 1:
-                print("-"*line_width)
+                print("-" * line_width)
             print(" {:>7} | {:>4} | {:>3} | {:<7.5f} | [{:5.3}, {:5.3}]"
                   .format(method, "All", len(edges_a)-1, edges_a[1]-edges_a[0], edges_a[0], edges_a[-1]))
             # print("{:4} {:>7}: width = {:<7.5f}, n_bins = {:>4,}, range = [{:5.3}, {:5.3}]".format("All", method, b['width'], b['n'], b['min'], b['max']))
             if verbose > 1:
-                print("="*line_width)
+                print("=" * line_width)
             else:
-                print("-"*line_width)
+                print("-" * line_width)
 
         # h, edges = h_a, edges_a
         h, edges = h_r, edges_r
@@ -137,7 +137,7 @@ def get_fpr_tpr(scores, bins):
 
     # TPR = TP / P
     # FPR = FP / N
-    # x=FPR, y=TPR
+    # x=FPR, y=TPR
     # p = 1. * np.arange(len(all_refs)) / (len(all_refs) - 1)
     hist_1, _ = np.histogram(scores["R_C"], bins=bins["edges"], density=False)
     hist_2, _ = np.histogram(scores["R_N"], bins=bins["edges"], density=False)
@@ -150,8 +150,8 @@ def get_fpr_tpr(scores, bins):
 
     cum_p = np.cumsum(hist_p)  # R_C := cases := positive
     cond_P = hist_p.sum()
-    tp = cond_P - cum_p  # Must subtract from P since cumsum grows the opposite way
-    
+    tp = cond_P - cum_p  # Must subtract from P since cumsum grows the opposite way
+
     cum_n = np.cumsum(hist_n)  # R_N := non-cases := negative
     cond_N = hist_n.sum()
     tn = cum_n
