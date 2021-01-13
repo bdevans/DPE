@@ -9,23 +9,20 @@
 import time
 import timeit
 import os
-# import numpy as np
 
-from datasets import load_diabetes_data
-from proportion_estimation import analyse_mixture
-from proportion_estimation import fit_kernel
+from dpe.datasets import load_diabetes_data
+from dpe import analyse_mixture
+from dpe import fit_kernel
 
 
 scores, bins, means, medians, p_C = load_diabetes_data('T1GRS')
 kernel = "gaussian"
 
-
-
 time_skl = timeit.timeit(stmt="fit_kernel(scores['Mix'], bw=bins['width'], kernel=kernel)", 
               setup="from datasets import load_diabetes_data; from proportion_estimation import fit_kernel; scores, bins, means, medians, p_C, kernel = *load_diabetes_data('T1GRS'), 'gaussian'",
               number=1000,
               timer=time.process_time)
-            #   timer=time.time)
+              # timer=time.time)
 
 # print(np.amin(time_skl))
 print(time_skl)

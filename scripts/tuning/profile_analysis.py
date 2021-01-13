@@ -5,9 +5,8 @@
 
 import os
 
-from datasets import load_diabetes_data
-from proportion_estimation import analyse_mixture
-from proportion_estimation import fit_kernel
+from dpe import analyse_mixture, fit_kernel
+from dpe.datasets import load_diabetes_data
 
 
 seed = 42
