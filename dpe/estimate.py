@@ -307,11 +307,10 @@ def generate_report(summary, true_pC=None, alpha=0.05):
     report.append("=" * line_width)
     for method, results in summary.items():
         report.append(f" {method:6} point | {results['p_C']:<17.5f} | {1-results['p_C']:<17.5f} ")
-        # NOTE: std(1-values) == std(values)
-        report.append(f" {method:6} (µ±σ) | {results['mean']:.5f} +/- {results['std']:.3f} "
-                                        f"| {1-results['mean']:.5f} +/- {results['std']:.3f} ")
-
-        if "CI" in results:  # n_boot > 1:
+        if "CI" in results and "mean" in results and "std" in results:  # n_boot > 1:
+            # NOTE: std(1-values) == std(values)
+            report.append(f" {method:6} (µ±σ) | {results['mean']:.5f} +/- {results['std']:.3f} "
+                                            f"| {1-results['mean']:.5f} +/- {results['std']:.3f} ")
             ci_low_C, ci_upp_C = results["CI"]
             ci_low_N, ci_upp_N = 1-ci_upp_C, 1-ci_low_C
             report.append(f" C.I. ({1-alpha:3.1%}) | {ci_low_C:<8.5f},{ci_upp_C:>8.5f} | {ci_low_N:<8.5f},{ci_upp_N:>8.5f} ")
