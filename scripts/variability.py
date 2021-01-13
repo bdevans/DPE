@@ -10,10 +10,9 @@ import time
 import os
 
 import numpy as np
-import pandas as pd
 
-import proportion_estimation as pe
-import datasets as ds
+import dpe
+import dpe.datasets as ds
 
 out_dir = os.path.join("results", "variability_data")
 os.makedirs(out_dir, exist_ok=True)
@@ -45,9 +44,9 @@ for tag, data in datasets.items():
     scores["Mix"] = mixture
 
     t = time.time()  # Start timer
-    results = pe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                                 boot_size=sample_size, n_mix=n_mix, alpha=alpha,
-                                 true_pC=p_C, n_jobs=-1, seed=seed, verbose=1)
+    results = dpe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
+                                  boot_size=sample_size, n_mix=n_mix, alpha=alpha,
+                                  true_pC=p_C, n_jobs=-1, seed=seed, verbose=1)
 
     summary, samples = results
     samples.to_csv(os.path.join(out_dir, "{}_bootstraps.csv".format(tag)), header=True)
