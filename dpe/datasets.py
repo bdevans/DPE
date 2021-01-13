@@ -8,7 +8,6 @@ Created on Thu Jul 19 12:18:40 2018
 
 import numpy as np
 import pandas as pd
-#import seaborn as sns
 
 from . utilities import estimate_bins
 
@@ -18,7 +17,6 @@ from . utilities import estimate_bins
 def load_diabetes_data(metric):
 
     dataset = 'data/biobank_mix_WTCC_ref.csv'
-#    metrics = ['T1GRS', 'T2GRS']
     headers = {'diabetes_type': 'group', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
 
     if metric == 'T1GRS':
@@ -65,19 +63,6 @@ def load_diabetes_data(metric):
     medians = {"R_C": np.median(scores["R_C"]),
                "R_N": median}
 
-    # --------------------------- Bin the data -------------------------------
-#    N = data.count()[0]
-    # bins = {}
-    #
-    # bin_edges = np.arange(bin_min, bin_max+bin_width, bin_width)
-    # bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-    #
-    # bins = {'width': bin_width,
-    #         'min': bin_min,
-    #         'max': bin_max,
-    #         'edges': bin_edges,
-    #         'centers': bin_centers}
-
     # if False:
     #     sns.jointplot(x='T1GRS', y='T2GRS', data=data)
     # #    f, ax = plt.subplots(1, 3)
@@ -86,6 +71,7 @@ def load_diabetes_data(metric):
     #     sns.jointplot(x='T1GRS', y='T2GRS', color='g', data=data.loc[data["group"]==3])
     # #    sns.JointGrid(x='T1GRS', y='T2GRS', data=data)
 
+    # --------------------------- Bin the data -------------------------------
     print("Diabetes Data [{}]".format(metric))
     # print("=====================")
     # print("Chosen: width = {}".format(bin_width))
@@ -152,18 +138,6 @@ def load_renal_data():
                "R_N": np.median(scores['R_N'])}
 
     # --------------------------- Bin the data -------------------------------
-#    N = data.count()[0]
-    # bins = {}
-    #
-    # bin_edges = np.arange(bin_min, bin_max+bin_width, bin_width)
-    # bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-    #
-    # bins = {'width': bin_width,
-    #         'min': bin_min,
-    #         'max': bin_max,
-    #         'edges': bin_edges,
-    #         'centers': bin_centers}
-
     print("Renal Data")
     # print("==========")
     # print("Chosen: width = {}".format(bin_width))
