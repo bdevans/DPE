@@ -49,11 +49,11 @@ def fit_kernel(scores, bw, kernel='gaussian'):  # , atol=0, rtol=1-4):
 # @mem.cache
 def fit_KDE_model(Mix, bins, model, params_mix, kernel, method='leastsq'):
     """Fit a combination of two reference population kernel density estimates
-    to a mixture. 
-    
+    to a mixture.
+
     The amplitude of each reference population is adjust iteratively using the
     Levenberg-Marquardt (least squares) algorithm by default, to optimise
-    the fit to the mixture population. The amplitudes are then normalised to 
+    the fit to the mixture population. The amplitudes are then normalised to
     give the proportion of R_C (cases) within the mixture.
     """
 
@@ -89,7 +89,7 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
     results for efficiency.
     """
 
-    methods_ = copy.deepcopy(methods)  # Prevent issue with repeated runs
+    methods_ = copy.deepcopy(methods)  # Prevent issue with repeated runs
     if isinstance(methods_, str):
         method_name = methods_
         if method_name.lower() == 'all':
@@ -121,7 +121,7 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
         if not isinstance(methods_["Means"], dict):
             methods_["Means"] = {"mu_C": np.mean(scores["R_C"]),
                                  "mu_N": np.mean(scores["R_N"])}
-        
+
         mu_C, mu_N = methods_["Means"]["mu_C"], methods_["Means"]["mu_N"]
         mix_mean = scores["Mix"].mean()
         if mix_mean < min(mu_C, mu_N) or mix_mean > max(mu_C, mu_N):
@@ -186,8 +186,8 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
 
 def correct_estimate(df_pe):
     """Apply bootstrap based bias correction.
-    
-    Assuming that the distribution of error between the the initial point 
+
+    Assuming that the distribution of error between the the initial point
     estimate and the real proportion is well approximated by the distribution
     of the error between the bootstrap estimates and the initial point
     estimate.
@@ -212,7 +212,7 @@ def correct_estimate(df_pe):
 def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean,
                         alpha=0.05, ci_method="bca"):
     """Calculate confidence intervals for a point estimate.
-    
+
     By default we use the alpha quantile of the distribution of the N_M * N_B
     bootstrapped p_C values, where alpha = 0.05.
 
@@ -221,17 +221,17 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     values : array
         The array of bootstrapped p_C estimates (for a particular method).
     initial : float, optional
-        An optional estimate from the original mixture (for a particular method). 
+        An optional estimate from the original mixture (for a particular method).
     correct_bias : None or bool, optional
-        A flag to correct the `experimental` CI method. 
+        A flag to correct the `experimental` CI method.
     average : function, optional
-        The function used to calculate the average estimate across bootstraps. 
+        The function used to calculate the average estimate across bootstraps.
     alpha : float, optional
-        The percentile to use for the confidence intervals (default = 0.05). 
-        The returned values are (alpha/2, 1-alpha/2) percentile confidence 
+        The percentile to use for the confidence intervals (default = 0.05).
+        The returned values are (alpha/2, 1-alpha/2) percentile confidence
         intervals.
     ci_method : str, optional
-        The name of the method used to calculate the confidence intervals. 
+        The name of the method used to calculate the confidence intervals.
     """
 
     n_obs = len(values)
@@ -240,7 +240,7 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     if ci_method.lower() == 'bca':
         # Adapted from https://github.com/cgevans/scikits-bootstrap
         # TODO: Replace with this external library for more robust checks
-        
+
         # print("Using BCa method...")
         # Esitamate the bias correction value (the median bias transformed into normal deviates)
         z0 = norm.ppf(np.sum(values < average_value, axis=0) / n_obs)
@@ -259,16 +259,16 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
             warnings.warn(f"BCa acceleration values for indexes {nanind} were \
                             undefined. Statistic values were likely all equal. \
                             Affected CI will be inaccurate.")
-        
+
         alphas = np.array([alpha/2, 1-alpha/2])
 
-        zs = z0 + norm.ppf(alphas).reshape(alphas.shape+(1,)*z0.ndim)
-        avals = norm.cdf(z0 + zs/(1-a*zs))
+        zs = z0 + norm.ppf(alphas).reshape(alphas.shape + (1,) * z0.ndim)
+        avals = norm.cdf(z0 + zs / (1-a*zs))
         np.seterr(**oldnperr)
 
         values = values.to_numpy()
         values.sort(axis=0)
-        nvals = np.round((n_obs-1)*avals)
+        nvals = np.round((n_obs-1) * avals)
         nvals = np.nan_to_num(nvals).astype('int')
         ci_low, ci_upp = values[nvals]
 
@@ -285,10 +285,10 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
     elif ci_method.lower() == 'stderr':
         p = average_value
         # NOTE: This currently allows CIs outside [0, 1]
-        err = np.sqrt(p*(1-p)/n_obs) * sp.stats.norm.ppf(1-alpha/2)
+        err = np.sqrt(p * (1-p) / n_obs) * sp.stats.norm.ppf(1-alpha/2)
         ci_low, ci_upp = p - err, p + err
     else:  # Assumes a binomial distribution
-        count = int(average_value*n_obs)
+        count = int(average_value * n_obs)
         ci_low, ci_upp = proportion_confint(count, n_obs, alpha=alpha,
                                             method=ci_method)
 
@@ -304,13 +304,12 @@ def generate_report(summary, true_pC=None, alpha=0.05):
     line_width = 54
     report = []
     report.append(f" {'Method':^12} | {'Estimated p_C':^17s} | {'Estimated p_N':^17s} ")
-    report.append("="*line_width)
+    report.append("=" * line_width)
     for method, results in summary.items():
         report.append(f" {method:6} point | {results['p_C']:<17.5f} | {1-results['p_C']:<17.5f} ")
         # NOTE: std(1-values) == std(values)
         report.append(f" {method:6} (µ±σ) | {results['mean']:.5f} +/- {results['std']:.3f} "
                                         f"| {1-results['mean']:.5f} +/- {results['std']:.3f} ")
-
 
         if "CI" in results:  # n_boot > 1:
             ci_low_C, ci_upp_C = results["CI"]
@@ -318,10 +317,10 @@ def generate_report(summary, true_pC=None, alpha=0.05):
             report.append(f" C.I. ({1-alpha:3.1%}) | {ci_low_C:<8.5f},{ci_upp_C:>8.5f} | {ci_low_N:<8.5f},{ci_upp_N:>8.5f} ")
             if "p_cor_C" in results:
                 report.append(f" Corrected    | {results['p_cor_C']:<17.5f} | {1-results['p_cor_C']:<17.5f} ")
-        report.append("-"*line_width)
+        report.append("-" * line_width)
     if true_pC:
         report.append(f" {'Ground Truth':12} | {true_pC:<17.5f} | {1-true_pC:<17.5f} ")
-        report.append("="*line_width)
+        report.append("=" * line_width)
     # report.append("\n")
     return "\n".join(report)
 
@@ -446,7 +445,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         A boolean flag specifing whether to apply the bootstrap correction
         method or not. Default: `False`.
     seed : int
-        An optional value to seed the random number generator with 
+        An optional value to seed the random number generator with
         (in the range [0, (2^32)-1]) for reproducibility of sampling used for
         confidence intervals.
         Defaults: `None`.
@@ -457,12 +456,12 @@ def analyse_mixture(scores, bins='fd', methods='all',
         Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to
         turn off all console output except the progress bars.
     true_pC : float
-        Optionally pass the true proportion of cases for comparing to the 
+        Optionally pass the true proportion of cases for comparing to the
         estimated proportion(s).
     logfile : str
         Optional filename for the output logs.
         Default: `"proportion_estimates.log"`.
- 
+
     Returns
     -------
     (summary, bootstraps) : tuple
@@ -484,7 +483,6 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
     Additionally the logfile is written to the working directory.
     """
-
 
     if seed is not None:
         np.random.seed(seed)
@@ -519,7 +517,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         assert "n" in bins
     else:
         warnings.warn(f"Unexpected bins data format: {type(bins)}")
-    
+
     if "method" in bins:
         bin_method = bins["method"]
     else:
@@ -682,7 +680,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
             df_correct = correct_estimate(df_pe)
             for method, p_cor_C in df_correct.items():
                 summary[method]["p_cor_C"] = p_cor_C  # TODO: Remove?
-        
+
     else:
         df_pe = pd.DataFrame(pe_initial, index=[0], columns=columns)
 
