@@ -10,9 +10,6 @@ dependencies:
   - pandas
   - scikit-learn
   - xlrd
-  # - scikit-plot
-  - matplotlib>=3.3
-  - seaborn
   - lmfit
   # - emcee
   # - corner
@@ -23,6 +20,10 @@ dependencies:
   # - h5py
   # - numexpr
   - tqdm
+  - pytest
+  # - scikit-plot
+  - matplotlib>=3.3
+  - seaborn
   - pip:
     - KDEpy
     # - fastkde
