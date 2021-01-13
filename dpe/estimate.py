@@ -326,11 +326,12 @@ def generate_report(summary, true_pC=None, alpha=0.05):
 
 
 def point_estimate(RM, R_C, R_N, bins, methods=None):
-    """Estimate the proportion of two reference populations comprising
+    r"""Estimate the proportion of two reference populations comprising
     an unknown mixture.
 
-    The returned proportions, \hat{p}_C, are with respect to R_C, the cases.
-    The proportion of R_N, p_N, is assumed to be 1 - p_C.
+    The returned proportions, :math:`\hat{p}_C`, are with respect to
+    :math:`R_C`, the cases. The proportion of :math:`R_N`, :math:`p_N`, is
+    assumed to be :math:`1 - \hat{p}_C`.
     """
 
     results = {}
