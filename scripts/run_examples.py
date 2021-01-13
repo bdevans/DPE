@@ -39,7 +39,7 @@ for p_C in example_proportions:
         scores = ds.load_dataset(f'{dataset}.csv')
     else:
         # Generate new data
-        print(f'Generating fresh example dataset...')
+        print('Generating fresh example dataset...')
         scores = ds.generate_dataset(p_C)
 
         # Save data
@@ -53,7 +53,7 @@ for p_C in example_proportions:
     # NOTE: the ground truth p_C is passed to analyse_mixture but is only used
     # for printing in the log file for easy comparison and may be omitted
     results = dpe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                                  boot_size=boot_size, n_mix=n_mix, alpha=alpha, 
+                                  boot_size=boot_size, n_mix=n_mix, alpha=alpha,
                                   ci_method=ci_method, correct_bias=correct_bias,
                                   seed=seed, n_jobs=n_jobs, verbose=verbose,
                                   true_p1=p_C, logfile=f'{dataset}.log')
