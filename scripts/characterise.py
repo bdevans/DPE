@@ -67,15 +67,15 @@ def assess(sample_size, p_C, R_C, R_N, bins, methods, n_boot, seed=None):
     scores['Mix'] = mixture
 
     if verbose:
-        logfile = os.path.join(out_dir, "logs", 
+        logfile = os.path.join(out_dir, "logs",
                                f'dpe_s{sample_size:05}_p{p_C:.2f}_{seed}.log')
     else:
         logfile = None
 
     results = dpe.analyse_mixture(scores, bins, methods, n_boot=n_boot,
-                                boot_size=-1, n_mix=n_mix, alpha=alpha,
-                                true_pC=p_C, n_jobs=1, seed=seed,
-                                verbose=0, logfile=logfile)
+                                  boot_size=-1, n_mix=n_mix, alpha=alpha,
+                                  true_pC=p_C, n_jobs=1, seed=seed,
+                                  verbose=0, logfile=logfile)
     summary, samples = results
     point = samples.iloc[[0]]
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         methods = dpe.prepare_methods(scores, bins)  # Get all methods
 
         # NOTE: There is always a point estimate in addition to any bootstraps
-        n_applications = len(sample_sizes) * len(proportions) * n_samples * (1+n_boot)
+        n_applications = len(sample_sizes) * len(proportions) * n_samples * (1 + n_boot)
         print(f"Total method applications (of {len(methods)} methods): {n_applications:,}")
 
         with open(os.path.join(out_dir, "run.log"), "a") as runlog:
