@@ -22,9 +22,8 @@ from sklearn.neighbors import KernelDensity
 from matplotlib import pyplot as plt
 
 from dpe.datasets import load_diabetes_data, load_coeliac_data
-from proportion_estimation import analyse_mixture
-from proportion_estimation import fit_kernel
-from utilities import Timer
+from dpe.estimate import analyse_mixture, fit_kernel
+from dpe.utilities import Timer
 
 # scores, bins, means, medians, p_C = load_diabetes_data('T1GRS')
 scores, bins, means, medians, p_C = load_coeliac_data()
@@ -260,6 +259,7 @@ if verbose:
 
 
 if False:
+    import corner
     # Calculating the posterior probability distribution of parameters
     res = mini.emcee(burn=300, steps=1000, thin=20, params=mini.params)
     corner.corner(res.flatchain, labels=res.var_names, truths=list(res.params.valuesdict().values()))
