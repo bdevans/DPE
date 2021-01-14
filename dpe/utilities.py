@@ -202,8 +202,8 @@ def load_accuracy(data_dir, label):
     boots_estimates = {}
 
     for method in _ALL_METHODS_:
-        point_file = f'{data_dir}/point_{method}_{label}.npy'
-        boots_file = f'{data_dir}/boots_{method}_{label}.npy'
+        point_file = os.path.join(data_dir, f"point_{method}_{label}.npy")
+        boots_file = os.path.join(data_dir, f"boots_{method}_{label}.npy")
         if os.path.isfile(point_file):
             point_estimates[method] = np.load(point_file)
         if os.path.isfile(boots_file):
