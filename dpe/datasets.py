@@ -180,47 +180,50 @@ def load_coeliac_data():
     return scores, chosen_bins, means, medians, p_C
 
 
-def generate_dataset(p_C):
+def generate_dataset(p_C, size=5000, seed=None):
 
     assert 0.0 <= p_C <= 1.0
+    assert 0 < size
 
-    n_ref_1 = 5000
-    n_ref_2 = 5000
-    n_mix = 5000
+    # Create a generator to avoid a complete reseed
+    rng = np.random.default_rng(seed)
 
-    ref1 = np.random.normal(loc=1, scale=0.2, size=n_ref_1)
-    bump = int(np.ceil(0.1 * n_ref_2))
-    ref2 = np.concatenate((np.random.normal(loc=1.2, scale=0.2, size=n_ref_2-bump),
-                           np.random.normal(loc=1.6, scale=0.05, size=bump)))
-    mix_n_ref_1 = int(round(p_C * n_mix))
-    mix_n_ref_2 = n_mix - mix_n_ref_1
-    mix = np.concatenate((np.random.choice(ref1, mix_n_ref_1, replace=True),
-                          np.random.choice(ref2, mix_n_ref_2, replace=True)))
+    n_R_C = size
+    n_R_N = size
+    n_mix = size
 
-    scores = {'Ref1': ref1,
-              'Ref2': ref2,
+    R_C = rng.normal(loc=1, scale=0.2, size=n_R_C)
+    bump = int(np.ceil(0.1 * n_R_N))
+    R_N = np.concatenate((rng.normal(loc=1.2, scale=0.2, size=n_R_N-bump),
+                          rng.normal(loc=1.6, scale=0.05, size=bump)))
+    mix_n_R_C = int(round(p_C * n_mix))
+    mix_n_R_N = n_mix - mix_n_R_C
+    mix = np.concatenate((rng.choice(R_C, mix_n_R_C, replace=True),
+                          rng.choice(R_N, mix_n_R_N, replace=True)))
+
+    scores = {'R_C': R_C,
+              'R_N': R_N,
               'Mix': mix}
     return scores
 
 
 def save_dataset(scores, filename, codes=None):
     if codes is None:
-        codes = {'Ref1': 1, 'Ref2': 2, 'Mix': 3}
-    groups = np.concatenate((np.ones_like(scores['Ref1'], dtype=int) * codes['Ref1'],
-                             np.ones_like(scores['Ref2'],
-                                          dtype=int) * codes['Ref2'],
+        codes = {'R_C': 1, 'R_N': 2, 'Mix': 3}
+    groups = np.concatenate((np.ones_like(scores['R_C'], dtype=int) * codes['R_C'],
+                             np.ones_like(scores['R_N'], dtype=int) * codes['R_N'],
                              np.ones_like(scores['Mix'], dtype=int) * codes['Mix']))
-    grs = np.concatenate((scores['Ref1'], scores['Ref2'], scores['Mix']))
+    grs = np.concatenate((scores['R_C'], scores['R_N'], scores['Mix']))
     data = pd.DataFrame(data={'Group': groups, 'GRS': grs})
     data.to_csv(filename, header=True, index=False)
 
 
 def load_dataset(filename, codes=None):
     if codes is None:
-        codes = {'Ref1': 1, 'Ref2': 2, 'Mix': 3}
+        codes = {'R_C': 1, 'R_N': 2, 'Mix': 3}
     data = pd.read_csv(filename)  # , header=['Group', 'GRS'])
     data.dropna(inplace=True)  # Remove any empty entries
-    scores = {'Ref1': data.loc[data['Group'] == codes['Ref1'], 'GRS'].values,
-              'Ref2': data.loc[data['Group'] == codes['Ref2'], 'GRS'].values,
+    scores = {'R_C': data.loc[data['Group'] == codes['R_C'], 'GRS'].values,
+              'R_N': data.loc[data['Group'] == codes['R_N'], 'GRS'].values,
               'Mix': data.loc[data['Group'] == codes['Mix'], 'GRS'].values}
     return scores

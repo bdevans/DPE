@@ -484,6 +484,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
     Additionally the logfile is written to the working directory.
     """
 
+    # TODO: Overhaul RNG to use generators: rng = np.random.default_rng()
     if seed is not None:
         np.random.seed(seed)
 
