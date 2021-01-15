@@ -1,13 +1,7 @@
 import os
-import sys
-# import pathlib
 
 import pytest
 import numpy as np
-
-# sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.absolute()))
-# print(sys.path)
-nproc = os.cpu_count()
 
 import dpe.datasets as ds
 import dpe
@@ -15,6 +9,7 @@ import dpe
 
 seed = 0
 # p_C = 0.1
+nproc = os.cpu_count()
 
 @pytest.fixture
 def scores_pC010():
