@@ -17,7 +17,7 @@ seed = 0
 # p_C = 0.1
 
 @pytest.fixture
-def scores_p010():
+def scores_pC010():
     """Generate synthetic data with p_C=0.1"""
     return ds.generate_dataset(p_C=0.1, size=5000, seed=seed)
 
@@ -57,15 +57,15 @@ expected_n_boot_10_n_mix_10 = {
     (10, 0, seed, nproc, expected_n_boot_10_nproc_8),
     (10, 10, seed, nproc, expected_n_boot_10_n_mix_10),
 ])
-def test_anaylse_mixture_parameterised(scores_p010, n_boot, n_mix, seed, nproc, expected):
-    summary, bootstraps = dpe.analyse_mixture(scores_p010, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc)
+def test_anaylse_mixture_parameterised(scores_pC010, n_boot, n_mix, seed, nproc, expected):
+    summary, bootstraps = dpe.analyse_mixture(scores_pC010, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc)
     for method, results in summary.items():
         for metric, value in results.items():
             assert np.all(np.isclose(value, expected[method][metric])), \
             f"{value} != {method}:{metric}={expected[method][metric]}"
 
-# def test_anaylse_mixture(scores_p010):
-#     results = dpe.analyse_mixture(scores_p010, n_boot=0, n_mix=0, seed=seed, true_pC=p_C)
+# def test_anaylse_mixture(scores_pC010):
+#     results = dpe.analyse_mixture(scores_pC010, n_boot=0, n_mix=0, seed=seed, true_pC=p_C)
 #     summary, bootstraps = results
 
 #     assert np.isclose(summary["EMD"]["p_C"], 0.12156986188389857)
@@ -74,8 +74,8 @@ def test_anaylse_mixture_parameterised(scores_p010, n_boot, n_mix, seed, nproc, 
 #     assert np.isclose(summary["Means"]["p_C"], 0.12116137064813201)
 
 
-# def test_anaylse_mixture_mix(scores_p010):
-#     results = dpe.analyse_mixture(scores_p010, n_boot=0, n_mix=10, seed=seed, true_pC=p_C)
+# def test_anaylse_mixture_mix(scores_pC010):
+#     results = dpe.analyse_mixture(scores_pC010, n_boot=0, n_mix=10, seed=seed, true_pC=p_C)
 #     summary, bootstraps = results
 
 #     assert np.isclose(summary["EMD"]["p_C"], 0.12156986188389857)
@@ -84,8 +84,8 @@ def test_anaylse_mixture_parameterised(scores_p010, n_boot, n_mix, seed, nproc, 
 #     assert np.isclose(summary["Means"]["p_C"], 0.12116137064813201)
 
 
-# def test_anaylse_mixture_boot(scores_p010):
-#     results = dpe.analyse_mixture(scores_p010, n_boot=10, n_mix=0, seed=seed, true_pC=p_C)
+# def test_anaylse_mixture_boot(scores_pC010):
+#     results = dpe.analyse_mixture(scores_pC010, n_boot=10, n_mix=0, seed=seed, true_pC=p_C)
 #     summary, bootstraps = results
 
 #     # Proportion estimates
@@ -116,8 +116,8 @@ def test_anaylse_mixture_parameterised(scores_p010, n_boot, n_mix, seed, nproc, 
 #     assert np.isclose(summary["Means"]["CI"][1], 0.14815690928847491)
 
 
-# def test_anaylse_mixture_boot_parallel(scores_p010):
-#     results = dpe.analyse_mixture(scores_p010, n_boot=10, n_mix=0, seed=seed, n_jobs=nproc, true_pC=p_C)
+# def test_anaylse_mixture_boot_parallel(scores_pC010):
+#     results = dpe.analyse_mixture(scores_pC010, n_boot=10, n_mix=0, seed=seed, n_jobs=nproc, true_pC=p_C)
 #     summary, bootstraps = results
 
 #     # Proportion estimates
@@ -149,8 +149,8 @@ def test_anaylse_mixture_parameterised(scores_p010, n_boot, n_mix, seed, nproc, 
 #     assert np.isclose(summary["Means"]["CI"][1], 0.13095145348487366), summary["Means"]["CI"][1]
 
 
-# def test_anaylse_mixture_mix_boot(scores_p010):
-#     results = dpe.analyse_mixture(scores_p010, n_boot=10, n_mix=10, seed=seed, true_pC=p_C)
+# def test_anaylse_mixture_mix_boot(scores_pC010):
+#     results = dpe.analyse_mixture(scores_pC010, n_boot=10, n_mix=10, seed=seed, true_pC=p_C)
 #     summary, bootstraps = results
 
 #     # Proportion estimates
@@ -181,8 +181,8 @@ def test_anaylse_mixture_parameterised(scores_p010, n_boot, n_mix, seed, nproc, 
 #     assert np.isclose(summary["Means"]["CI"][1], 0.1400325155522334)
 
 
-# def test_anaylse_mixture_mix_boot_parallel(scores_p010):
-#     results = dpe.analyse_mixture(scores_p010, n_boot=10, n_mix=10, seed=seed, n_jobs=nproc, true_pC=p_C)
+# def test_anaylse_mixture_mix_boot_parallel(scores_pC010):
+#     results = dpe.analyse_mixture(scores_pC010, n_boot=10, n_mix=10, seed=seed, n_jobs=nproc, true_pC=p_C)
 #     summary, bootstraps = results
 
 #     # Proportion estimates
