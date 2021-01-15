@@ -12,7 +12,7 @@ Installation
 1. Add this folder to your `PYTHONPATH`.
 2. Install the requirements using one of the provided requirements files:
    1. If you use another Python distribution: `pip3 install -r requirements.txt`.
-   2. Or, if you use (Ana)conda: `conda env create -f environment.yml`. Then run `source activate dpe` to activate the environment. 
+   2. Or, if you use Anaconda: `conda env create -f environment.yml`. Then run `source activate dpe` to activate the environment. 
 
 This should take approximately 1-2 minutes to complete, depending on the speed of your internet connection and the number of dependencies already satisfied. 
 
@@ -39,8 +39,10 @@ The analysis parameters may be changed by editing the `run_examples.py` script. 
 Optionally, the file `generate_data.py` may be edited to change the construction parameters and generate new data sets to analyse. 
 
 Note: The population of cases is sometimes referred to as Reference 1 and the population of non-cases referred to as Reference 2. Accordingly these notations:
+```
 R_C == Ref1, R_N == Ref2
 p_C == p1, p_N == p2
+```
 may be used interchangeably. 
 
 ### Expected Output
@@ -133,7 +135,7 @@ The results are reproducible by default since a seed is set (42) for the pseudo 
 Running on your data
 --------------------
 
-The main requirement is to prepare a dictionary (`dict`) containing the keys `Ref1`, `Ref2` and `Mix`. The associated values should be (one dimensional) arrays (or lists) of the GRS scores for the "Reference 1" (cases) distribution, the "Reference 2" (non-cases) distribution and the Mixture distribution respectively. 
+The main requirement is to prepare a dictionary (`dict`) containing the keys `R_C`, `R_N` and `Mix`. The associated values should be (one dimensional) arrays (or lists) of the GRS scores for the "Reference 1" (cases) distribution, the "Reference 2" (non-cases) distribution and the Mixture distribution respectively. 
 
 Alternatively a `csv` file may be prepared and loaded with the function `data_utilities.load_dataset(filename)` as demonstrated in the `run_examples.py` script. The `csv` file should contain the header `Group,GRS` followed by pairs of `code,score` values (one per line for each GRS score) where code is `1` for the Reference 1 distribution (cases), `2` for the Reference 2 distribution (non-cases) and `3` for the mixture distribution. 
 
@@ -144,6 +146,7 @@ Pseudocode
 
 The main algorithm is as follows. Details of the specific methods may be found in the methods section of the accompanying manuscript. 
 
+```
 bins <-- generate_bins({R_C, R_N, Mix}, method='fd')  # Freedman-Diaconis
 for method in ["Excess", "Means", "EMD", "KDE"]:
     p_meth^i <-- get_point_estimate({R_C, R_N, Mix}, bins, method)  # Proportion of cases
@@ -157,6 +160,7 @@ for method in ["Excess", "Means", "EMD", "KDE"]:
     p_meth^cor <-- correct_estimate(p_meth^i, {p_m_b}_meth)  # Use the set of all bootstraps of all mixtures for each method
     CI_meth <-- get_confidence_intervals(p_meth^cor, {p_m_b}_meth, alpha)
 end
+```
 
 Explanation of the main function
 --------------------------------
