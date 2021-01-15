@@ -146,7 +146,7 @@ Pseudocode
 
 The main algorithm is as follows. Details of the specific methods may be found in the methods section of the accompanying manuscript. 
 
-```
+```sh
 bins <-- generate_bins({R_C, R_N, Mix}, method='fd')  # Freedman-Diaconis
 for method in ["Excess", "Means", "EMD", "KDE"]:
     p_meth^i <-- get_point_estimate({R_C, R_N, Mix}, bins, method)  # Proportion of cases
@@ -154,7 +154,7 @@ for method in ["Excess", "Means", "EMD", "KDE"]:
         Mix_meth_m <-- get_monte_carlo_mixture({R_C, R_N}, p_meth^i)
         for b in 1..N_B:  # Number of bootstraps
             Mix_meth_m_b <-- get_bootstrap({Mix_meth_m}, bins)  # Sample with replacement
-            p_meth_m_b <-- get_point_estimate({R_C, R_N, Mix_meth_m_b},bins, method)
+            p_meth_m_b <-- get_point_estimate({R_C, R_N, Mix_meth_m_b}, bins, method)
         end
     end
     p_meth^cor <-- correct_estimate(p_meth^i, {p_m_b}_meth)  # Use the set of all bootstraps of all mixtures for each method
