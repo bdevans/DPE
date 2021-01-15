@@ -35,7 +35,7 @@ expected_n_boot_10 = {
     'KDE': {'p_C': 0.11653533406952703, 'CI': (0.10882118268399207, 0.1448788902735669), 'mean': 0.12278166955266238, 'std': 0.012485646023580961}
     }
 
-expected_n_boot_10_nproc_8 = {
+expected_n_boot_10_parallel = {
     'Excess': {'p_C': 0.0964, 'CI': (0.0776, 0.1108), 'mean': 0.09759999999999999, 'std': 0.0100860299424501}, 
     'Means': {'p_C': 0.12116137064813201, 'CI': (0.11014270881728092, 0.13095145348487366), 'mean': 0.12283908114071776, 'std': 0.008544651916214157}, 
     'EMD': {'p_C': 0.12156986188389857, 'CI': (0.10911018704388409, 0.13124582773285004), 'mean': 0.12267561935887468, 'std': 0.00860512889035671}, 
@@ -51,10 +51,10 @@ expected_n_boot_10_n_mix_10 = {
 
 @pytest.mark.parametrize("n_boot,n_mix,seed,nproc,expected", [
     (0, 0, seed, 1, expected_point),
-    (0, 10, seed, 1, expected_point),  # NOTE: mixture modelling is skipped if n_boot==0
+    (0, 10, seed, 1, expected_point),  # NOTE: Mixture modelling is skipped if n_boot==0
     (10, 0, seed, 1, expected_n_boot_10),
     (10, 10, seed, 1, expected_n_boot_10_n_mix_10),
-    (10, 0, seed, nproc, expected_n_boot_10_nproc_8),
+    (10, 0, seed, nproc, expected_n_boot_10_parallel),  # NOTE: These results differ from the serial runs but depend on n_boot not n_jobs
     (10, 10, seed, nproc, expected_n_boot_10_n_mix_10),
 ])
 def test_anaylse_mixture_parameterised(scores_pC010, n_boot, n_mix, seed, nproc, expected):
@@ -62,7 +62,7 @@ def test_anaylse_mixture_parameterised(scores_pC010, n_boot, n_mix, seed, nproc,
     for method, results in summary.items():
         for metric, value in results.items():
             assert np.all(np.isclose(value, expected[method][metric])), \
-            f"{value} != {method}:{metric}={expected[method][metric]}"
+            f"{value} != expected[{method}][{metric}]={expected[method][metric]}"
 
 # def test_anaylse_mixture(scores_pC010):
 #     results = dpe.analyse_mixture(scores_pC010, n_boot=0, n_mix=0, seed=seed, true_pC=p_C)
