@@ -36,7 +36,7 @@ from sklearn.metrics import auc
 # TODO: Try replacing with scipy.optimize.curve_fit to reduce dependencies:
 # https://lmfit.github.io/lmfit-py/model.html
 
-from . utilities import estimate_bins, get_fpr_tpr
+from . utilities import estimate_bins, get_fpr_tpr, construct_mixture
 from . config import _ALL_METHODS_
 
 
@@ -393,10 +393,13 @@ def bootstrap_mixture(Mix, R_C, R_N, bins, methods, boot_size=-1, seed=None):
     if boot_size == -1:
         boot_size = len(Mix)
 
-    if seed is None:
-        bs = np.random.choice(Mix, boot_size, replace=True)
-    else:
-        bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
+    # if seed is None:
+    #     bs = np.random.choice(Mix, boot_size, replace=True)
+    # else:
+    #     bs = np.random.RandomState(seed).choice(Mix, boot_size, replace=True)
+    
+    rng = np.random.default_rng(seed)
+    bs = rng.choice(Mix, boot_size, replace=True)
 
     return point_estimate(bs, R_C, R_N, bins, methods)
 
@@ -485,8 +488,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
     """
 
     # TODO: Overhaul RNG to use generators: rng = np.random.default_rng()
-    if seed is not None:
-        np.random.seed(seed)
+    # if seed is not None:
+    #     np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     if correct_bias and n_mix + n_boot == 0:
         warnings.warn("No bootstraps - Ignoring bias correction!")
@@ -584,15 +588,18 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
         # Make bootstrapping deterministic with parallelism
         # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
-        boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
+        # boot_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_boot)
+        boot_seeds = rng.integers(np.iinfo(np.int32).max, size=n_boot, dtype=np.int32)
 
         if n_mix <= 0:
             # HACK: This is to reduce the joblib overhead when n_jobs==1
             if n_jobs == 1 or n_jobs is None:
                 # NOTE: These results are identical to when n_jobs==1 in the
                 # parallel section however it takes about 25% less time per iteration
-                results = [bootstrap_mixture(Mix, R_C, R_N, bins, methods_, boot_size, seed=None)
-                           for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+                # results = [bootstrap_mixture(Mix, R_C, R_N, bins, methods_, boot_size, seed=None)
+                #            for b in trange(n_boot, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
+                results = [bootstrap_mixture(Mix, R_C, R_N, bins, methods_, boot_size, seed=b_seed)
+                           for b_seed in tqdm(boot_seeds, desc="Bootstraps", dynamic_ncols=True, disable=disable)]
             else:
                 with Parallel(n_jobs=n_jobs) as parallel:
                     results = parallel(delayed(bootstrap_mixture)(Mix, R_C, R_N, bins, methods_, boot_size, seed=b_seed)
@@ -625,15 +632,16 @@ def analyse_mixture(scores, bins='fd', methods='all',
                 single_method[method] = methods_[method]
                 mix_results = []
 
+                assert(0.0 <= p_hat_C <= 1.0)
+
                 for m in trange(n_mix, desc="Mixture", dynamic_ncols=True, disable=diable_mix_bar):
 
-                    assert(0.0 <= p_hat_C <= 1.0)
-                    n_C = int(round(sample_size * p_hat_C))
-                    n_N = sample_size - n_C
-
                     # Construct mixture
-                    mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
-                                              np.random.choice(R_N, n_N, replace=True)))
+                    # n_C = int(round(sample_size * p_hat_C))
+                    # n_N = sample_size - n_C
+                    # mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
+                    #                           np.random.choice(R_N, n_N, replace=True)))
+                    mixture = construct_mixture(R_C, R_N, p_hat_C, sample_size, seed=rng)
 
                     # Spawn threads
                     with Parallel(n_jobs=nprocs) as parallel:

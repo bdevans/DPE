@@ -93,11 +93,8 @@ if __name__ == "__main__":
 
     if seed is None:
         seed = np.random.randint(np.iinfo(np.int32).max)
+        print(f"Created new RNG seed: {seed}")
     assert 0 <= seed < np.iinfo(np.int32).max
-
-    # Set random seed
-    np.random.seed(seed)
-    # rng = np.random.RandomState(42)
 
     # Create output directories
     characterisation_dir = os.path.join("results", "characterisation")
@@ -130,6 +127,11 @@ if __name__ == "__main__":
                              ("Coeliac", load_coeliac_data()),
                              ("Renal", load_renal_data())]:
 
+        # Set random seed
+        # np.random.seed(seed)
+        # rng = np.random.RandomState(42) ... rng.choie()
+        # rng = np.random.default_rng(seed)
+
         (scores, bins, means, medians, p_C) = data
 
         if output_application[data_label]:
@@ -143,7 +145,7 @@ if __name__ == "__main__":
                 summary, df_pe = dpe.analyse_mixture(scores, bins, methods,
                                         n_boot=n_boot, boot_size=-1, n_mix=n_mix,  # boot_size=sample_size,
                                         alpha=alpha, ci_method=ci_method,
-                                        correct_bias=correct_bias, n_jobs=-1,  # Previously correct_bias defaulted to False
+                                        correct_bias=correct_bias, seed=seed, n_jobs=-1,  # Previously correct_bias defaulted to False
                                         true_pC=p_C, logfile=os.path.join(out_dir, f"pe_{data_label}.log"))
 
                 elapsed = time.time() - t
@@ -206,6 +208,9 @@ if __name__ == "__main__":
 
         if output_analysis[data_label]:
 
+            # Seed RNG for permutations, construct_mixture and analyse_mixture
+            rng = np.random.default_rng(seed)
+
             # Plot violins for a set of proportions
             # p_stars = [0.05, 0.25, 0.50, 0.75, 0.95]
             # sizes = [100, 500, 1000, 5000, 10000]
@@ -227,8 +232,10 @@ if __name__ == "__main__":
                 # constructing the mixtures and estimating them.
                 n_R_C, n_R_N = len(scores['R_C']), len(scores['R_N'])
                 partition_R_C, partition_R_N = n_R_C // 2, n_R_N // 2
-                inds_R_C = np.random.permutation(n_R_C)
-                inds_R_N = np.random.permutation(n_R_N)
+                # inds_R_C = np.random.permutation(n_R_C)
+                # inds_R_N = np.random.permutation(n_R_N)
+                inds_R_C = rng.permutation(n_R_C)
+                inds_R_N = rng.permutation(n_R_N)
                 hold_out_scores = {'R_C': scores['R_C'][inds_R_C[:partition_R_C]],
                                    'R_N': scores['R_N'][inds_R_N[:partition_R_N]]}
                 violin_scores = {'R_C': scores['R_C'][inds_R_C[partition_R_C:]],
@@ -249,7 +256,7 @@ if __name__ == "__main__":
                         for p, p_star in enumerate(prop_bar):
                             prop_bar.set_description(f" p_C = {p_star:6.2f}")
 
-                            violin_scores['Mix'] = construct_mixture(hold_out_scores['R_C'], hold_out_scores['R_N'], p_star, size)
+                            violin_scores['Mix'] = construct_mixture(hold_out_scores['R_C'], hold_out_scores['R_N'], p_star, size, seed=rng)
                             Mixtures[mix][p_star] = violin_scores['Mix']
                             summary, df_cm = dpe.analyse_mixture(violin_scores, bins, methods,
                                                     n_boot=n_boot, boot_size=size,
@@ -257,6 +264,7 @@ if __name__ == "__main__":
                                                     alpha=alpha, true_pC=p_star,
                                                     ci_method=ci_method,
                                                     correct_bias=correct_bias,  # Previously correct_bias defaulted to False
+                                                    seed=rng.integers(np.iinfo(np.int32).max, dtype=np.int32),
                                                     n_jobs=-1, verbose=0,
                                                     logfile=os.path.join(out_dir, f"pe_{data_label}_size_{size:05d}_p_C_{p_star:3.2f}.log"))
                             df_point = df_cm.iloc[[0]].copy()

@@ -61,7 +61,7 @@ if verbose and not os.path.exists(os.path.join(out_dir, "logs")):
 def assess(sample_size, p_C, R_C, R_N, bins, methods, n_boot, seed=None):
     '''New method using analyse_mixture'''
 
-    mixture = construct_mixture(R_C, R_N, p_C, sample_size)
+    mixture = construct_mixture(R_C, R_N, p_C, sample_size, seed)
 
     scores = {'R_C': R_C, 'R_N': R_N}
     scores['Mix'] = mixture
@@ -100,7 +100,8 @@ if __name__ == '__main__':
         runlog.write(f"Running with {nprocs} processors...\n\n")
 
     # Set random seed
-    np.random.seed(seed)
+    # np.random.seed(seed)
+    rng = np.random.default_rng(seed)  # TODO: Check this still works
 
     np.seterr(divide='ignore', invalid='ignore')
 
@@ -154,7 +155,8 @@ if __name__ == '__main__':
 
                 # Make mixtures deterministic with parallelism
                 # https://joblib.readthedocs.io/en/latest/auto_examples/parallel_random_state.html
-                mix_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_samples)
+                # mix_seeds = np.random.randint(np.iinfo(np.int32).max, size=n_samples)
+                mix_seeds = rng.integers(np.iinfo(np.int32).max, size=n_samples, dtype=np.int32)
 
                 # Spawn threads
                 with Parallel(n_jobs=nprocs) as parallel:

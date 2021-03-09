@@ -170,14 +170,18 @@ def get_fpr_tpr(scores, bins):
     return fpr, tpr
 
 
-def construct_mixture(R_C, R_N, p_C, size):
+def construct_mixture(R_C, R_N, p_C, size, seed=None):
+
     assert(0.0 <= p_C <= 1.0)
     n_C = int(round(size * p_C))
     n_N = size - n_C
 
+    # If seed is a Generator it is returned unaltered
+    rng = np.random.default_rng(seed)
+
     # Construct mixture
-    mixture = np.concatenate((np.random.choice(R_C, n_C, replace=True),
-                              np.random.choice(R_N, n_N, replace=True)))
+    mixture = np.concatenate((rng.choice(R_C, n_C, replace=True),
+                              rng.choice(R_N, n_N, replace=True)))
     return mixture
 
 
