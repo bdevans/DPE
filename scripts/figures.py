@@ -247,7 +247,7 @@ if __name__ == "__main__":
                     Mixtures = {mix: {} for mix in range(n_seeds)}
 
                     for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):  # Redundant loop
-                        mix_dist_file = os.path.join(out_dir, f"mix{mix}_size{size}_{data_label}.pkl")
+                        mix_dist_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{mix:03d}.pkl")
 
                         prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
                         for p, p_star in enumerate(prop_bar):
