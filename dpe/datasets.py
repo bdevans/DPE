@@ -6,6 +6,7 @@ Created on Thu Jul 19 12:18:40 2018
 @author: ben
 """
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -88,14 +89,19 @@ def load_renal_data():
     3 is mixture (microalbuminuria) in all individuals not on insulin.
     Truth is 7.77'''
 
+    binning_method = 'fd'  # TODO: Take max over R_C, R_N?
     metric = 'T2GRS'
 
     # dataset = 'data/renal_data.csv'
     # headers = {'t2d_grs_77': 'T2GRS', 'group': 'group'}
-    dataset = 'data/renal_final_data_mixture_2_type_1_1.xls'
-    headers = {"T2GRS": "T2GRS", "Group": "group"}
-    p_C = 0.0758
-    binning_method = 'fd'  # TODO: Take max over R_C, R_N?
+    # dataset = 'data/renal_final_data_mixture_2_type_1_1.xls'
+    # headers = {"T2GRS": "T2GRS", "Group": "group"}
+    # p_C = 0.0758
+    # codes = {"R_C": 1, "Mix": 2}
+    dataset = os.path.join("data", "uptodate_renal_data.xls")  # 8/3/21
+    headers = {"T2DGRS": "T2GRS", "Group": "group"}
+    codes = {"R_C": 1, "Mix": 3}
+    p_C = 0.134
 
     # New "enriched" data set
     # dataset = 'data/renal_data_new.csv'
@@ -127,9 +133,9 @@ def load_renal_data():
     prev_data = pd.read_csv('data/renal_data.csv')
     prev_data.rename(columns={'t2d_grs_77': 'T2GRS', 'group': 'group'}, inplace=True)
 
-    scores = {'R_C': data.loc[data['group'] == 1, metric].values,
+    scores = {'R_C': data.loc[data['group'] == codes["R_C"], metric].values,
               'R_N': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=42).values,
-              'Mix': data.loc[data['group'] == 2, metric].values}
+              'Mix': data.loc[data['group'] == codes["Mix"], metric].values}
 
     means = {'R_C': scores['R_C'].mean(),
              'R_N': scores['R_N'].mean()}

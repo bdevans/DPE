@@ -44,8 +44,8 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 
 FRESH_DATA = True  # False  # CAUTION!
 seed = 42
-n_boot = 10  # 1000
-n_mix = 10  # 100
+n_boot = 1000
+n_mix = 100
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
@@ -60,8 +60,8 @@ adjust_excess = False  # TODO: Reimplement this or remove?
 
 # Configure plots
 output_diabetes_rocs = False
-output_application = {'Diabetes': False, 'Renal': False, 'Coeliac': True}
-application_xlims = {'Diabetes': None, 'Renal': None, 'Coeliac': (0, 0.3)}
+output_application = {'Diabetes': False, 'Renal': True, 'Coeliac': True}
+application_xlims = {'Diabetes': None, 'Renal': (0, 0.3), 'Coeliac': (0, 0.3)}
 output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
 output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
 average = np.mean  # TODO: Check
@@ -135,8 +135,8 @@ if __name__ == "__main__":
         adjustment_factor = 1.0
 
     for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
-                             # ("Renal", load_renal_data()),
-                             ("Coeliac", load_coeliac_data())]:
+                             ("Coeliac", load_coeliac_data()),
+                             ("Renal", load_renal_data())]:
 
         (scores, bins, means, medians, p_C) = data
 
