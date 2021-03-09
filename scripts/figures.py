@@ -44,8 +44,8 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 
 FRESH_DATA = True  # False  # CAUTION!
 seed = 42
-n_boot = 1000
-n_mix = 100
+n_boot = 10  # 1000
+n_mix = 10  # 100
 sample_size = 1000  # -1
 n_seeds = 1
 selected_mix = 0
@@ -57,6 +57,7 @@ ci_method = "bca"  # "experimental"  # "stderr" # "centile" "jeffreys"
 correct_bias = False  # Flag to use bias correction: corrected = 2 * pe_point - mean(pe_boot)
 adjust_excess = False  # TODO: Reimplement this or remove?
 # KDE_kernel = 'gaussian'  # ['gaussian', 'tophat', 'epanechnikov', 'exponential', 'linear', 'cosine']
+methods = {method: True for method in dpe._ALL_METHODS_}
 
 # Configure plots
 output_diabetes_rocs = False
@@ -67,9 +68,7 @@ output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
 average = np.mean  # TODO: Check
 # deviation = np.std
 
-# TODO: Move to __main__
-#    mpl.style.use('seaborn')
-# plt.style.use('seaborn-white')
+# Set plotting style
 mpl.rc('figure', figsize=(10, 8))
 mpl.rc('font', size=14)
 mpl.rc('axes', titlesize=14)    # fontsize of the axes title
@@ -82,30 +81,30 @@ mpl.rc('lines', linewidth=2)
 mpl.rc('figure', dpi=100)
 mpl.rc('savefig', dpi=600)
 mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationWarning
+# mpl.style.use('seaborn')
+# plt.style.use('seaborn-white')
+sns.set_style("ticks")
 
-# Create output directories
-characterisation_dir = os.path.join("results", "characterisation")
-if seed is None:
-    seed = np.random.randint(np.iinfo(np.int32).max)
-assert 0 <= seed < np.iinfo(np.int32).max
-out_dir = os.path.join("results", f"n{sample_size}_m{n_mix}_b{n_boot}_s{seed}")
-fig_dir = os.path.join(out_dir, "figs")
-os.makedirs(fig_dir, exist_ok=True)
+np.seterr(divide='ignore', invalid='ignore')
 
 # ----------------------------------------------------------------------------
 
 if __name__ == "__main__":
 
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    if not os.path.exists(fig_dir):
-        os.makedirs(fig_dir)
+    if seed is None:
+        seed = np.random.randint(np.iinfo(np.int32).max)
+    assert 0 <= seed < np.iinfo(np.int32).max
 
     # Set random seed
     np.random.seed(seed)
     # rng = np.random.RandomState(42)
-    np.seterr(divide='ignore', invalid='ignore')
+
+    # Create output directories
+    characterisation_dir = os.path.join("results", "characterisation")
+    out_dir = os.path.join("results", f"n{sample_size}_m{n_mix}_b{n_boot}_s{seed}")
+    fig_dir = os.path.join(out_dir, "figs")
+    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(fig_dir, exist_ok=True)
 
     if output_diabetes_rocs:
         # Plot ROC curves
@@ -126,9 +125,6 @@ if __name__ == "__main__":
         fig.savefig(os.path.join(fig_dir, 'roc_Diabetes.png'))
         # exit()
 
-    sns.set_style("ticks")
-
-    methods = {method: True for method in dpe._ALL_METHODS_}
     if adjust_excess:
         adjustment_factor = 1 / 0.92  # adjusted for fact it underestimates by 8%
     else:
