@@ -82,7 +82,7 @@ def load_diabetes_data(metric):
     return scores, chosen_bins, means, medians, p_C
 
 
-def load_renal_data():
+def load_renal_data(seed=42):
     '''Load individuals with Type 2 Diabetes GRS and renal disease (microalbuminuria)
     Group: 1 is controls;
     2 is non insulin treated type 2;
@@ -134,7 +134,7 @@ def load_renal_data():
     prev_data.rename(columns={'t2d_grs_77': 'T2GRS', 'group': 'group'}, inplace=True)
 
     scores = {'R_C': data.loc[data['group'] == codes["R_C"], metric].values,
-              'R_N': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=42).values,
+              'R_N': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=seed).values,
               'Mix': data.loc[data['group'] == codes["Mix"], metric].values}
 
     means = {'R_C': scores['R_C'].mean(),

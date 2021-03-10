@@ -44,6 +44,7 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 
 FRESH_DATA = True  # False  # CAUTION!
 seed = 42
+sample_seed = 42  # Used for sampling for Renal non-cases
 n_boot = 1000  # 10  # 1000
 n_mix = 100  # 10  # 100
 sample_size = 1000  # -1
@@ -124,7 +125,7 @@ if __name__ == "__main__":
 
     for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                              ("Coeliac", load_coeliac_data()),
-                             ("Renal", load_renal_data())]:
+                             ("Renal", load_renal_data(seed=sample_seed))]:
 
         # Set random seed
         # np.random.seed(seed)
