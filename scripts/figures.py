@@ -219,6 +219,7 @@ if __name__ == "__main__":
             p_stars = [0.1, 0.4, 0.8]
             sizes = [500, 1000, 5000]
             # n_boot = 5
+            selected_mix = 0
 
             # Generate multiple mixes
             point_estimates_res_file = os.path.join(out_dir, f"pe_stack_analysis_point_{data_label}.pkl")
@@ -242,11 +243,13 @@ if __name__ == "__main__":
 
                 dfs_point = []
                 dfs_boot = []
+                mix_dfs = []
 
                 size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
                 for s, size in enumerate(size_bar):
                     size_bar.set_description(f"Size = {size:6,}")
                     Mixtures = {mix: {} for mix in range(n_seeds)}
+                    mix_dfs.append([])
 
                     for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):  # Redundant loop
                         mix_dist_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{mix:03d}.pkl")
@@ -288,6 +291,7 @@ if __name__ == "__main__":
                             dfs_boot.append(df_boots)
 
                         df_size = pd.DataFrame(Mixtures[mix], columns=p_stars)
+                        mix_dfs[s].append(df_size)
                         df_size.to_pickle(mix_dist_file)
 
                 df_point = pd.concat(dfs_point, ignore_index=True)
@@ -310,13 +314,21 @@ if __name__ == "__main__":
                 else:
                     warnings.warn(f"Missing data file: {boot_estimates_res_file}")
                     break
+                mix_dfs = []
+                for s, size in enumerate(sizes):
+                    mix_dfs.append([])
+                    for mix in n_seeds:
+                        mix_dist_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{mix:03d}.pkl")
+                        mix_dfs[s].append(pd.read_pickle(mix_dist_file))
 
             # Plot selected violins
             print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
-            plot_mixes = [0]
+            plot_mixes = [selected_mix]
             for mix in plot_mixes:  # range(n_seeds):
-                fig = plot_selected_violins(scores, bins, df_point, df_boots, methods, p_stars, sizes,
-                                    out_dir, data_label, selected_mix=mix,
+                fig = plot_selected_violins(scores, bins, df_point, df_boots, # methods, 
+                                    p_stars, sizes,
+                                    # out_dir, data_label, 
+                                    mix_dfs, selected_mix=mix,
                                     add_ci=True, alpha=0.05, ci_method=ci_method,
                                     correct_bias=correct_bias, average=average)
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.png'))

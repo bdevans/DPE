@@ -522,8 +522,9 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
     #     plt.savefig(os.path.join(fig_dir, 'boxes_{}.png'.format(data_label)))
 
 
-def plot_selected_violins(scores, bins, df_point, df_boots, methods, 
-                          p_stars, sizes, out_dir, data_label, selected_mix=0,
+def plot_selected_violins(scores, bins, df_point, df_boots, #methods, 
+                          p_stars, sizes, #out_dir, data_label, 
+                          mix_dfs, selected_mix=0,
                           add_ci=True, alpha=0.05, ci_method="bca",
                           correct_bias=False, average=np.mean):  # , fig_dir=""):
 
@@ -546,11 +547,13 @@ def plot_selected_violins(scores, bins, df_point, df_boots, methods,
     for si, size in enumerate(sizes):
 #        ax_vio = fig_select.add_subplot(gs[-(si+1), :-1])
 #        ax_mix = fig_select.add_subplot(gs[-(si+1), -1])
-        mix_dist_file = os.path.join(out_dir, f"mix{selected_mix}_size{size}_{data_label}.pkl")
-        if not os.path.isfile(mix_dist_file):
-            warnings.warn(f"File not found: {mix_dist_file}")
-            return
-        df_mixes = pd.read_pickle(mix_dist_file)
+        # mix_dist_file = os.path.join(out_dir, f"mix{selected_mix}_size{size}_{data_label}.pkl")
+        # mix_dist_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{selected_mix:03d}.pkl")
+        # if not os.path.isfile(mix_dist_file):
+        #     warnings.warn(f"File not found: {mix_dist_file}")
+        #     return
+        # df_mixes = pd.read_pickle(mix_dist_file)
+        df_mixes = mix_dfs[si][selected_mix]
 
         if si == 0:
             # Save base axes
