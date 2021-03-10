@@ -545,6 +545,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
                       left=0.05, right=0.96, bottom=0.08, top=0.97)
 
     for si, size in enumerate(sizes):
+        print(f"Size = {size} [#{si}/{len(sizes)}]: ", end='', flush=True)
 #        ax_vio = fig_select.add_subplot(gs[-(si+1), :-1])
 #        ax_mix = fig_select.add_subplot(gs[-(si+1), -1])
         # mix_dist_file = os.path.join(out_dir, f"mix{selected_mix}_size{size}_{data_label}.pkl")
@@ -584,6 +585,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
 
         # Plot violins of bootstrapped estimates
         for p, p_star in enumerate(p_stars):
+            print(f"p_C = {p_star} [#{p}/{len(p_stars)}]; ", end='', flush=True)
 
             # Add annotations for p_C
             ax_vio.axvline(x=p_star, ymin=0, ymax=1, ls='--', lw=3, zorder=0, color=palette[p+1])
@@ -667,7 +669,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
 
                 ##### NEW METHOD #####
 
-                # Estract point estimates for the particular hyperparameters
+                # Extract point estimates for the particular hyperparameters
                 df_p = df_point[np.isclose(p_star, df_point["p_C"])
                                 & (df_point['Size'] == size)
                                 & (df_point["Mix"] == selected_mix)]
@@ -710,7 +712,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
                     ax_vio.plot(x, y, 'o', c=palette[p+1], markersize=9, markeredgecolor=(0.45, 0.45, 0.45), zorder=20)  # label=r"$\hat{p}_C$", 
                     ax_vio.plot(x, y, '.', c=(0.45, 0.45, 0.45), markersize=2, markeredgecolor=(0.45, 0.45, 0.45), label=r"$\hat{p}_C$", zorder=30)
 
-
+        print()
         if si == len(sizes)-1:  # Top row
             handles, labels = ax_mix.get_legend_handles_labels()
             # sort both labels and handles by labels
