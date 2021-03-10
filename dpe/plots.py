@@ -403,7 +403,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
 #        x, y = df_point.iloc[0].values, ax.get_yticks()
 #        means = x
 
-    errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average)
+    errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average, alpha=alpha, ci_method=ci_method)
 
     if correct_bias:
         if orient == 'v':
@@ -680,7 +680,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
 
                 df_b_piv = df_b_piv[df_p_piv.columns]  # Manually sort before merge
                 df_pe = pd.concat([df_p_piv, df_b_piv], ignore_index=True)
-                errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average)
+                errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average, alpha=alpha, ci_method=ci_method)
 
 
                 if correct_bias:
