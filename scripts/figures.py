@@ -165,7 +165,9 @@ if __name__ == "__main__":
             # Plot worked examples
             print(f"Plotting application with {data_label} scores...", flush=True)
             fig_ex = plt.figure(figsize=(12, 4))
-            gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
+            # gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
+            #                   left=0.08, right=0.95, bottom=0.15, top=0.96)
+            gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.25, wspace=0.25,
                               left=0.08, right=0.95, bottom=0.15, top=0.96)
 
             # sns.set_style("ticks")
@@ -173,9 +175,13 @@ if __name__ == "__main__":
                 ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
                 plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
 
+            with sns.axes_style("ticks"):
+                ax_roc_ex = fig_ex.add_subplot(gs[0, 1])
+                plot_roc(scores, bins, full_labels=False, ax=ax_roc_ex)
+
             # with sns.axes_style("whitegrid"):
             with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
-                ax_ci_ex = fig_ex.add_subplot(gs[0, 1])
+                ax_ci_ex = fig_ex.add_subplot(gs[0, -1])
                 plot_bootstraps(df_pe, correct_bias=correct_bias, p_C=p_C,
                                 ax=ax_ci_ex, limits=application_xlims[data_label],
                                 ci_method=ci_method, initial=False, legend=False,

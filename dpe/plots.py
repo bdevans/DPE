@@ -758,7 +758,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
     return fig_select
 
 
-def plot_roc(scores, bins, title=None, ax=None):
+def plot_roc(scores, bins, title=None, full_labels=True, ax=None):
     """Plot the Reciever Operator characteristic
 
     Args:
@@ -767,23 +767,28 @@ def plot_roc(scores, bins, title=None, ax=None):
     # http://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_curve.html
     if not ax:
         fig, ax = plt.subplots()
-    plt.sca(ax)
+        # plt.sca(ax)
 
     fpr, tpr = get_fpr_tpr(scores, bins)
     roc_auc = auc(fpr, tpr)
 
-    ax.plot(fpr, tpr, lw=1, label=f'AUC = {roc_auc:.2f}')
+    # ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}')  # lw=1, 
+    sns.lineplot(x=fpr, y=tpr, label=f'AUC = {roc_auc:.2f}', ax=ax)
     ax.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Chance')
 
-    plt.xlim([0, 1])
-    plt.ylim([0, 1])
-    plt.xlabel('False Positive Rate (1 - Specificity)')
-    plt.ylabel('True Positive Rate (Sensitivity)')
-    if not title:
-        plt.title('Receiver operating characteristic')
+    ax.set_xlim([0, 1])
+    ax.set_ylim([0, 1])
+    if full_labels:
+        ax.set_xlabel('False Positive Rate (1 - Specificity)')
+        ax.set_ylabel('True Positive Rate (Sensitivity)')
     else:
-        plt.title(title)
-    plt.legend(loc="lower right")
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Positive Rate')
+    # if not title:
+    #     ax.set_title('Receiver operating characteristic')
+    if title:
+        ax.set_title(title)
+    ax.legend(loc="lower right")
     ax.set(aspect="equal")
 
     return ax
