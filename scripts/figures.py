@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 mix_dfs = []
                 for s, size in enumerate(sizes):
                     mix_dfs.append([])
-                    for mix in n_seeds:
+                    for mix in range(n_seeds):
                         mix_dist_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{mix:03d}.pkl")
                         mix_dfs[s].append(pd.read_pickle(mix_dist_file))
 
