@@ -43,7 +43,7 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 # TODO: Report or use correct_bias?
 
 FRESH_DATA = True  # False  # CAUTION!
-seed = 42
+seed = 0  # 42
 sample_seed = 42  # Used for sampling for Renal non-cases
 n_boot = 1000  # 10  # 1000
 n_mix = 100  # 10  # 100
