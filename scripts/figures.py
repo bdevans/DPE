@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
             res_file = os.path.join(out_dir, f"pe_results_{data_label}.pkl")
 
-            if FRESH_DATA:  # or True:
+            if FRESH_DATA or not os.path.isfile(res_file):
                 print(f"Running mixture analysis on {data_label} scores...", flush=True)
                 t = time.time()  # Start timer
 
@@ -155,11 +155,12 @@ if __name__ == "__main__":
                 df_pe.to_pickle(res_file)
             else:
                 print(f"Loading {data_label} analysis...", flush=True)
-                if os.path.isfile(res_file):
-                    df_pe = pd.read_pickle(res_file)
-                else:
-                    warnings.warn(f"Missing data file: {res_file}")
-                    break
+                df_pe = pd.read_pickle(res_file)
+                # if os.path.isfile(res_file):
+                #     df_pe = pd.read_pickle(res_file)
+                # else:
+                #     warnings.warn(f"Missing data file: {res_file}")
+                #     break
 
             # Plot worked examples
             print(f"Plotting application with {data_label} scores...", flush=True)
