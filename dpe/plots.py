@@ -12,6 +12,7 @@ from sklearn.metrics import auc
 import dpe
 from . estimate import calc_conf_intervals, fit_kernel
 from . utilities import get_fpr_tpr
+# from . utilities import get_roc_scores
 
 
 def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_method="bca"):
@@ -771,6 +772,9 @@ def plot_roc(scores, bins, title=None, full_labels=True, ax=None):
 
     fpr, tpr = get_fpr_tpr(scores, bins)
     roc_auc = auc(fpr, tpr)
+    # NOTE: This gives the same results as above for Coeliac and 
+    # Renal applications but is slower since it uses raw scores not binned data
+    # fpr, tpr, roc_auc = get_roc_scores(scores)
 
     # ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}')  # lw=1, 
     sns.lineplot(x=fpr, y=tpr, label=f'AUC = {roc_auc:.2f}', ax=ax)
