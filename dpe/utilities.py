@@ -3,6 +3,7 @@ import time
 
 import numpy as np
 from sklearn.neighbors import KernelDensity
+from sklearn.metrics import roc_curve, roc_auc_score
 
 # import dpe
 # from dpe.estimate import calc_conf_intervals
@@ -125,6 +126,15 @@ def estimate_bins(data, bin_range=None, verbose=0):
                         'centers': (edges[:-1] + edges[1:]) / 2,
                         'n': len(edges) - 1}
     return hist, bins
+
+
+def get_roc_scores(scores):
+
+    y = np.r_[np.zeros_like(scores["R_N"]), np.ones_like(scores["R_C"])]
+    y_scores = np.r_[scores["R_N"], scores["R_C"]]
+    fpr, tpr, thresholds = roc_curve(y, y_scores, pos_label=1)
+    auc = roc_auc_score(y, y_scores)
+    return fpr, tpr, auc
 
 
 def get_fpr_tpr(scores, bins):
