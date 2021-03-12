@@ -42,8 +42,8 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 # TODO: Apply bias correction to other methods e.g. 'bca'?
 # TODO: Report or use correct_bias?
 
-FRESH_DATA = True  # False  # CAUTION!
-seed = 0  # 42
+FRESH_DATA = False  # CAUTION!
+seed = 0
 sample_seed = 42  # Used for sampling for Renal non-cases
 n_boot = 1000  # 10  # 1000
 n_mix = 100  # 10  # 100
@@ -164,33 +164,40 @@ if __name__ == "__main__":
 
             # Plot worked examples
             print(f"Plotting application with {data_label} scores...", flush=True)
-            fig_ex = plt.figure(figsize=(12, 4))
-            # gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
-            #                   left=0.08, right=0.95, bottom=0.15, top=0.96)
-            gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.25, wspace=0.25,
-                              left=0.08, right=0.95, bottom=0.15, top=0.96)
+            with mpl.rc_context({'axes.labelsize': 11, 
+                                'xtick.labelsize': 10, 
+                                'ytick.labelsize': 10,
+                                'legend.fontsize': 9}):
+                fig_ex = plt.figure(figsize=(12, 3.7))
+                # gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
+                #                   left=0.08, right=0.95, bottom=0.15, top=0.96)
+                gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.3, wspace=0.25,
+                                left=0.08, right=0.95, bottom=0.15, top=0.96)
 
-            # sns.set_style("ticks")
-            with sns.axes_style("ticks"):
-                ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
-                plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+                # sns.set_style("ticks")
+                with sns.axes_style("ticks"):
+                    ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
+                    plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
 
-            with sns.axes_style("ticks"):
-                ax_roc_ex = fig_ex.add_subplot(gs[0, 1])
-                plot_roc(scores, bins, full_labels=False, ax=ax_roc_ex)
+                with sns.axes_style("ticks"):
+                    ax_roc_ex = fig_ex.add_subplot(gs[0, 1])
+                    plot_roc(scores, bins, full_labels=False, ax=ax_roc_ex)
+                    sns.despine(ax=ax_roc_ex, top=True, right=True, trim=True)
+                    ax_roc_ex.set_xlim([0, 1.01])  # Prevent clipping of line
+                    ax_roc_ex.set_ylim([0, 1.01])  # Prevent clipping of line
 
-            # with sns.axes_style("whitegrid"):
-            with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
-                ax_ci_ex = fig_ex.add_subplot(gs[0, -1])
-                plot_bootstraps(df_pe, correct_bias=correct_bias, p_C=p_C,
-                                ax=ax_ci_ex, limits=application_xlims[data_label],
-                                ci_method=ci_method, initial=False, legend=False,
-                                violins=True, orient='h', average=average)
-                # if application_xlims[data_label]:
-                #     ax_ci_ex.set_xlim(*application_xlims[data_label])
+                # with sns.axes_style("whitegrid"):
+                with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
+                    ax_ci_ex = fig_ex.add_subplot(gs[0, -1])
+                    plot_bootstraps(df_pe, correct_bias=correct_bias, p_C=p_C,
+                                    ax=ax_ci_ex, limits=application_xlims[data_label],
+                                    ci_method=ci_method, initial=False, legend=False,
+                                    violins=True, orient='h', average=average)
+                    # if application_xlims[data_label]:
+                    #     ax_ci_ex.set_xlim(*application_xlims[data_label])
 
-            fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
-            fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
+                fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
+                fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
 
         if output_characterisation[data_label]:
 
