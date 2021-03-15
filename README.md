@@ -1,9 +1,14 @@
 Distribution Proportion Estimation
 ==================================
 
-Evaluation of algorithms for estimating the prevalence of cases in a mixture population based on genetic risk scores.
+Algorithms for estimating the prevalence of cases in a mixture population based on genetic risk scores.
 
-This folder contains the Python 3 implementation of the proportion estimation algorithms, which was developed and run with Python 3.7.6. The following instructions assume that you have a working Python (>=3.6) installation obtained either through Anaconda (recommended) or through other means (which requires pip). 
+[![GitHub license](https://img.shields.io/github/license/bdevans/DPE)](https://github.com/bdevans/DPE/blob/master/LICENSE.txt)
+[**DOI: 10.1101/2020.02.20.20025528**](https://doi.org/10.1101/2020.02.20.20025528)
+
+------------------------------------------------------------------------
+
+This repository contains the Python 3 implementation of the proportion estimation algorithms, which was developed and run with Python 3.7.6. The following instructions assume that you have a working Python (>=3.6) installation obtained either through Anaconda (recommended) or through other means (which requires pip). 
 
 Installation
 ------------
