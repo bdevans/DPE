@@ -294,3 +294,21 @@ Methods Summary
 | Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
 |               |                       |                       | Computationally expensive. |
 
+Citation
+--------
+
+If you use this software, please cite our publication:
+
+```bibtex
+@article {Evans2020.02.20.20025528,
+	author = {Evans, Benjamin D. and S{\l}owi{\'n}ski, Piotr and Hattersley, Andrew T. and Jones, Samuel E. and Sharp, Seth and Kimmitt, Robert A. and Weedon, Michael N. and Oram, Richard A. and Tsaneva-Atanasova, Krasimira and Thomas, Nicholas J.},
+	title = {Estimating population level disease prevalence using genetic risk scores},
+	elocation-id = {2020.02.20.20025528},
+	year = {2021},
+	doi = {10.1101/2020.02.20.20025528},
+	publisher = {Cold Spring Harbor Laboratory Press},
+	URL = {https://www.medrxiv.org/content/early/2021/02/27/2020.02.20.20025528},
+	eprint = {https://www.medrxiv.org/content/early/2021/02/27/2020.02.20.20025528.full.pdf},
+	journal = {medRxiv}
+}
+```
