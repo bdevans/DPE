@@ -696,12 +696,13 @@ def analyse_mixture(scores, bins='fd', methods='all',
     # ----------- Summarise proportions for the whole distribution ------------
     if verbose > 0 or logfile is not None:
         report = generate_report(summary, true_pC=true_pC, alpha=alpha)
+        report = report.encode(encoding="utf-8", errors="replace").decode()
 
     if verbose > 0:
-        print("\n" + report.encode(errors="replace").decode() + "\n")
+        print("\n" + report + "\n")
 
     if logfile is not None:
-        with open(logfile, 'a') as lf:
+        with open(logfile, 'a', encoding="utf-8") as lf:
             lf.write(report)
             lf.write("\n")
 
