@@ -140,9 +140,9 @@ The results are reproducible by default since a seed is set (42) for the pseudo 
 Running on your data
 --------------------
 
-The main requirement is to prepare a dictionary (`dict`) containing the keys `R_C`, `R_N` and `Mix`. The associated values should be (one dimensional) arrays (or lists) of the GRS scores for the "Reference 1" (cases) distribution, the "Reference 2" (non-cases) distribution and the Mixture distribution respectively. 
+The main requirement is to prepare a dictionary (`dict`) containing the keys `R_C`, `R_N` and `Mix`. The associated values should be (one dimensional) arrays (or lists) of the GRS scores for the "Cases Reference" (`R_C`) distribution, the "Non-cases Reference" (`R_N`) distribution and the Mixture distribution (`Mix`) respectively. 
 
-Alternatively a `csv` file may be prepared and loaded with the function `data_utilities.load_dataset(filename)` as demonstrated in the `run_examples.py` script. The `csv` file should contain the header `Group,GRS` followed by pairs of `code,score` values (one per line for each GRS score) where code is `1` for the Reference 1 distribution (cases), `2` for the Reference 2 distribution (non-cases) and `3` for the mixture distribution. 
+Alternatively a `csv` file may be prepared and loaded with the function `data_utilities.load_dataset(filename)` as demonstrated in the `run_examples.py` script. The `csv` file should contain the header `Group,GRS` followed by pairs of `code,score` values (one per line for each GRS score) where code is `1` for the Cases Reference distribution, `2` for the Non-cases Reference distribution and `3` for the Mixture distribution. 
 
 Once the GRS scores have been prepared in a suitable form, they may be passed to the `analyse_mixture()` function as demonstrated in the `run_examples.py` script. Further details about this function are given in the next section. 
 
