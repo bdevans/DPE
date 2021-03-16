@@ -698,7 +698,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         report = generate_report(summary, true_pC=true_pC, alpha=alpha)
 
     if verbose > 0:
-        print("\n" + report + "\n")
+        print("\n" + report.encode(erros="replace").decode() + "\n")
 
     if logfile is not None:
         with open(logfile, 'a') as lf:
