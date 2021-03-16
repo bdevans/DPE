@@ -153,17 +153,24 @@ The main algorithm is as follows. Details of the specific methods may be found i
 
 ```sh
 bins <-- generate_bins({R_C, R_N, Mix}, method='fd')  # Freedman-Diaconis
-for method in ["Excess", "Means", "EMD", "KDE"]:
-    p_meth^i <-- get_point_estimate({R_C, R_N, Mix}, bins, method)  # Proportion of cases
-    for m in 1..N_M:  # Number of Monte Carlo mixtures
-        Mix_meth_m <-- get_monte_carlo_mixture({R_C, R_N}, p_meth^i)
-        for b in 1..N_B:  # Number of bootstraps
+p^hat <-- {}  # Dictionary (hashtable) of proportion estimates
+p^cor <-- {}  # Dictionary (hashtable) of corrected proportion estimates
+p^mbe <-- {}  # Dictionary (hashtable) of mixture-bootstrap estimates
+CI <-- {}  # Dictionary (hashtable) of confidence intervals (2-tuple)
+for meth in ["Excess", "Means", "EMD", "KDE"]:
+    p^hat[meth] <-- get_point_estimate({R_C, R_N, Mix}, bins, meth)  # Proportion of cases
+    # Calculate confidence intervals around the initial proportion estimates
+    p^mbe[meth] = []  # Create empty list of estimates for each method
+    for m in 1 to N_M:  # Number of Monte Carlo mixtures
+        Mix_meth_m <-- get_monte_carlo_mixture({R_C, R_N}, p^hat[meth])
+        for b in 1 to N_B:  # Number of bootstraps
             Mix_meth_m_b <-- get_bootstrap({Mix_meth_m}, bins)  # Sample with replacement
-            p_meth_m_b <-- get_point_estimate({R_C, R_N, Mix_meth_m_b}, bins, method)
+            p_meth_m_b <-- get_point_estimate({R_C, R_N, Mix_meth_m_b}, bins, meth)
+            p^mbe[meth].append(p_meth_m_b)
         end
     end
-    p_meth^cor <-- correct_estimate(p_meth^i, {p_m_b}_meth)  # Use the set of all bootstraps of all mixtures for each method
-    CI_meth <-- get_confidence_intervals(p_meth^cor, {p_m_b}_meth, alpha)
+    p^cor[meth] <-- correct_estimate(p^hat[meth], p^mbe[meth])  # Use the set of all bootstraps of all mixtures for each method
+    CI[meth] <-- get_confidence_intervals(p^cor[meth], p^mbe[meth], alpha=0.05)
 end
 ```
 
