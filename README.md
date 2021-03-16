@@ -198,14 +198,14 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
 (summary, bootstraps) (`tuple`): A tuple consisting of the following data structures.
 
-- summary (`dict`): A nested dictionary with a key for each estimation method within which
-    is a dictionary with the following keys:
-    `p_C` : the prevalence estimate
+- summary (`dict`): A nested dictionary with a key for each estimation method within which is a dictionary with the following keys:
+    - `p_C` : the prevalence estimate
+    
     Optionally, if bootstrapping is used:
-    `CI` : the confidence intervals around the prevalence
-    `mean` : the mean of the bootstrapped estimates
-    `std` : the standard deviation of the bootstrap estimates
-    `p_cor_C` : the correct prevalence estimate when `correct_bias == True`
+    - `CI` : the confidence intervals around the prevalence
+    - `mean` : the mean of the bootstrapped estimates
+    - `std` : the standard deviation of the bootstrap estimates
+    - `p_cor_C` : the correct prevalence estimate when `correct_bias == True`
 - bootstraps (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
 
 Additionally the logfile is written to the working directory.
@@ -241,8 +241,7 @@ These methods assume that higher GRS is associated with cases.
 
     ```python
     def interpolate_CDF(scores, x_i, min_edge, max_edge):
-        """Interpolate the cumulative density function of the scores at the points
-        in the array `x_i`.
+        """Interpolate the cumulative density function of the scores at the points in the array `x_i`.
         """
 
         x = [min_edge, *sorted(scores), max_edge]
