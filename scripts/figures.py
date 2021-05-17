@@ -49,6 +49,7 @@ n_boot = 1000  # 10  # 1000
 n_mix = 100  # 10  # 100
 sample_size = 1000  # -1
 n_seeds = 1  # Deprecated
+n_construction_seeds = 100
 verbose = False
 
 # Set method details
@@ -62,6 +63,7 @@ methods = {method: True for method in dpe._ALL_METHODS_}
 # Configure plots
 output_diabetes_rocs = False
 output_application = {'Diabetes': False, 'Renal': True, 'Coeliac': True}
+output_application_vary_cases = {'Diabetes': False, 'Renal': True, 'Coeliac': False}
 application_xlims = {'Diabetes': None, 'Renal': (0, 0.3), 'Coeliac': (0, 0.3)}
 output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
 output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
@@ -198,6 +200,92 @@ if __name__ == "__main__":
 
                 fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
                 fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
+
+        if output_application_vary_cases[data_label]:
+            
+            assert "Mix_C" in scores and "Mix_N" in scores
+            res_file = os.path.join(out_dir, f"pe_results_vary_cases_{data_label}.pkl")
+
+            n_steps = int(round(1 / 0.05)) + 1  # 5% steps including ends
+            constructed_p_Cs = np.linspace(0, 1, num=n_steps, endpoint=True)
+
+            if FRESH_DATA or not os.path.isfile(res_file):
+                print(f"Running mixture analysis with varying cases on {data_label} scores...", flush=True)
+                t = time.time()  # Start timer
+
+                # Seed RNG for permutations, construct_mixture and analyse_mixture
+                rng = np.random.default_rng(seed)
+                mix_seeds = rng.integers(0, np.iinfo(np.int32).max, endpoint=False, size=n_steps * n_construction_seeds)
+
+                # Maintain the same mixture size for each constructed mixture (sampling with replacement)
+                size = len(scores["Mix"])
+
+                construct_results = []
+
+                p_C_bar = tqdm.tqdm(constructed_p_Cs, dynamic_ncols=True)
+                for p, constructed_p_C in enumerate(p_C_bar):
+                    p_C_bar.set_description(f" p_C = {constructed_p_C:6.2f}")
+
+                    for mix in tqdm.trange(n_construction_seeds, dynamic_ncols=True, desc=" Mix"):
+                        mix_seed = mix_seeds[p * n_construction_seeds + mix]
+
+                        # Construct new mixtures
+                        constructed_scores = {"R_C": scores["R_C"], "R_N": scores["R_N"]}  # Ensure summary statistics are updated
+                        constructed_scores["Mix"] = construct_mixture(scores['Mix_C'], scores['Mix_N'], 
+                                                                    constructed_p_C, size, seed=mix_seed)
+
+                        # Consider only the point estimates n_boot=0
+                        summary, df_pe = dpe.analyse_mixture(constructed_scores, bins, methods,
+                                                n_boot=0, boot_size=-1, n_mix=n_mix,  # boot_size=sample_size,
+                                                alpha=alpha, ci_method=ci_method,
+                                                correct_bias=correct_bias, seed=mix_seed, n_jobs=-1,  # Previously correct_bias defaulted to False
+                                                verbose=0, true_pC=constructed_p_C, 
+                                                logfile=os.path.join(out_dir, f"pe_{data_label}_constructed_p_C_{constructed_p_C:3.2f}.log"))
+
+                        # summary := {"Excess": {"p_C": ...}, ...}
+                        df_construct = df_pe.iloc[[0]].copy()
+                        df_construct["p_C"] = constructed_p_C
+                        df_construct["Mix"] = mix
+                        construct_results.append(df_construct)
+
+                df_construct = pd.concat(construct_results, ignore_index=True)
+
+                elapsed = time.time() - t
+                print(f'Elapsed time = {elapsed:.3f} seconds\n')
+
+                # Save results
+                df_construct.to_pickle(res_file)
+            else:
+                print(f"Loading {data_label} with varying cases analysis...", flush=True)
+                df_construct = pd.read_pickle(res_file)
+
+            # Plot results
+            print("Plotting analysis of p_C vs. constructed p_C with {} scores...".format(data_label), flush=True)
+            with sns.axes_style("whitegrid"):
+                fig, axes = plt.subplots(nrows=1, ncols=len(methods), sharex=True, sharey=True, figsize=(12, 4))
+                df_construct_tidy = df_construct.melt(var_name="Method",
+                                        id_vars=["p_C", "Mix"],
+                                        value_name="Estimate")
+                for m, method in enumerate(methods):
+                    method_data = df_construct_tidy.query(f"Method == '{method}'")
+                
+                    ax = axes[m]
+                    sns.lineplot(x="p_C", y="Estimate", data=method_data, err_style="bars", ax=ax)
+                    ax.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Perfect Estimator')
+                    ax.set_aspect('equal')
+                    ax.set_xlim([0, 1])
+                    ax.set_ylim([0, 1])
+                    ticks = np.linspace(0, 1, 6, endpoint=True)
+                    ax.set_xticks(ticks)
+                    ax.set_yticks(ticks)
+                    if m == 0:
+                        ax.set_ylabel(r"$\hat{p}_C$ (Estimate)")
+                    ax.set_xlabel(r"$p_C$ (Ground Truth)")
+                    ax.set_title(method)
+
+            fig.savefig(os.path.join(fig_dir, f'estimation_test_{data_label}.png'))
+            fig.savefig(os.path.join(fig_dir, f'estimation_test_{data_label}.svg'), transparent=True)
+
 
         if output_characterisation[data_label]:
 

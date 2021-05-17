@@ -101,7 +101,7 @@ def load_renal_data(seed=42):
     dataset = os.path.join("data", "uptodate_renal_data.xls")  # 8/3/21
     headers = {"T2DGRS": "T2GRS", "Group": "group"}
     codes = {"R_C": 1, "Mix": 3}
-    p_C = 0.134
+    # p_C = 0.134
 
     # New "enriched" data set
     # dataset = 'data/renal_data_new.csv'
@@ -117,6 +117,16 @@ def load_renal_data(seed=42):
     data.rename(columns=headers, inplace=True)
     data.dropna(inplace=True)  # Remove empty entries
     # print(data.describe())
+
+    mix_dataset = os.path.join("data", "post_rev_2_data.xls")  # 14/5/21
+    p_C = 0.1404
+    mix_codes = {"cases": 1, "non-cases": 0}  # Defined truth
+    mix_headers = {"t2d_grs_77": "T2GRS", "Diabetes": "Diabetes"}
+
+    mix_data = pd.read_excel(mix_dataset)
+    mix_data.rename(columns=mix_headers, inplace=True)
+    mix_data.dropna(inplace=True)  # Remove empty entries
+
 
     scores = {}
     means = {}
@@ -135,7 +145,11 @@ def load_renal_data(seed=42):
 
     scores = {'R_C': data.loc[data['group'] == codes["R_C"], metric].values,
               'R_N': prev_data.loc[prev_data['group'] == 1, metric].sample(n=10000, random_state=seed).values,
-              'Mix': data.loc[data['group'] == codes["Mix"], metric].values}
+            #   'Mix': data.loc[data['group'] == codes["Mix"], metric].values}
+              'Mix': mix_data.loc[:, metric].values,
+              # Include the defined truth for the mixture scores
+              'Mix_C': mix_data.loc[mix_data['Diabetes'] == mix_codes["cases"], metric].values,
+              'Mix_N': mix_data.loc[mix_data['Diabetes'] == mix_codes["non-cases"], metric].values,}
 
     means = {'R_C': scores['R_C'].mean(),
              'R_N': scores['R_N'].mean()}
