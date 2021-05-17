@@ -126,7 +126,7 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
         mix_mean = scores["Mix"].mean()
         if mix_mean < min(mu_C, mu_N) or mix_mean > max(mu_C, mu_N):
             warnings.warn(f"The mixture mean ({mix_mean:.3}) lies outside of "
-                          "the range of reference means [{mu_C:.3}, {mu_N:.3}]"
+                          f"the range of reference means [{mu_C:.3}, {mu_N:.3}]"
                           " so is unsuitable for this mixture analysis.")
 
     if "EMD" in methods_:
