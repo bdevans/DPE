@@ -1,4 +1,4 @@
-Distribution Proportion Estimation
+Distribution Proportion Estimation <!-- omit in toc -->
 ==================================
 
 Methods for estimating the prevalence of cases in a mixture population based on genetic risk scores.
@@ -12,12 +12,27 @@ This repository contains the Python 3 implementation of the proportion estimatio
 
 A seperate Matlab implementation is provided in the [`matlab`](https://github.com/bdevans/DPE/tree/main/matlab) subdirectory with its own instructions. 
 
+Table of Contents <!-- omit in toc -->
+-----------------
+- [Installation](#installation)
+- [Running the examples](#running-the-examples)
+  - [Expected Output](#expected-output)
+- [Reproducibility](#reproducibility)
+- [Running on your own data](#running-on-your-own-data)
+- [Pseudocode](#pseudocode)
+- [Explanation of the main function](#explanation-of-the-main-function)
+  - [Inputs](#inputs)
+  - [Outputs](#outputs)
+- [Methods](#methods)
+- [Methods Summary](#methods-summary)
+- [Citation](#citation)
+
 Installation
 ------------
 
-0. Install Python >= 3.6. 
-1. Add this folder to your `PYTHONPATH`.
-2. Install the requirements using one of the provided requirements files:
+1. Install Python >= 3.6. 
+2. Add this folder to your `PYTHONPATH`.
+3. Install the requirements using one of the provided requirements files:
    1. If you use a standard Python distribution: `pip3 install -r requirements.txt`.
    2. Or, if you use Anaconda: `conda env create -f environment.yml`. Then run `source activate dpe` to activate the environment. 
 
@@ -25,8 +40,8 @@ This should take approximately 1-2 minutes to complete, depending on the speed o
 
 The examples given were tested with Python 3.8.2 on macOS 11.4 (20F71) running in a Docker container (version 20.10.7, build f0df350). The exact packages installed with `conda` during testing are given in `.devcontainer/frozen_environment.yml`. 
 
-Running the worked examples
----------------------------
+Running the examples
+--------------------
 
 Three main code files are relevant for review purposes:
 1. `scripts/run_examples.py` the main script for applying the proportion estimation algorithms to the example data sets.
@@ -89,8 +104,8 @@ Reproducibility
 
 The results are reproducible by default since a seed is set (42) for the pseudo random number generator. This seed may be changed (or set to `None` for a random seed) or set to any integer in the range `[0, 2^32)` to explore variations in results due to stochasticity in sampling. 
 
-Running on your data
---------------------
+Running on your own data
+------------------------
 
 The main requirement is to prepare a dictionary (`dict`) containing the keys `R_C`, `R_N` and `Mix`. The associated values should be (one dimensional) arrays (or lists) of the GRS scores for the "Cases Reference" (`R_C`) distribution, the "Non-cases Reference" (`R_N`) distribution and the "Mixture" distribution (`Mix`) respectively. 
 
