@@ -205,7 +205,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
     - `CI` : the confidence intervals around the prevalence
     - `mean` : the mean of the bootstrapped estimates
     - `std` : the standard deviation of the bootstrap estimates
-    - `p_cor_C` : the correct prevalence estimate when `correct_bias == True`
+    - `p_cor_C` : the corrected prevalence estimate when `correct_bias == True`
 - bootstraps (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
 
 Additionally the logfile is written to the working directory.
