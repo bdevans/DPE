@@ -94,7 +94,6 @@ Method: 100%|██████████████████████�
 
 Elapsed time = 628.835 seconds
 ================================================================================ 
-
 ```
 
 Additionally a `results` directory will be created with a subdirectory for each data set processed containing a `csv` file with the initial point estimates and bootstrap estimates for each method. 
