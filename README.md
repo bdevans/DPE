@@ -1,7 +1,7 @@
 Distribution Proportion Estimation
 ==================================
 
-Algorithms for estimating the prevalence of cases in a mixture population based on genetic risk scores.
+Methods for estimating the prevalence of cases in a mixture population based on genetic risk scores.
 
 [![GitHub license](https://img.shields.io/github/license/bdevans/DPE)](https://github.com/bdevans/DPE/blob/master/LICENSE.txt)
 [**DOI: 10.1101/2020.02.20.20025528**](https://doi.org/10.1101/2020.02.20.20025528)
@@ -16,7 +16,7 @@ Installation
 0. Install Python >= 3.6. 
 1. Add this folder to your `PYTHONPATH`.
 2. Install the requirements using one of the provided requirements files:
-   1. If you use another Python distribution: `pip3 install -r requirements.txt`.
+   1. If you use a standard Python distribution: `pip3 install -r requirements.txt`.
    2. Or, if you use Anaconda: `conda env create -f environment.yml`. Then run `source activate dpe` to activate the environment. 
 
 This should take approximately 1-2 minutes to complete, depending on the speed of your internet connection and the number of dependencies already satisfied. 
