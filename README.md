@@ -216,21 +216,23 @@ Methods
 
 We bootstrap (i.e. sample with replacement) from the available data, systematically varying sample size and mixture proportion. We then apply the following methods to yield estimates of the true proportion and from those, calculate the errors throughout the bootstrap parameter space.
 
-These methods assume that higher GRS is associated with cases. 
-
-1. Means
-
-    ```python
-    p_hat_C = (RM.mean() - mu_N) / (mu_C - mu_N)
-    p_hat_C = np.clip(p_hat_C, 0.0, 1.0)
-    ```
-
-2. [Excess](https://www.thelancet.com/journals/landia/article/PIIS2213-8587(17)30362-5/fulltext)
+1. [Excess](https://www.thelancet.com/journals/landia/article/PIIS2213-8587(17)30362-5/fulltext)
 
     ```python
     number_low = len(RM[RM <= population_median])
     number_high = len(RM[RM > population_median])
-    p_hat_C = (number_high - number_low) / len(RM)
+    p_hat_C = abs(number_high - number_low) / len(RM)
+    p_hat_C = np.clip(p_hat_C, 0.0, 1.0)
+    ```
+
+2. Means
+
+    ```python
+    mu_C, mu_N = methods["Means"]["mu_C"], methods["Means"]["mu_N"]
+    if mu_C > mu_N:  # This should be the case
+        p_hat_C = (RM.mean() - mu_N) / (mu_C - mu_N)
+    else:
+        p_hat_C = (mu_N - RM.mean()) / (mu_N - mu_C)
     p_hat_C = np.clip(p_hat_C, 0.0, 1.0)
     ```
 
