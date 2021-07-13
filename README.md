@@ -26,29 +26,22 @@ The examples given were tested with Python 3.7.6 on macOS 10.14.6 (18G3020) runn
 Running the worked examples
 ---------------------------
 
-Three code files are provided for review purposes:
-1. `run_examples.py` the main script for applying the proportion estimation algorithms to the example data sets.
-2. `data_utilities.py` has utilities for generating, loading and saving synthetic data sets.
-3. `proportion_estimation.py` has the main routines for estimating proportions in a mixture distribution.
+Three main code files are relevant for review purposes:
+1. `scripts/run_examples.py` the main script for applying the proportion estimation algorithms to the example data sets.
+2. `dpe/datasets.py` has utilities for generating, loading and saving synthetic data sets.
+3. `dpe/estimate.py` has the main routines for estimating proportions in a mixture distribution.
 
 Once the requirements are installed (and the environment activated if necessary) run the example script with:
 
 ```
-python run_examples.py
+python scripts/run_examples.py
 ```
 
 The proportion estimates and confidence intervals are then generated, with a plain text summary printed to the console (when verbose > 0) and written to a log file (named after the data set file with a `.log` extension). 
 
 The analysis parameters may be changed by editing the `run_examples.py` script. It is recommended to keep the total number of mixture bootstraps (`n_mix * n_boot`) below around 10,000 when using the KDE method, as this may taken a long time to finish. 
 
-Optionally, the file `generate_data.py` may be edited to change the construction parameters and generate new data sets to analyse. 
-
-Note: The population of cases is sometimes referred to as Reference 1 and the population of non-cases referred to as Reference 2. Accordingly these notations:
-```
-R_C == Ref1, R_N == Ref2
-p_C == p1, p_N == p2
-```
-may be used interchangeably. 
+Optionally, the file `datasets.py` may be edited to change the construction parameters and generate new data sets to analyse. 
 
 ### Expected Output
 
@@ -287,6 +280,13 @@ These methods assume that higher GRS is associated with cases.
         amp_R_N = res_mix.params['amp_2'].value
         return amp_R_C / (amp_R_C + amp_R_N)
     ```
+
+Note: The population of cases is sometimes referred to as Reference 1 and the population of non-cases referred to as Reference 2. Accordingly these notations:
+```
+R_C == Ref1, R_N == Ref2
+p_C == p1, p_N == p2
+```
+may be used interchangeably. 
 
 Methods Summary
 ---------------
