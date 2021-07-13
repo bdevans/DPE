@@ -25,9 +25,9 @@ load_data = True  # Change this to False to generate new datasets
 
 # Less frequently changed parameters
 seed = 42  # Set this to seed the PRNG for reproducibility of results
-n_jobs = -1  # Change this to set the number of CPUs to use in parallel or -1 to use all
+n_jobs = -1  # Change this to set the number of CPUs to use in parallel or -1 to use all CPUs
 ci_method = "bca"  # Method for calculating confidence intervals: Bias-corrected and accelerated bootstrap interval
-correct_bias = True  # Flag to apply bootstrap correction to the estimate
+correct_bias = False  # Flag to apply bootstrap correction to the estimate
 boot_size = -1  # Size of each bootstrap (set to -1 to make it the same size as the mixture distribution)
 alpha = 0.05  # Used to set the centile for calculating the confidence intervals from bootstrapped estimates
 bins = 'fd'  # Use Freedman-Diaconis rule for binning data by default
