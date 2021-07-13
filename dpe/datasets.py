@@ -15,6 +15,55 @@ from . utilities import estimate_bins
 """R_C := cases; R_N := non-cases; Mix := mixture"""
 
 
+def generate_dataset(p_C, size=5000, seed=None):
+
+    assert 0.0 <= p_C <= 1.0
+    assert 0 < size
+
+    # Create a generator to avoid a complete reseed
+    rng = np.random.default_rng(seed)
+
+    n_R_C = size
+    n_R_N = size
+    n_mix = size
+
+    R_C = rng.normal(loc=1, scale=0.2, size=n_R_C)
+    bump = int(np.ceil(0.1 * n_R_N))
+    R_N = np.concatenate((rng.normal(loc=1.2, scale=0.2, size=n_R_N-bump),
+                          rng.normal(loc=1.6, scale=0.05, size=bump)))
+    mix_n_R_C = int(round(p_C * n_mix))
+    mix_n_R_N = n_mix - mix_n_R_C
+    mix = np.concatenate((rng.choice(R_C, mix_n_R_C, replace=True),
+                          rng.choice(R_N, mix_n_R_N, replace=True)))
+
+    scores = {'R_C': R_C,
+              'R_N': R_N,
+              'Mix': mix}
+    return scores
+
+
+def save_dataset(scores, filename, codes=None):
+    if codes is None:
+        codes = {'R_C': 1, 'R_N': 2, 'Mix': 3}
+    groups = np.concatenate((np.ones_like(scores['R_C'], dtype=int) * codes['R_C'],
+                             np.ones_like(scores['R_N'], dtype=int) * codes['R_N'],
+                             np.ones_like(scores['Mix'], dtype=int) * codes['Mix']))
+    grs = np.concatenate((scores['R_C'], scores['R_N'], scores['Mix']))
+    data = pd.DataFrame(data={'Group': groups, 'GRS': grs})
+    data.to_csv(filename, header=True, index=False)
+
+
+def load_dataset(filename, codes=None):
+    if codes is None:
+        codes = {'R_C': 1, 'R_N': 2, 'Mix': 3}
+    data = pd.read_csv(filename)  # , header=['Group', 'GRS'])
+    data.dropna(inplace=True)  # Remove any empty entries
+    scores = {'R_C': data.loc[data['Group'] == codes['R_C'], 'GRS'].values,
+              'R_N': data.loc[data['Group'] == codes['R_N'], 'GRS'].values,
+              'Mix': data.loc[data['Group'] == codes['Mix'], 'GRS'].values}
+    return scores
+
+
 def load_diabetes_data(metric):
 
     dataset = 'data/biobank_mix_WTCC_ref.csv'
@@ -198,52 +247,3 @@ def load_coeliac_data():
     chosen_bins = bins[binning_method]
     chosen_bins["method"] = binning_method
     return scores, chosen_bins, means, medians, p_C
-
-
-def generate_dataset(p_C, size=5000, seed=None):
-
-    assert 0.0 <= p_C <= 1.0
-    assert 0 < size
-
-    # Create a generator to avoid a complete reseed
-    rng = np.random.default_rng(seed)
-
-    n_R_C = size
-    n_R_N = size
-    n_mix = size
-
-    R_C = rng.normal(loc=1, scale=0.2, size=n_R_C)
-    bump = int(np.ceil(0.1 * n_R_N))
-    R_N = np.concatenate((rng.normal(loc=1.2, scale=0.2, size=n_R_N-bump),
-                          rng.normal(loc=1.6, scale=0.05, size=bump)))
-    mix_n_R_C = int(round(p_C * n_mix))
-    mix_n_R_N = n_mix - mix_n_R_C
-    mix = np.concatenate((rng.choice(R_C, mix_n_R_C, replace=True),
-                          rng.choice(R_N, mix_n_R_N, replace=True)))
-
-    scores = {'R_C': R_C,
-              'R_N': R_N,
-              'Mix': mix}
-    return scores
-
-
-def save_dataset(scores, filename, codes=None):
-    if codes is None:
-        codes = {'R_C': 1, 'R_N': 2, 'Mix': 3}
-    groups = np.concatenate((np.ones_like(scores['R_C'], dtype=int) * codes['R_C'],
-                             np.ones_like(scores['R_N'], dtype=int) * codes['R_N'],
-                             np.ones_like(scores['Mix'], dtype=int) * codes['Mix']))
-    grs = np.concatenate((scores['R_C'], scores['R_N'], scores['Mix']))
-    data = pd.DataFrame(data={'Group': groups, 'GRS': grs})
-    data.to_csv(filename, header=True, index=False)
-
-
-def load_dataset(filename, codes=None):
-    if codes is None:
-        codes = {'R_C': 1, 'R_N': 2, 'Mix': 3}
-    data = pd.read_csv(filename)  # , header=['Group', 'GRS'])
-    data.dropna(inplace=True)  # Remove any empty entries
-    scores = {'R_C': data.loc[data['Group'] == codes['R_C'], 'GRS'].values,
-              'R_N': data.loc[data['Group'] == codes['R_N'], 'GRS'].values,
-              'Mix': data.loc[data['Group'] == codes['Mix'], 'GRS'].values}
-    return scores
