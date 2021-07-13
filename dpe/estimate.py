@@ -688,7 +688,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         if correct_bias:
             df_correct = correct_estimate(df_pe)
             for method, p_cor_C in df_correct.items():
-                summary[method]["p_cor_C"] = p_cor_C  # TODO: Remove?
+                summary[method]["p_cor_C"] = p_cor_C.values[0]  # TODO: Remove?
 
     else:
         df_pe = pd.DataFrame(pe_initial, index=[0], columns=columns)
