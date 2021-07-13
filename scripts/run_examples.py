@@ -3,6 +3,13 @@
 
 import time
 import os
+import sys
+import pathlib
+
+project_dir = str(pathlib.Path(__file__).parent.parent.absolute())
+if project_dir not in sys.path:
+    print(f"Adding {project_dir} to PYTHONPATH...")
+    sys.path.insert(0, project_dir)
 
 import dpe
 import dpe.datasets as ds
