@@ -24,5 +24,5 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then /opt/conda/bin/conda env up
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
 
 # RUN conda list --explicit
-# RUN conda list --export
+RUN conda list --export
 # RUN pip freeze
