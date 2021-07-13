@@ -1,4 +1,5 @@
 Developed and tested on Matlab 2020b. Code requires 'Statistics and Machine Learning Toolbox'. 
+With questions and comments regarding the matlab code, please contact: p.m.slowinski@exeter.ac.uk
 
 To run the  example:
 1.) change the Matlab working directory to the directory containing this readme file
