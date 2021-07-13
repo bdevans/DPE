@@ -140,8 +140,8 @@ acc = skew/6;  % acceleration ignor /sqrt(N_mix) (e.g. in the end of equation 7.
 % Tim C. Hesterberg (2015) What Teachers Should Know About the Bootstrap:
 % Resampling in the Undergraduate Statistics Curriculum,
 % The American Statistician, 69(4): 371-386. https://doi.org/10.1080/00031305.2015.1089789
-cnt_h=1-CI_centile/2;
-cnt_l=1-cnt_h;
+cnt_l=CI_centile/2;
+cnt_h=1-cnt_l;
 expanded_alpha=normcdf(tinv([cnt_l cnt_h],N_mix-1)* sqrt(N_mix / (N_mix-1)));
 
 z_alpha1 = norminv(expanded_alpha(1));
