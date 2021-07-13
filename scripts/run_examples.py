@@ -56,7 +56,7 @@ for p_C in example_proportions:
                                   boot_size=boot_size, n_mix=n_mix, alpha=alpha,
                                   ci_method=ci_method, correct_bias=correct_bias,
                                   seed=seed, n_jobs=n_jobs, verbose=verbose,
-                                  true_p1=p_C, logfile=f'{dataset}.log')
+                                  true_pC=p_C, logfile=f'{dataset}.log')
 
     summary, bootstraps = results
     bootstraps.to_csv(os.path.join(out_dir, f"{dataset}_bootstraps.csv"), header=True)
