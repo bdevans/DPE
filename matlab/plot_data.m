@@ -1,3 +1,5 @@
+%contact: p.m.slowinski@exeter.ac.uk
+
 ref_C=scores(scores(:,1)==1,2); %assign scores to cohorts
 ref_N=scores(scores(:,1)==2,2); %assign scores to cohorts
 mix=scores(scores(:,1)==3,2); %assign scores to cohorts
