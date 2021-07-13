@@ -47,80 +47,37 @@ Optionally, the file `datasets.py` may be edited to change the construction para
 
 ### Expected Output
 
-When running with the parameters given in the manuscript (N_M = 100 N_B = 1000) on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 1h15m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time can be reduced considerably by reducing the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, the simulation time has been reduced in `run_examples.py` for demonstration purposes by reducing the number of bootstraps (N_B = 100) such that the run time is approximately 10m per data set (although this can be edited for longer runs). The output produced for the first data set is given below for N_B = 100:
+When running with the parameters given in the manuscript (N_M = 100 N_B = 1000) on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 1h15m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time can be reduced considerably by reducing the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, the simulation time has been reduced in `run_examples.py` for demonstration purposes by reducing the number of bootstraps (N_B = 100) such that the run time is approximately 10m per data set (although this can be edited for longer runs). The output produced for the first data set (p_C = 0.25) is given below for N_M = 100 and N_B = 100 parallelised across 8 threads:
 
 ```
 ================================================================================
 Running on example dataset: p_C = 0.25
 Loading dataset: example_pC025...
 Running 100 bootstraps with 8 processors...
-Method: 100%|█████████████████████████████████████| 4/4 [09:07<00:00, 136.98s/it]
+Method: 100%|████████████████████████████████████████████████████████████| 4/4 [10:16<00:00, 154.24s/it]
 
-    Method    |   Estimated pC    |   Estimated pN    
+    Method    |   Estimated p_C   |   Estimated p_N   
 ======================================================
  Excess point | 0.18200           | 0.81800           
- Excess (µ±σ) | 0.13694 +/- 0.019 | 0.86306 +/- 0.019 
- C.I. (95.0%) | 0.18920 , 0.26361 | 0.73639 , 0.81080 
- Corrected    | 0.22706           | 0.77294           
+ Excess (µ±σ) | 0.13660 +/- 0.018 | 0.86340 +/- 0.018 
+ C.I. (95.0%) | 0.10160 , 0.17320 | 0.82680 , 0.89840 
 ------------------------------------------------------
  Means  point | 0.24279           | 0.75721           
- Means  (µ±σ) | 0.24490 +/- 0.018 | 0.75510 +/- 0.018 
- C.I. (95.0%) | 0.20469 , 0.27637 | 0.72363 , 0.79531 
- Corrected    | 0.24069           | 0.75931           
+ Means  (µ±σ) | 0.24264 +/- 0.020 | 0.75736 +/- 0.020 
+ C.I. (95.0%) | 0.20415 , 0.28230 | 0.71770 , 0.79585 
 ------------------------------------------------------
  EMD    point | 0.24313           | 0.75687           
- EMD    (µ±σ) | 0.24357 +/- 0.019 | 0.75643 +/- 0.019 
- C.I. (95.0%) | 0.20500 , 0.27984 | 0.72016 , 0.79500 
- Corrected    | 0.24269           | 0.75731           
+ EMD    (µ±σ) | 0.24399 +/- 0.019 | 0.75601 +/- 0.019 
+ C.I. (95.0%) | 0.20545 , 0.28065 | 0.71935 , 0.79455 
 ------------------------------------------------------
  KDE    point | 0.24843           | 0.75157           
- KDE    (µ±σ) | 0.24595 +/- 0.022 | 0.75405 +/- 0.022 
- C.I. (95.0%) | 0.20809 , 0.29445 | 0.70555 , 0.79191 
- Corrected    | 0.25090           | 0.74910           
+ KDE    (µ±σ) | 0.25001 +/- 0.022 | 0.74999 +/- 0.022 
+ C.I. (95.0%) | 0.20753 , 0.29408 | 0.70592 , 0.79247 
 ------------------------------------------------------
  Ground Truth | 0.25000           | 0.75000           
 ======================================================
 
-Elapsed time = 548.460 seconds
-================================================================================ 
-
-```
-
-The longer run time output from processing the `example_pC025` data set with N_M = 100 and N_B = 1000 is given below:
-
-```
-================================================================================
-Running on example dataset: p_C = 0.25
-Loading dataset: example_pC025...
-Running 1000 bootstraps with 8 processors...
-Method: 100%|█████████████████████████████████████| 4/4 [1:14:08<00:00, 1112.13s/it]
-
-    Method    |   Estimated pC    |   Estimated pN    
-======================================================
- Excess point | 0.18200           | 0.81800           
- Excess (µ±σ) | 0.13752 +/- 0.019 | 0.86248 +/- 0.019 
- C.I. (95.0%) | 0.18920 , 0.26200 | 0.73800 , 0.81080 
- Corrected    | 0.22648           | 0.77352           
-------------------------------------------------------
- Means  point | 0.24279           | 0.75721           
- Means  (µ±σ) | 0.24466 +/- 0.018 | 0.75534 +/- 0.018 
- C.I. (95.0%) | 0.20485 , 0.27659 | 0.72341 , 0.79515 
- Corrected    | 0.24093           | 0.75907           
-------------------------------------------------------
- EMD    point | 0.24313           | 0.75687           
- EMD    (µ±σ) | 0.24374 +/- 0.019 | 0.75626 +/- 0.019 
- C.I. (95.0%) | 0.20468 , 0.27912 | 0.72088 , 0.79532 
- Corrected    | 0.24252           | 0.75748           
-------------------------------------------------------
- KDE    point | 0.24843           | 0.75157           
- KDE    (µ±σ) | 0.24610 +/- 0.021 | 0.75390 +/- 0.021 
- C.I. (95.0%) | 0.20822 , 0.29159 | 0.70841 , 0.79178 
- Corrected    | 0.25075           | 0.74925           
-------------------------------------------------------
- Ground Truth | 0.25000           | 0.75000           
-======================================================
-
-Elapsed time = 4450.042 seconds
+Elapsed time = 628.835 seconds
 ================================================================================ 
 
 ```
