@@ -25,6 +25,8 @@ CI_centile=0.05; %centile for calculating the confidence intervals from bootstra
 %
 %Please note that small differences between Matlab and Python example outputs 
 %are due to different pseudorandom number generator (PRNG) implementations.
+%
+%contact: p.m.slowinski@exeter.ac.uk
 
 clc
 disp('running')
