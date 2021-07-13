@@ -10,7 +10,7 @@ dependencies:
   - pandas
   - scikit-learn
   - xlrd
-  - lmfit
+  - lmfit>=0.9
   # - emcee
   # - corner
   - statsmodels
