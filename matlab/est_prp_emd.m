@@ -28,8 +28,6 @@ bin_max=max(all_socres);
 [~,edges] = histcounts(all_ref,'BinMethod','fd','BinLimits',[bin_min,bin_max]);
 bw=edges(2)-edges(1);
 bc=edges(1:end-1)+bw/2;
-bc=[bin_min, bc, bin_max];
-
 
 i_cdf1=distribution2cdf(ref1',bin_min,bin_max,bc);
 i_cdf2=distribution2cdf(ref2',bin_min,bin_max,bc);
