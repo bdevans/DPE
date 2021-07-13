@@ -39,21 +39,22 @@ print('=' * 80)
 for p_C in example_proportions:
 
     dataset = f'example_pC{int(round(100*p_C)):03}'
+    dataset_file = os.path.join(project_dir, "data", f'{dataset}.csv')
     print(f'Running on example dataset: p_C = {p_C}')
     if load_data:
         # Load the example dataset
         print(f'Loading dataset: {dataset}...')
-        scores = ds.load_dataset(f'{dataset}.csv')
+        scores = ds.load_dataset(dataset_file)
     else:
         # Generate new data
         print('Generating fresh example dataset...')
         scores = ds.generate_dataset(p_C)
 
         # Save data
-        ds.save_dataset(scores, f'{dataset}.csv')
+        ds.save_dataset(scores, dataset_file)
 
     # Create output directory
-    out_dir = os.path.join("results", dataset)
+    out_dir = os.path.join(project_dir, "results", dataset)
     os.makedirs(out_dir, exist_ok=True)
 
     t = time.time()  # Start timer
