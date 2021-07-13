@@ -7,6 +7,7 @@ function scores=generate_example_data(pC,sample_size,seed)
 % scores - matrix with artificial scores. 
 %          1st column is a label 1 - ref_C, 2 - ref_N, 3 - mixture 
 %          2nd column has random numbers (artificial scores)
+% contact: p.m.slowinski@exeter.ac.uk
 
 rng(seed);
 n_ref_C=sample_size; % size of cases sample
