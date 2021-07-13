@@ -278,7 +278,7 @@ Methods Summary
 Citation
 --------
 
-If you use this software, please cite our publication:
+If you use this software, please cite our accompanying [publication](https://doi.org/10.1101/2020.02.20.20025528):
 
 ```bibtex
 @article {Evans2020.02.20.20025528,
