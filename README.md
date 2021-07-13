@@ -295,12 +295,12 @@ Methods Summary
 
 |               | Means                 | Excess                | EMD                   | KDE                   |
 | ------------- | --------------------- | --------------------- | --------------------- | --------------------- |
-| Advantages    | Trivial to calculate. | Trivial to calculate. | Computationally cheap. | Accurate |
+| Advantages    | Simple to calculate. | Simple to calculate. | Computationally cheap. | Accurate |
 |               | Relies only on summary statistics. | Relies only on summary statistics. | ... | ... |
 |               | Works for even highly overlapping distributions. |    |   |
 | ------------- | --------------------- | --------------------- | ----------------- | ----------------- |
-| Disadvantages | Inaccurate when data is not normally distributed. | Inaccurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
-|               |                       |                       | Computationally expensive. |
+| Disadvantages | Less accurate when data is not normally distributed. | Less accurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
+|               |               |                       |                       | Computationally expensive. |
 
 Citation
 --------
