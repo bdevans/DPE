@@ -7,8 +7,11 @@ To run the  example:
  - to generate data with different distributions, open and modify generate_example_data.m
 3.) to plot the scores run plot_data.m
 
-Please note that small differences between Matlab and Python example outputs are due to different pseudorandom number generator (PRNG) implementations.
-The example_script.m will run for around 400 sec. (timed on macOS 10.14.6 with Intel Core i7, 2.2 GHz processor - single core performance) and will produce the following output in Matlab's Command Window (Elapsed time values will change depending on sytem):
+Please note that small differences between Matlab and Python example outputs are due to different 
+pseudorandom number generator (PRNG) implementations. The example_script.m will run for around 400 sec. 
+(timed on macOS 10.14.6 with Intel Core i7, 2.2 GHz processor - single core performance) and will 
+produce the following output in Matlab's Command Window (Elapsed time values will change depending
+on the system):
 
 running
 Elapsed time is 11.340442 seconds.
