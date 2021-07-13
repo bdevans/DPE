@@ -4,6 +4,7 @@ Distribution Proportion Estimation <!-- omit in toc -->
 Methods for estimating the prevalence of cases in a mixture population based on genetic risk scores.
 
 [![GitHub license](https://img.shields.io/github/license/bdevans/DPE)](https://github.com/bdevans/DPE/blob/master/LICENSE.txt)
+![Workflow](https://github.com/bdevans/DPE/actions/workflows/python-package.yml/badge.svg)
 [**DOI: 10.1101/2020.02.20.20025528**](https://doi.org/10.1101/2020.02.20.20025528)
 
 ------------------------------------------------------------------------
