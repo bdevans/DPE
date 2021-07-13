@@ -257,12 +257,11 @@ We bootstrap (i.e. sample with replacement) from the available data, systematica
         return amp_R_C / (amp_R_C + amp_R_N)
     ```
 
-Note: The population of cases is sometimes referred to as Reference 1 and the population of non-cases referred to as Reference 2. Accordingly these notations:
+Note: The population of cases is sometimes referred to as Reference 1 and the population of non-cases referred to as Reference 2. Accordingly these notations may be used interchangeably.
 ```
 R_C == Ref1, R_N == Ref2
 p_C == p1, p_N == p2
-```
-may be used interchangeably. 
+``` 
 
 Methods Summary
 ---------------
