@@ -8,7 +8,7 @@ Methods for estimating the prevalence of cases in a mixture population based on 
 
 ------------------------------------------------------------------------
 
-This repository contains the Python 3 implementation of the proportion estimation algorithms, which was developed and run with Python 3.7.6. The following instructions assume that you have a working Python (>=3.6) installation obtained either through Anaconda (recommended) or through other means (which requires pip). 
+This repository contains the Python 3 implementation of the proportion estimation algorithms. The following instructions assume that you have a working Python (>=3.6) installation obtained either through Anaconda (recommended) or through other means (which requires pip). 
 
 A seperate Matlab implementation is provided in the [`matlab`](https://github.com/bdevans/DPE/tree/main/matlab) subdirectory with its own instructions. 
 
