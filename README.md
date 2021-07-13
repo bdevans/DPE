@@ -23,7 +23,7 @@ Installation
 
 This should take approximately 1-2 minutes to complete, depending on the speed of your internet connection and the number of dependencies already satisfied. 
 
-The examples given were tested with Python 3.7.6 on macOS 10.14.6 (18G3020) running in a Docker container (version 19.03.5, build 633a0ea). The exact packages installed with `pip` during testing are given in `frozen_dependencies.txt`. 
+The examples given were tested with Python 3.8.2 on macOS 11.4 (20F71) running in a Docker container (version 20.10.7, build f0df350). The exact packages installed with `conda` during testing are given in `.devcontainer/frozen_environment.yml`. 
 
 Running the worked examples
 ---------------------------
