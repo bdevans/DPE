@@ -13,6 +13,7 @@ function [p_I,CI_BCa,B,prv_bts,prv_jckknf]=est_prp_excess(ref1,ref2,mix,CI_centi
 %ADDITIONAL output
 %prv_bts - bootstrap values (can be used for plotting or diagnostics)
 %prv_jckknf - jackknife values (can be used for plotting or diagnostics)
+%contact: p.m.slowinski@exeter.ac.uk
 
 ref1=ref1(:);
 ref2=ref2(:);
