@@ -209,19 +209,40 @@ def correct_estimate(df_pe):
     return pd.DataFrame(corrected, index=[-1], columns=df_pe.columns)
 
 
-def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean,
+def calc_conf_intervals(bootstraps, 
+                        estimate=None, scores=None, bins=None, est_method=None,
+                        correct_bias=True, average=np.mean,
                         alpha=0.05, ci_method="bca"):
     """Calculate confidence intervals for a point estimate.
 
-    By default we use the alpha quantile of the distribution of the N_M * N_B
-    bootstrapped p_C values, where alpha = 0.05.
+    By default we use the BCa method to correct for skew and bias in the
+    distribution of the N_M * N_B bootstrapped p_C values, with alpha = 0.05.
 
     Parameters
     ----------
-    values : array
+    bootstraps : array
         The array of bootstrapped p_C estimates (for a particular method).
-    initial : float, optional
+    estimate : float, optional
         An optional estimate from the original mixture (for a particular method).
+    scores : dict, optional
+        A dictionary of score distributions for the BCa CI method of the form,
+        `{'R_C': array_of_cases_scores,
+          'R_N': array_of_non-cases_scores,
+          'Mix': array_of_mixture_scores}`.
+    bins : str, optional
+        A string specifying the binning method for the BCa CI method:
+        `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`.
+        Default: `'fd'`.
+        Alternatively, a dictionary,
+        `{'width': bin_width, 'min', min_edge, 'max': max_edge,
+          'edges': array_of_bin_edges, 'centers': array_of_bin_centers,
+          'n': number_of_bins}`.
+    est_method : dict, optional
+        A dictionary of a single method name from the set of methods:
+        {'Excess', 'Means', 'EMD', 'KDE'}, with associated precomputed
+        properties for the BCa CI method.
+        e.g. `{'Means': {"mu_C": np.mean(scores["R_C"]),
+                         "mu_N": np.mean(scores["R_N"])}}`.
     correct_bias : None or bool, optional
         A flag to correct the `experimental` CI method.
     average : function, optional
@@ -234,20 +255,32 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
         The name of the method used to calculate the confidence intervals.
     """
 
-    n_obs = len(values)
-    average_value = average(values)
+    n_obs = len(bootstraps)
+    average_value = average(bootstraps)
 
     if ci_method.lower() == 'bca':
+        assert estimate is not None and 0.0 <= estimate <= 1.0
+        assert scores is not None
+        assert bins is not None
+        assert est_method is not None
+        assert len(est_method) == 1  # Single method passed
+        method_name = list(est_method)[0]
+        R_C = scores['R_C']
+        R_N = scores['R_N']
+        Mix = scores['Mix']
         # Adapted from https://github.com/cgevans/scikits-bootstrap
         # TODO: Replace with this external library for more robust checks
 
         # print("Using BCa method...")
-        # Esitamate the bias correction value (the median bias transformed into normal deviates)
-        z0 = norm.ppf(np.sum(values < average_value, axis=0) / n_obs)
+        # Estimate the bias correction value (the median bias transformed into normal deviates)
+        z0 = norm.ppf(np.sum(bootstraps < estimate, axis=0) / n_obs)
 
-        # Statistics of the jackknife distribution
-        indices = np.arange(n_obs)
-        jack_values = [average(values[indices != ind]) for ind in range(n_obs)]
+        # Statistics of the jackknife distribution computed from original data
+        indices = np.arange(len(Mix), dtype=np.uint)
+        
+        jack_values = np.asarray([point_estimate(Mix[indices != ind], R_C, R_N, bins, est_method)[method_name] for ind in indices])
+        # indices = np.arange(n_obs)
+        # jack_values = [average(bootstraps[indices != ind]) for ind in range(n_obs)]
         jack_mean = np.mean(jack_values)
 
         # Temporarily kill numpy warnings:
@@ -263,29 +296,29 @@ def calc_conf_intervals(values, initial=None, correct_bias=True, average=np.mean
         alphas = np.array([alpha/2, 1-alpha/2])
 
         zs = z0 + norm.ppf(alphas).reshape(alphas.shape + (1,) * z0.ndim)
-        avals = norm.cdf(z0 + zs / (1-a*zs))
+        avals = norm.cdf(z0 + zs / (1 - a * zs))
         np.seterr(**oldnperr)
 
-        values = values.to_numpy()
-        values.sort(axis=0)
-        nvals = np.round((n_obs-1) * avals)
+        bootstraps = bootstraps.to_numpy()
+        bootstraps.sort(axis=0)
+        nvals = np.round((n_obs - 1) * avals)
         nvals = np.nan_to_num(nvals).astype('int')
-        ci_low, ci_upp = values[nvals]
+        ci_low, ci_upp = bootstraps[nvals]
 
     elif ci_method.lower() == 'experimental':
-        assert initial is not None and 0.0 <= initial <= 1.0
+        assert estimate is not None and 0.0 <= estimate <= 1.0
         if correct_bias:
-            err_low, err_upp = np.percentile(values-initial, [100*alpha/2, 100*(1-alpha/2)])
-            ci_low, ci_upp = initial-err_upp, initial-err_low
+            err_low, err_upp = np.percentile(bootstraps-estimate, [100*alpha/2, 100*(1-alpha/2)])
+            ci_low, ci_upp = estimate-err_upp, estimate-err_low
         else:
             # TODO: Refactor
-            ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
+            ci_low, ci_upp = np.percentile(bootstraps, [100*alpha/2, 100*(1-alpha/2)])
     elif ci_method.lower() == 'centile':
-        ci_low, ci_upp = np.percentile(values, [100*alpha/2, 100*(1-alpha/2)])
+        ci_low, ci_upp = np.percentile(bootstraps, [100*alpha/2, 100*(1-alpha/2)])
     elif ci_method.lower() == 'stderr':
         p = average_value
         # NOTE: This currently allows CIs outside [0, 1]
-        err = np.sqrt(p * (1-p) / n_obs) * sp.stats.norm.ppf(1-alpha/2)
+        err = np.sqrt(p * (1 - p) / n_obs) * sp.stats.norm.ppf(1 - alpha / 2)
         ci_low, ci_upp = p - err, p + err
     else:  # Assumes a binomial distribution
         count = int(average_value * n_obs)
@@ -308,7 +341,7 @@ def generate_report(summary, true_pC=None, alpha=0.05):
     for method, results in summary.items():
         report.append(f" {method:6} point | {results['p_C']:<17.5f} | {1-results['p_C']:<17.5f} ")
         if "CI" in results and "mean" in results and "std" in results:  # n_boot > 1:
-            # NOTE: std(1-values) == std(values)
+            # NOTE: std(1-bootstraps) == std(bootstraps)
             report.append(f" {method:6} (µ±σ) | {results['mean']:.5f} +/- {results['std']:.3f} "
                                             f"| {1-results['mean']:.5f} +/- {results['std']:.3f} ")
             ci_low_C, ci_upp_C = results["CI"]
@@ -557,11 +590,11 @@ def analyse_mixture(scores, bins='fd', methods='all',
             lf.write(f"CI method = '{ci_method}'; alpha = {alpha}; seed = {seed}\n")
             lf.write("\n\n")
 
-    # Get initial estimate of proportions
+    # Get initial estimate of proportion (p_C) for each method
     pe_initial = point_estimate(Mix, R_C, R_N, bins, methods_)
 
     for method, p_hat_C in pe_initial.items():
-        summary[method]["p_C"] = p_hat_C
+        summary[method]["p_C"] = p_hat_C  # .values[0]
 
     if verbose > 1:
         print('Initial point estimates:')
@@ -664,17 +697,11 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
             pe_boot = pd.DataFrame.from_records(results, columns=columns)
 
-        # Put into dataframe
-        pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
-        df_pe = pd.concat([pe_initial, pe_boot], ignore_index=True)
-        if n_mix > 0:
-            index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
-            index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
-            df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
-
         for method in columns:
             # Calculate confidence intervals
-            ci_low1, ci_upp1 = calc_conf_intervals(pe_boot[method], initial=pe_initial[method],
+            ci_low1, ci_upp1 = calc_conf_intervals(pe_boot[method], estimate=pe_initial[method],
+                                                scores=scores, bins=bins, 
+                                                est_method={method: methods_[method]},  # Use a single method
                                                 average=np.mean, alpha=alpha,
                                                 ci_method=ci_method,
                                                 correct_bias=correct_bias)  # TODO: Use correct_bias?
@@ -684,6 +711,14 @@ def analyse_mixture(scores, bins='fd', methods='all',
             # Summary of bootstrapped estimates, \tilde{p}_C
             summary[method]["mean"] = np.mean(pe_boot[method])
             summary[method]["std"] = np.std(pe_boot[method])
+
+        # Put into dataframe because correct_estimate uses the indices
+        pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
+        df_pe = pd.concat([pe_initial, pe_boot], ignore_index=True)
+        if n_mix > 0:
+            index_arrays = list(itertools.product(range(1, n_mix+1), range(1, n_boot+1)))
+            index_arrays.insert(0, (0, 0))  # Prepend 0, 0 for point estimate
+            df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
 
         if correct_bias:
             df_correct = correct_estimate(df_pe)

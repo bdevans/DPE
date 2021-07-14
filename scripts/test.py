@@ -32,4 +32,5 @@ scores = scores_pC010()
 n_boot = 10
 n_mix = 10
 summary, bootstraps = dpe.analyse_mixture(scores, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc, true_pC=p_C)
+print(f"{n_boot=}, {n_mix=}, {seed=}, {nproc=}")
 print(summary)
