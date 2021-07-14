@@ -15,17 +15,17 @@ produce the following output in Matlab's Command Window (Elapsed time values wil
 on the system):
 
 running
-Elapsed time is 11.340442 seconds.
-Elapsed time is 6.623568 seconds.
-Elapsed time is 42.111663 seconds.
-Elapsed time is 309.899719 seconds.
+Elapsed time is 11.738661 seconds.
+Elapsed time is 6.805715 seconds.
+Elapsed time is 43.023635 seconds.
+Elapsed time is 317.615285 seconds.
  
 True pC := 0.25
 ===================================================================
-EXCESS:	pC (95% CI):= 0.18 (0.187, 0.22)	Bias:= -0.0484
+EXCESS: pC (95% C):= 0.182 (0.1904, 0.2116)
 -------------------------------------------------------------------
-MEANS:	pC (95% CI):= 0.246 (0.209, 0.285)	Bias:= -0.000927
+MEANS: pC (95% C):= 0.24279 (0.20468, 0.2829)
 -------------------------------------------------------------------
-EMD:	pC (95% CI):= 0.245 (0.209, 0.286)	Bias:= -0.00204
+EMD: pC (95% C):= 0.24313 (0.20581, 0.28332)
 -------------------------------------------------------------------
-KDE:	pC (95% CI):= 0.244 (0.205, 0.294)	Bias:= -0.00277
+KDE: pC (95% C):= 0.24843 (0.2047, 0.29339)

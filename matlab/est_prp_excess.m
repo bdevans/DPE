@@ -25,53 +25,92 @@ mdrn=median(ref2);
 %median of the cases distribution
 mdrc=median(ref1);
 
-if mdrn<mdrc
+if mdrn>mdrc
     N1=sum(mix(:)<=mdrn);
     N2=sum(mix(:)>mdrn);
-elseif mdrn>=mdrc % case if median R_N is bigger than median of R_C
+    
+    prv=NaN(1,2);
+    prv(1)=abs(N2-N1)/numel(mix);
+    prv(2)=1-prv(1);
+    
+    p_I=prv;
+    
+    N_ref1=numel(ref1);
+    N_ref2=numel(ref2);
+    N_mix=numel(mix);
+    
+    % jackknife estimates of pre to later estimate Empirical influence function
+    prv_jckknf=NaN(1,N_mix);
+    
+    for i_jckknf=1:N_mix
+        jckk_mix=mix;
+        jckk_mix(i_jckknf)=[];
+        N1=sum(jckk_mix(:)<=mdrn);
+        N2=sum(jckk_mix(:)>mdrn);
+        prv_jckknf(i_jckknf)=abs(N2-N1)/numel(jckk_mix);
+    end
+    
+    N_p1=round(N_mix*p_I(1));
+    N_p2=N_mix-N_p1;
+    
+    prv_bts=NaN(100,1000);
+    
+    for i_mix=1:100
+        mixture_gen=[ref1(randi(N_ref1,1,N_p1)); ref2(randi(N_ref2,1,N_p2))];
+        
+        % bootstrap 1000 times
+        for i_bts=1:1000
+            mixture_rs=mixture_gen(randi(N_mix,1,N_mix));
+            
+            N1=sum(mixture_rs(:)<=mdrn);
+            N2=sum(mixture_rs(:)>mdrn);
+            
+            prv_bts(i_mix,i_bts)=abs(N2-N1)/N_mix;
+        end
+    end
+%---------------------------
+elseif mdrn<=mdrc % case if median R_N is bigger than median of R_C
+    
     N1=sum(mix(:)>mdrn);
     N2=sum(mix(:)<=mdrn);
-end
-
-
-prv=NaN(1,2);
-prv(1)=abs(N2-N1)/numel(mix);
-prv(2)=1-prv(1);
-
-p_I=prv;
-
-N_ref1=numel(ref1);
-N_ref2=numel(ref2);
-N_mix=numel(mix);
-
-% jackknife estimates of pre to later estimate Empirical influence function
-prv_jckknf=NaN(1,N_mix);
-
-for i_jckknf=1:N_mix
-    jckk_mix=mix;
-    jckk_mix(i_jckknf)=[];
-    N1=sum(jckk_mix(:)<=mdrn);
-    N2=sum(jckk_mix(:)>mdrn);
-    prv_jckknf(i_jckknf)=abs(N2-N1)/numel(jckk_mix);
-end
-
-N_p1=round(N_mix*p_I(1));
-N_p2=N_mix-N_p1;
-
-prv_bts=NaN(100,1000);
-
-% 100 model mixtures
-for i_mix=1:100
-    mixture_gen=[ref1(randi(N_ref1,1,N_p1)); ref2(randi(N_ref2,1,N_p2))];
+    prv=NaN(1,2);
+    prv(1)=abs(N2-N1)/numel(mix);
+    prv(2)=1-prv(1);
     
-    % bootstrap 1000 times
-    for i_bts=1:1000
-        mixture_rs=mixture_gen(randi(N_mix,1,N_mix));
+    p_I=prv;
+    
+    N_ref1=numel(ref1);
+    N_ref2=numel(ref2);
+    N_mix=numel(mix);
+    
+    % jackknife estimates of pre to later estimate Empirical influence function
+    prv_jckknf=NaN(1,N_mix);
+    
+    for i_jckknf=1:N_mix
+        jckk_mix=mix;
+        jckk_mix(i_jckknf)=[];
+        N1=sum(jckk_mix(:)>mdrn);
+        N2=sum(jckk_mix(:)<=mdrn);
+        prv_jckknf(i_jckknf)=abs(N2-N1)/numel(jckk_mix);
+    end
+    
+    N_p1=round(N_mix*p_I(1));
+    N_p2=N_mix-N_p1;
+    
+    prv_bts=NaN(100,1000);
+
+    % 100 model mixtures
+    for i_mix=1:100
+        mixture_gen=[ref1(randi(N_ref1,1,N_p1)); ref2(randi(N_ref2,1,N_p2))];
         
-        N1=sum(mixture_rs(:)<=mdrn);
-        N2=sum(mixture_rs(:)>mdrn);
-        
-        prv_bts(i_mix,i_bts)=abs(N2-N1)/N_mix;
+        % bootstrap 1000 times
+        for i_bts=1:1000
+            mixture_rs=mixture_gen(randi(N_mix,1,N_mix));
+            
+            N1=sum(mixture_rs(:)>mdrn);
+            N2=sum(mixture_rs(:)<=mdrn);
+            prv_bts(i_mix,i_bts)=abs(N2-N1)/N_mix;
+        end
     end
 end
 
@@ -103,8 +142,8 @@ acc = skew/6;  % acceleration ignor /sqrt(N_mix) (e.g. in the end of equation 7.
 % Tim C. Hesterberg (2015) What Teachers Should Know About the Bootstrap:
 % Resampling in the Undergraduate Statistics Curriculum,
 % The American Statistician, 69(4): 371-386. https://doi.org/10.1080/00031305.2015.1089789
-cnt_h=1-CI_centile/2;
-cnt_l=1-cnt_h;
+cnt_l=CI_centile/2;
+cnt_h=1-cnt_l;
 expanded_alpha=normcdf(tinv([cnt_l cnt_h],N_mix-1)* sqrt(N_mix / (N_mix-1)));
 
 z_alpha1 = norminv(expanded_alpha(1));

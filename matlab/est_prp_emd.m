@@ -28,8 +28,6 @@ bin_max=max(all_socres);
 [~,edges] = histcounts(all_ref,'BinMethod','fd','BinLimits',[bin_min,bin_max]);
 bw=edges(2)-edges(1);
 bc=edges(1:end-1)+bw/2;
-bc=[bin_min, bc, bin_max];
-
 
 i_cdf1=distribution2cdf(ref1',bin_min,bin_max,bc);
 i_cdf2=distribution2cdf(ref2',bin_min,bin_max,bc);
@@ -132,8 +130,8 @@ acc = skew/6;  % acceleration ignor /sqrt(N_mix) (e.g. in the end of equation 7.
 % Tim C. Hesterberg (2015) What Teachers Should Know About the Bootstrap: 
 % Resampling in the Undergraduate Statistics Curriculum, 
 % The American Statistician, 69(4): 371-386. https://doi.org/10.1080/00031305.2015.1089789
-cnt_h=1-CI_centile/2;
-cnt_l=1-cnt_h;
+cnt_l=CI_centile/2;
+cnt_h=1-cnt_l;
 expanded_alpha=normcdf(tinv([cnt_l cnt_h],N_mix-1)* sqrt(N_mix / (N_mix-1)));
 
 z_alpha1 = norminv(expanded_alpha(1));
