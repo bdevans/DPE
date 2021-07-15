@@ -29,7 +29,7 @@ def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_me
         boot_values = df_pe.iloc[1:, m]
 
         if correct_bias:
-            # TODO: replace with correct_estimate(df_pe)
+            # TODO: replace with correct_estimates(df_pe)
             centres[m] = 2 * df_pe.iloc[0, m] - np.mean(boot_values)  # TODO: check np.mean|average
             boot_values = 2 * df_pe.iloc[0, m] - boot_values  # TODO: Check this step
         else:
@@ -359,7 +359,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
     methods = df_pe.columns.tolist()
     # TODO: Think...
 #    if correct_bias:
-#        df_correct = pe.correct_estimate(df_pe)
+#        df_correct = pe.correct_estimates(df_pe)
 
 
     # Draw violin plots of bootstraps

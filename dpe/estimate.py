@@ -184,14 +184,22 @@ def prepare_methods(scores, bins, methods=None, verbose=1):
     return methods_
 
 
-def correct_estimate(df_pe):
-    """Apply bootstrap based bias correction.
-
+def calculate_bias(estimate, bootstraps, average=np.median):
+    """Calculate the bootstrap based bias.
+    
     Assuming that the distribution of error between the the initial point
     estimate and the real proportion is well approximated by the distribution
     of the error between the bootstrap estimates and the initial point
     estimate.
+
+    NOTE: BCa modifies the quantiles to handle skewness and median bias, so 
+    the median is used as the default for bias calculation (Efron, 1987).
     """
+    return average(bootstraps) - estimate
+
+
+def correct_estimates(df_pe, average=np.median):
+    """Apply bootstrap based bias correction."""
 
     assert len(df_pe) > 1  # Need at least one boot strap estimate
     pe_point = df_pe.iloc[0, :]
@@ -203,9 +211,10 @@ def correct_estimate(df_pe):
     for method in df_pe:  # loop over columns (i.e. methods)
         # point_est = pe_point[method]
         if n_boot > 0:
-            # bias = point_est - np.mean(pe_boot[method])
-            # corrected[method] = point_est + bias
-            corrected[method] = 2 * pe_point[method] - np.mean(pe_boot[method])  # TODO: check np.mean|average
+            # bias = average(pe_boot[method]) - point_est
+            # corrected[method] = point_est - bias
+            # corrected[method] = 2 * pe_point[method] - average(pe_boot[method])
+            corrected[method] = pe_point[method] - calculate_bias(pe_point[method], pe_boot[method])
     return pd.DataFrame(corrected, index=[-1], columns=df_pe.columns)
 
 
@@ -247,6 +256,7 @@ def calc_conf_intervals(bootstraps,
         A flag to correct the `experimental` CI method.
     average : function, optional
         The function used to calculate the average estimate across bootstraps.
+        NOTE: This does not apply to BCa, which implicitly uses the median.
     alpha : float, optional
         The percentile to use for the confidence intervals (default = 0.05).
         The returned values are (alpha/2, 1-alpha/2) percentile confidence
@@ -642,6 +652,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
         else:  # Extended mixture & bootstrap routine to calculate CIs
             # TODO: Refactor for efficiency
+            # NOTE: BCa modifies the quantiles to handle skewness and median bias, so 
+            # the median is used as the default for bias calculation (Efron, 1987).
+            average = np.median
             sample_size = len(Mix)
             results = {}
 
@@ -711,8 +724,10 @@ def analyse_mixture(scores, bins='fd', methods='all',
             # Summary of bootstrapped estimates, \tilde{p}_C
             summary[method]["mean"] = np.mean(pe_boot[method])
             summary[method]["std"] = np.std(pe_boot[method])
+            # summary[method]["bias"] = average(pe_boot[method]) - pe_initial[method]
+            summary[method]["bias"] = calculate_bias(pe_initial[method], pe_boot[method], average=average)
 
-        # Put into dataframe because correct_estimate uses the indices
+        # Put into dataframe because correct_estimates uses the indices
         pe_initial = pd.DataFrame(pe_initial, index=[0], columns=columns)
         df_pe = pd.concat([pe_initial, pe_boot], ignore_index=True)
         if n_mix > 0:
@@ -721,7 +736,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
             df_pe.index = pd.MultiIndex.from_tuples(index_arrays, names=["Remix", "Bootstrap"])
 
         if correct_bias:
-            df_correct = correct_estimate(df_pe)
+            df_correct = correct_estimates(df_pe)
             for method, p_cor_C in df_correct.items():
                 summary[method]["p_cor_C"] = p_cor_C.values[0]  # TODO: Remove?
 
