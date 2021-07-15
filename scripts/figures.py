@@ -37,8 +37,6 @@ from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
 
 # ---------------------------- Define constants ------------------------------
 
-# TODO: Check the use of averaging method np.mean|average
-# See: plots.get_error_bars, estimate.correct_estimate
 # TODO: Apply bias correction to other methods e.g. 'bca'?
 # TODO: Report or use correct_bias?
 
@@ -67,7 +65,7 @@ output_application_vary_cases = {'Diabetes': False, 'Renal': True, 'Coeliac': Fa
 application_xlims = {'Diabetes': None, 'Renal': (0, 0.3), 'Coeliac': (0, 0.3)}
 output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
 output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
-average = np.mean  # TODO: Check
+average = np.mean  # NOTE: Used in get_error_bars and calculate_bias. Does not apply when using BCa (which implicitly uses the median).
 # deviation = np.std
 
 # Set plotting style
