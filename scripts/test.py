@@ -3,6 +3,7 @@
 import os
 import sys
 import pathlib
+import pprint
 
 import pytest
 import numpy as np
@@ -19,18 +20,26 @@ import dpe
 seed = 0
 # np.random.seed(seed)
 
-p_C = 0.1
 # scores = ds.generate_dataset(p_C=p_C)
 
 # @pytest.fixture
-def scores_pC010():
+def scores_pC010_size100():
     """Generate synthetic data with p_C=0.1"""
-    return ds.generate_dataset(p_C=0.1, size=5000, seed=seed)
+    return ds.generate_dataset(p_C=0.1, size=100, seed=seed)
 
-nproc = 8
-scores = scores_pC010()
+# @pytest.fixture
+def scores_pC020_size500():
+    """Generate synthetic data with p_C=0.2"""
+    return ds.generate_dataset(p_C=0.2, size=500, seed=seed)
+
+p_C = 0.1
+scores = scores_pC010_size100()
+# p_C = 0.2
+# scores = scores_pC020_size500()
 n_boot = 10
 n_mix = 10
+nproc = 8
 summary, bootstraps = dpe.analyse_mixture(scores, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc, true_pC=p_C)
 print(f"{n_boot=}, {n_mix=}, {seed=}, {nproc=}")
+# pprint.pprint(summary)
 print(summary)

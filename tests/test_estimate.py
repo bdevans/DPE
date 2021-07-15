@@ -13,54 +13,97 @@ nproc = os.cpu_count()
 
 
 @pytest.fixture
-def scores_pC010():
+def scores_pC010_size100():
+    """Generate synthetic data with p_C=0.1"""
+    return ds.generate_dataset(p_C=0.1, size=100, seed=seed)
+
+expected_point_size100 = {
+    'Excess': {'p_C': 0.14}, 
+    'Means': {'p_C': 0.18293067873890895}, 
+    'EMD': {'p_C': 0.1598270527703443}, 
+    'KDE': {'p_C': 0.22486535485520434}
+    }
+
+expected_size100_n_boot10 = {
+    'Excess': {'p_C': 0.14, 'CI': (0.0, 0.28), 'mean': 0.17600000000000002, 'std': 0.09583318840568752, 'bias': 0.0}, 
+    'Means': {'p_C': 0.18293067873890895, 'CI': (0.11636027513235522, 0.33880589896255464), 'mean': 0.19488787944082625, 'std': 0.10328422616643053, 'bias': -0.008438343021288042}, 
+    'EMD': {'p_C': 0.1598270527703443, 'CI': (0.02119497381956048, 0.2883579618350394), 'mean': 0.17272677210846873, 'std': 0.08456747077157699, 'bias': 0.014759182335856796}, 
+    'KDE': {'p_C': 0.22486535485520434, 'CI': (0.029069533605505137, 0.3669878169136295), 'mean': 0.24316495927493706, 'std': 0.10688796970498039, 'bias': 0.02543108175970124}
+    }
+
+expected_size100_n_boot10_n_mix10 = {
+    'Excess': {'p_C': 0.14, 'CI': (0.0, 0.34), 'mean': 0.1502, 'std': 0.10250834112402755, 'bias': 0.0}, 
+    'Means': {'p_C': 0.18293067873890895, 'CI': (0.0, 0.4686396758186981), 'mean': 0.16170378791626627, 'std': 0.11415563390587638, 'bias': -0.013712238845887764}, 
+    'EMD': {'p_C': 0.1598270527703443, 'CI': (0.018079589403520724, 0.4289956832203804), 'mean': 0.18648509022269402, 'std': 0.11646875624771075, 'bias': 0.010452929491985036}, 
+    'KDE': {'p_C': 0.22486535485520434, 'CI': (1.2692213373587228e-09, 0.52946066246552), 'mean': 0.2371214922403585, 'std': 0.15130456753787117, 'bias': -0.00023046799646284089}
+    }
+
+expected_size100_n_boot10_parallel = {
+    'Excess': {'p_C': 0.14, 'CI': (0.0, 0.28), 'mean': 0.17600000000000002, 'std': 0.09583318840568752, 'bias': 0.0}, 
+    'Means': {'p_C': 0.18293067873890895, 'CI': (0.11636027513235522, 0.33880589896255464), 'mean': 0.19488787944082625, 'std': 0.10328422616643053, 'bias': -0.008438343021288042}, 
+    'EMD': {'p_C': 0.1598270527703443, 'CI': (0.02119497381956048, 0.2883579618350394), 'mean': 0.17272677210846873, 'std': 0.08456747077157699, 'bias': 0.014759182335856796}, 
+    'KDE': {'p_C': 0.22486535485520434, 'CI': (0.029069533605505137, 0.3669878169136295), 'mean': 0.24316495927493706, 'std': 0.10688796970498039, 'bias': 0.02543108175970124}
+    }
+
+# @pytest.mark.fast
+@pytest.mark.parametrize("n_boot,n_mix,seed,nproc,expected", [
+    (0, 0, seed, 1, expected_point_size100),
+    (0, 10, seed, 1, expected_point_size100),  # NOTE: Mixture modelling is skipped if n_boot==0
+    (10, 0, seed, 1, expected_size100_n_boot10),
+    (10, 10, seed, 1, expected_size100_n_boot10_n_mix10),
+    (10, 10, seed, nproc, expected_size100_n_boot10_n_mix10),
+    (10, 0, seed, nproc, expected_size100_n_boot10_parallel),  # NOTE: These results differ from the serial runs but depend on n_boot not n_jobs
+])
+def test_anaylse_mixture_parameterised(scores_pC010_size100, n_boot, n_mix, seed, nproc, expected):
+    summary, bootstraps = dpe.analyse_mixture(scores_pC010_size100, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc)
+    for method, results in summary.items():
+        for metric, value in results.items():
+            assert np.all(np.isclose(value, expected[method][metric])), \
+            f"{value} != expected[{method}][{metric}]={expected[method][metric]}"
+
+
+@pytest.fixture
+def scores_pC010_size5000():
     """Generate synthetic data with p_C=0.1"""
     return ds.generate_dataset(p_C=0.1, size=5000, seed=seed)
 
 
-expected_point = {
+expected_point_size5000 = {
     'Excess': {'p_C': 0.0964},
     'Means': {'p_C': 0.12116137064813201},
     'EMD': {'p_C': 0.12156986188389857},
     'KDE': {'p_C': 0.11653533406952703}
     }
 
-expected_n_boot_10 = {
-    'Excess': {'p_C': 0.0964, 'CI': (0.0788, 0.11), 'mean': 0.09623999999999999, 'std': 0.013116340953177453},
-    'Means': {'p_C': 0.12116137064813201, 'CI': (0.10567834935848158, 0.13408197987526282), 'mean': 0.12062971258005899, 'std': 0.010329231195737199},
-    'EMD': {'p_C': 0.12156986188389857, 'CI': (0.10695540862358027, 0.13506864157907), 'mean': 0.12130475132716852, 'std': 0.010077862989318908},
-    'KDE': {'p_C': 0.11653533406952703, 'CI': (0.10008488391610758, 0.13113053107870062), 'mean': 0.11330220847636982, 'std': 0.011794233996819635}
+expected_size5000_n_boot10 = {
+
     }
 
-expected_n_boot_10_parallel = {
-    'Excess': {'p_C': 0.0964, 'CI': (0.0788, 0.11), 'mean': 0.09623999999999999, 'std': 0.013116340953177453},
-    'Means': {'p_C': 0.12116137064813201, 'CI': (0.10567834935848158, 0.13408197987526282), 'mean': 0.12062971258005899, 'std': 0.010329231195737199},
-    'EMD': {'p_C': 0.12156986188389857, 'CI': (0.10695540862358027, 0.13506864157907), 'mean': 0.12130475132716852, 'std': 0.010077862989318908},
-    'KDE': {'p_C': 0.11653533406952703, 'CI': (0.10008488391610758, 0.13113053107870062), 'mean': 0.11330220847636982, 'std': 0.011794233996819635}
+expected_size5000_n_boot10_n_mix10 = {
+
     }
 
-expected_n_boot_10_n_mix_10 = {
-    'Excess': {'p_C': 0.0964, 'CI': (0.0732, 0.128), 'mean': 0.071952, 'std': 0.020117039941303493},
-    'Means': {'p_C': 0.12116137064813201, 'CI': (0.08675545060213877, 0.15684461770709052), 'mean': 0.1248328111839013, 'std': 0.019118462180588044},
-    'EMD': {'p_C': 0.12156986188389857, 'CI': (0.08614573543295623, 0.1503927578221721), 'mean': 0.11489674057535156, 'std': 0.018446112762141968},
-    'KDE': {'p_C': 0.11653533406952703, 'CI': (0.08158211231405496, 0.14812652344989502), 'mean': 0.11398743016947095, 'std': 0.01926771502334951}
+expected_size5000_n_boot10_parallel = {
+
     }
 
 
-@pytest.mark.parametrize("n_boot,n_mix,seed,nproc,expected", [
-    (0, 0, seed, 1, expected_point),
-    (0, 10, seed, 1, expected_point),  # NOTE: Mixture modelling is skipped if n_boot==0
-    (10, 0, seed, 1, expected_n_boot_10),
-    (10, 10, seed, 1, expected_n_boot_10_n_mix_10),
-    (10, 0, seed, nproc, expected_n_boot_10_parallel),  # NOTE: These results differ from the serial runs but depend on n_boot not n_jobs
-    (10, 10, seed, nproc, expected_n_boot_10_n_mix_10),
-])
-def test_anaylse_mixture_parameterised(scores_pC010, n_boot, n_mix, seed, nproc, expected):
-    summary, bootstraps = dpe.analyse_mixture(scores_pC010, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc)
-    for method, results in summary.items():
-        for metric, value in results.items():
-            assert np.all(np.isclose(value, expected[method][metric])), \
-            f"{value} != expected[{method}][{metric}]={expected[method][metric]}"
+# @pytest.mark.skip
+# # @pytest.mark.slow
+# @pytest.mark.parametrize("n_boot,n_mix,seed,nproc,expected", [
+#     (0, 0, seed, 1, expected_point_size5000),
+#     (0, 10, seed, 1, expected_point_size5000),  # NOTE: Mixture modelling is skipped if n_boot==0
+#     (10, 0, seed, 1, expected_size5000_n_boot10),
+#     (10, 10, seed, 1, expected_size5000_n_boot10_n_mix10),
+#     (10, 10, seed, nproc, expected_size5000_n_boot10_n_mix10),
+#     (10, 0, seed, nproc, expected_size5000_n_boot10_parallel),  # NOTE: These results differ from the serial runs but depend on n_boot not n_jobs
+# ])
+# def test_anaylse_mixture_parameterised(scores_pC010_size5000, n_boot, n_mix, seed, nproc, expected):
+#     summary, bootstraps = dpe.analyse_mixture(scores_pC010_size5000, n_boot=n_boot, n_mix=n_mix, seed=seed, n_jobs=nproc)
+#     for method, results in summary.items():
+#         for metric, value in results.items():
+#             assert np.all(np.isclose(value, expected[method][metric])), \
+#             f"{value} != expected[{method}][{metric}]={expected[method][metric]}"
 
 
 # def test_anaylse_mixture(scores_pC010):
