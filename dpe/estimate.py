@@ -531,10 +531,13 @@ def analyse_mixture(scores, bins='fd', methods='all',
     Additionally the logfile is written to the working directory.
     """
 
-    # TODO: Overhaul RNG to use generators: rng = np.random.default_rng()
-    # if seed is not None:
-    #     np.random.seed(seed)
     rng = np.random.default_rng(seed)
+
+    assert 0 <= n_mix
+    assert 0 <= n_boot
+    assert 0.0 < alpha < 1.0
+    if true_pC is not None:
+        assert 0.0 <= true_pC <= 1.0
 
     if correct_bias and n_mix + n_boot == 0:
         warnings.warn("No bootstraps - Ignoring bias correction!")
