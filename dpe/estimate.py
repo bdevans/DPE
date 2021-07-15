@@ -658,9 +658,6 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
         else:  # Extended mixture & bootstrap routine to calculate CIs
             # TODO: Refactor for efficiency
-            # NOTE: BCa modifies the quantiles to handle skewness and median bias, so 
-            # the median is used as the default for bias calculation (Efron, 1987).
-            average = np.median
             sample_size = len(Mix)
             results = {}
 
@@ -716,6 +713,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
             pe_boot = pd.DataFrame.from_records(results, columns=columns)
 
+        # NOTE: BCa modifies the quantiles to handle skewness and median bias, so 
+        # the median is used as the default for bias calculation (Efron, 1987).
+        average = np.median
         for method in columns:
             # Calculate confidence intervals
             ci_low1, ci_upp1 = calc_conf_intervals(pe_boot[method], estimate=pe_initial[method],
