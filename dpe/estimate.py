@@ -274,6 +274,7 @@ def calc_conf_intervals(bootstraps,
         assert bins is not None
         assert est_method is not None
         assert len(est_method) == 1  # Single method passed
+        
         method_name = list(est_method)[0]
         R_C = scores['R_C']
         R_N = scores['R_N']
@@ -287,10 +288,7 @@ def calc_conf_intervals(bootstraps,
 
         # Statistics of the jackknife distribution computed from original data
         indices = np.arange(len(Mix), dtype=np.uint)
-        
         jack_values = np.asarray([point_estimate(Mix[indices != ind], R_C, R_N, bins, est_method)[method_name] for ind in indices])
-        # indices = np.arange(n_obs)
-        # jack_values = [average(bootstraps[indices != ind]) for ind in range(n_obs)]
         jack_mean = np.mean(jack_values)
 
         # Temporarily kill numpy warnings:
@@ -323,13 +321,16 @@ def calc_conf_intervals(bootstraps,
         else:
             # TODO: Refactor
             ci_low, ci_upp = np.percentile(bootstraps, [100*alpha/2, 100*(1-alpha/2)])
+
     elif ci_method.lower() == 'centile':
         ci_low, ci_upp = np.percentile(bootstraps, [100*alpha/2, 100*(1-alpha/2)])
+
     elif ci_method.lower() == 'stderr':
         p = average_value
         # NOTE: This currently allows CIs outside [0, 1]
         err = np.sqrt(p * (1 - p) / n_obs) * sp.stats.norm.ppf(1 - alpha / 2)
         ci_low, ci_upp = p - err, p + err
+
     else:  # Assumes a binomial distribution
         count = int(average_value * n_obs)
         ci_low, ci_upp = proportion_confint(count, n_obs, alpha=alpha,
