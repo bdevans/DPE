@@ -355,11 +355,13 @@ def generate_report(summary, true_pC=None, alpha=0.05):
             # NOTE: std(1-bootstraps) == std(bootstraps)
             report.append(f" {method:6} (µ±σ) | {results['mean']:.5f} +/- {results['std']:.3f} "
                                             f"| {1-results['mean']:.5f} +/- {results['std']:.3f} ")
+            if "bias" in results:
+                report.append(f" Bias         | {results['bias']:<17.5f} | {-results['bias']:<17.5f} ")
+            if "p_cor_C" in results:
+                report.append(f" Corrected    | {results['p_cor_C']:<17.5f} | {1-results['p_cor_C']:<17.5f} ")
             ci_low_C, ci_upp_C = results["CI"]
             ci_low_N, ci_upp_N = 1-ci_upp_C, 1-ci_low_C
             report.append(f" C.I. ({1-alpha:3.1%}) | {ci_low_C:<8.5f},{ci_upp_C:>8.5f} | {ci_low_N:<8.5f},{ci_upp_N:>8.5f} ")
-            if "p_cor_C" in results:
-                report.append(f" Corrected    | {results['p_cor_C']:<17.5f} | {1-results['p_cor_C']:<17.5f} ")
         report.append("-" * line_width)
     if true_pC:
         report.append(f" {'Ground Truth':12} | {true_pC:<17.5f} | {1-true_pC:<17.5f} ")
