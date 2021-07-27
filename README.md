@@ -111,7 +111,7 @@ The main requirement is to prepare a dictionary (`dict`) containing the keys `R_
 
 Alternatively a `csv` file may be prepared and loaded with the function `datasets.load_dataset(filename)` as demonstrated in the `run_examples.py` script. The `csv` file should contain the header `Group,GRS` followed by pairs of `code,score` values (one per line for each GRS score) where code is `1` for the Cases Reference distribution, `2` for the Non-cases Reference distribution and `3` for the Mixture distribution. 
 
-Once the GRS scores have been prepared in a suitable form, they may be passed to the `analyse_mixture()` function as demonstrated in the `run_examples.py` script. Further details about this function are given in the next section. 
+Once the GRS scores have been prepared in a suitable form, they may be passed to the `analyse_mixture()` function as demonstrated in the `run_examples.py` script. Further details about this function are given in the following sections. 
 
 Pseudocode
 ----------
