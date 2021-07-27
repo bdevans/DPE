@@ -32,7 +32,7 @@ Installation
 ------------
 
 1. Install Python >= 3.6. 
-2. Add this folder to your `PYTHONPATH`.
+2. Clone this repository and add this folder to your `PYTHONPATH`: `git clone https://github.com/bdevans/DPE.git`
 3. Install the requirements using one of the provided requirements files:
    1. If you use a standard Python distribution: `pip3 install -r requirements.txt`.
    2. Or, if you use Anaconda: `conda env create -f environment.yml`. Then run `source activate dpe` to activate the environment. 
