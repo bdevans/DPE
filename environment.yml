@@ -24,6 +24,6 @@ dependencies:
   # - scikit-plot
   - matplotlib>=3.3
   - seaborn
-  - pip:
-    - KDEpy
+  # - pip:
+  #   - KDEpy
     # - fastkde
