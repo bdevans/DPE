@@ -66,7 +66,7 @@ def load_dataset(filename, codes=None):
 
 def load_diabetes_data(metric):
 
-    dataset = 'data/biobank_mix_WTCC_ref.csv'
+    dataset = os.path.join('data', 'biobank_mix_WTCC_ref.csv')
     headers = {'diabetes_type': 'group', 't1GRS': 'T1GRS', 't2GRS': 'T2GRS'}
 
     if metric == 'T1GRS':
@@ -189,7 +189,7 @@ def load_renal_data(seed=42):
 #              # 'R_N': data.loc[data['group'] == 2, metric].values,
 #              'Mix': data.loc[data['group'] == 3, metric].values}
 
-    prev_data = pd.read_csv('data/renal_data.csv')
+    prev_data = pd.read_csv(os.path.join('data', 'renal_data.csv'))
     prev_data.rename(columns={'t2d_grs_77': 'T2GRS', 'group': 'group'}, inplace=True)
 
     scores = {'R_C': data.loc[data['group'] == codes["R_C"], metric].values,
@@ -223,7 +223,7 @@ def load_coeliac_data():
     mixture 3
     '''
 
-    dataset = 'data/new_data_control_1_cases_2_mixture_3.csv'
+    dataset = os.path.join('data', 'new_data_control_1_cases_2_mixture_3.csv')
     p_C = 0.139  # Not ground truth - 13.9% report a diagnosis of coeliac so our analysis shows there is no undiagnosed coeliac within a gluten free cohort
     binning_method = 'fd'
 
