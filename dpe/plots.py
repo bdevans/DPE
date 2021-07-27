@@ -15,7 +15,10 @@ from . utilities import get_fpr_tpr
 # from . utilities import get_roc_scores
 
 
-def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_method="bca"):
+def get_error_bars(df_pe, summary=None,
+                   scores=None, bins=None, methods=None, 
+                   correct_bias=False, average=np.mean, 
+                   alpha=0.05, ci_method="bca"):
     """df: columns are method names"""
 
     #methods = list(df.columns)
@@ -24,6 +27,8 @@ def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_me
     errors = np.zeros(shape=(2, n_methods))
     centres = np.zeros(n_methods)
 
+    # if correct_bias:
+    #     centres = correct_estimates(df_pe, average=average)
     for m, method in enumerate(df_pe):  # enumerate(methods):
 
         boot_values = df_pe.iloc[1:, m]
@@ -36,9 +41,19 @@ def get_error_bars(df_pe, correct_bias=False, average=np.mean, alpha=0.05, ci_me
             centres[m] = df_pe.iloc[0, m]
             # boot_values = df_pe.iloc[1:, m]
 
-        ci_low, ci_upp = calc_conf_intervals(boot_values, correct_bias=False,  #initial=centre,
-                                            average=average, alpha=alpha,
-                                            ci_method=ci_method)
+        if summary is None or "CI" not in summary[method]:
+            # assert scores is not None
+            # assert bins is not None
+            # assert methods is not None
+            ci_low, ci_upp = calc_conf_intervals(boot_values, estimate=centres[m],
+                                                scores=scores, bins=bins, 
+                                                est_method=methods[method],
+                                                correct_bias=False,
+                                                average=average, alpha=alpha,
+                                                ci_method=ci_method)
+        else:
+            ci_low, ci_upp = summary[method]["CI"]
+
         errors[0, m] = centres[m] - ci_low
         errors[1, m] = ci_upp - centres[m]
 
@@ -332,7 +347,9 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
     # plt.savefig('figs/distributions_{}.png'.format(data_label))
 
 
-def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
+def plot_bootstraps(df_pe, summary=None,
+                    scores=None, bins=None, prepared_methods=None,
+                    correct_bias=None, initial=True, p_C=None,
                     ax=None, limits=None, alpha=0.05, ci_method="bca",
                     violins=True, legend=True, orient="v", average=np.mean):
 
@@ -404,7 +421,10 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
 #        x, y = df_point.iloc[0].values, ax.get_yticks()
 #        means = x
 
-    errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average, alpha=alpha, ci_method=ci_method)
+    errors, centres = get_error_bars(df_pe, summary=summary, 
+                                    #  scores=scores, bins=bins, methods=prepared_methods,  # TODO: prepared_methods
+                                     correct_bias=correct_bias, average=average, 
+                                     alpha=alpha, ci_method=ci_method)
 
     if correct_bias:
         if orient == 'v':
@@ -479,7 +499,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
     elif orient == 'h':
         ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=1.25, markeredgecolor=c_edge,
                     capsize=12, capthick=1, label=error_label, zorder=10)
-        
+
         # Add grey border around error bars
         ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=2, capsize=14, capthick=4)
 
@@ -523,7 +543,7 @@ def plot_bootstraps(df_pe, correct_bias=None, initial=True, p_C=None,
     #     plt.savefig(os.path.join(fig_dir, 'boxes_{}.png'.format(data_label)))
 
 
-def plot_selected_violins(scores, bins, df_point, df_boots, #methods, 
+def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods, 
                           p_stars, sizes, #out_dir, data_label, 
                           mix_dfs, selected_mix=0,
                           add_ci=True, alpha=0.05, ci_method="bca",
@@ -683,7 +703,10 @@ def plot_selected_violins(scores, bins, df_point, df_boots, #methods,
 
                 df_b_piv = df_b_piv[df_p_piv.columns]  # Manually sort before merge
                 df_pe = pd.concat([df_p_piv, df_b_piv], ignore_index=True)
-                errors, centres = get_error_bars(df_pe, correct_bias=correct_bias, average=average, alpha=alpha, ci_method=ci_method)
+                errors, centres = get_error_bars(df_pe, summary=summaries[si][selected_mix][p],
+                                                #  scores=scores, bins=bins, methods=None,  # TODO: prepared_methods
+                                                 correct_bias=correct_bias, average=average,
+                                                 alpha=alpha, ci_method=ci_method)
 
 
                 if correct_bias:
