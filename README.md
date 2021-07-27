@@ -63,38 +63,42 @@ Optionally, the file `datasets.py` may be edited to change the construction para
 
 ### Expected Output
 
-When running with the parameters given in the manuscript (N_M = 100 N_B = 1000) on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 1h15m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time can be reduced considerably by reducing the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, the simulation time has been reduced in `run_examples.py` for demonstration purposes by reducing the number of bootstraps (N_B = 100) such that the run time is approximately 10m per data set (although this can be edited for longer runs). The output produced for the first data set (p_C = 0.25) is given below for N_M = 100 and N_B = 100 parallelised across 8 threads:
+When running with the parameters N_M = 100 and N_B = 100 on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 40m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time increases considerably with the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, a short simulation for demonstration purposes has been configured in `run_examples.py` by using fewer bootstraps (N_B = 100) than in the manuscript (N_B = 1000), although this can be edited for longer runs if desired. The output produced for the first data set (p_C = 0.25) is given below for N_M = 100 and N_B = 100 parallelised across 8 threads:
 
 ```
 ================================================================================
 Running on example dataset: p_C = 0.25
 Loading dataset: example_pC025...
 Running 100 bootstraps with 8 processors...
-Method: 100%|████████████████████████████████████████████████████████████| 4/4 [10:16<00:00, 154.24s/it]
+Method: 100%|████████████████████████████████████| 4/4 [19:41<00:00, 295.33s/it]
 
     Method    |   Estimated p_C   |   Estimated p_N   
 ======================================================
  Excess point | 0.18200           | 0.81800           
  Excess (µ±σ) | 0.13660 +/- 0.018 | 0.86340 +/- 0.018 
- C.I. (95.0%) | 0.10160 , 0.17320 | 0.82680 , 0.89840 
+ Bias         | -0.04560          | 0.04560           
+ C.I. (95.0%) | 0.19040 , 0.20320 | 0.79680 , 0.80960 
 ------------------------------------------------------
  Means  point | 0.24279           | 0.75721           
  Means  (µ±σ) | 0.24264 +/- 0.020 | 0.75736 +/- 0.020 
- C.I. (95.0%) | 0.20415 , 0.28230 | 0.71770 , 0.79585 
+ Bias         | -0.00026          | 0.00026           
+ C.I. (95.0%) | 0.20433 , 0.28278 | 0.71722 , 0.79567 
 ------------------------------------------------------
  EMD    point | 0.24313           | 0.75687           
  EMD    (µ±σ) | 0.24399 +/- 0.019 | 0.75601 +/- 0.019 
- C.I. (95.0%) | 0.20545 , 0.28065 | 0.71935 , 0.79455 
+ Bias         | 0.00093           | -0.00093          
+ C.I. (95.0%) | 0.20334 , 0.27881 | 0.72119 , 0.79666 
 ------------------------------------------------------
  KDE    point | 0.24843           | 0.75157           
  KDE    (µ±σ) | 0.25001 +/- 0.022 | 0.74999 +/- 0.022 
- C.I. (95.0%) | 0.20753 , 0.29408 | 0.70592 , 0.79247 
+ Bias         | 0.00136           | -0.00136          
+ C.I. (95.0%) | 0.20503 , 0.29097 | 0.70903 , 0.79497 
 ------------------------------------------------------
  Ground Truth | 0.25000           | 0.75000           
 ======================================================
 
-Elapsed time = 628.835 seconds
-================================================================================ 
+Elapsed time = 2503.352 seconds
+================================================================================
 ```
 
 Additionally a `results` directory will be created with a subdirectory for each data set processed containing a `csv` file with the initial point estimates and bootstrap estimates for each method. 
