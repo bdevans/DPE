@@ -21,6 +21,7 @@ CI_centile=0.05; %centile for calculating the confidence intervals from bootstra
 %each function has the same output
 %p_I - vector of point estimates p_I(1) is pC, p_I(2) is pN
 %CI - vector of 95% confidence intervals CI(1,2) for p_I(1), CI(3,4) for p_I(2)
+%for the description of all availible outputs see the function files
 %
 %Please note that small differences between Matlab and Python example outputs 
 %are due to different pseudorandom number generator (PRNG) implementations.
@@ -45,11 +46,11 @@ toc
 disp(' ')
 disp(['True pC := ' num2str(true_pC,3)])
 disp('===================================================================')
-disp(['EXCESS:' 9 'pC (95% C):= ' num2str(p_I_xcs(1),5) ' (' num2str(CI_xcs(1),5) ', ' num2str(CI_xcs(2),5) ')'])
+disp(['EXCESS:' 9 'pC (95% CI):= ' num2str(p_I_xcs(1),5) ' (' num2str(CI_xcs(1),5) ', ' num2str(CI_xcs(2),5) ')'])
 disp('-------------------------------------------------------------------')
-disp(['MEANS:' 9 'pC (95% C):= ' num2str(p_I_mn(1),5) ' (' num2str(CI_mn(1),5) ', ' num2str(CI_mn(2),5) ')'])
+disp(['MEANS:' 9 'pC (95% CI):= ' num2str(p_I_mn(1),5) ' (' num2str(CI_mn(1),5) ', ' num2str(CI_mn(2),5) ')'])
 disp('-------------------------------------------------------------------')
-disp(['EMD:' 9 'pC (95% C):= ' num2str(p_I_emd(1),5) ' (' num2str(CI_emd(1),5) ', ' num2str(CI_emd(2),5) ')'])
+disp(['EMD:' 9 'pC (95% CI):= ' num2str(p_I_emd(1),5) ' (' num2str(CI_emd(1),5) ', ' num2str(CI_emd(2),5) ')'])
 disp('-------------------------------------------------------------------')
-disp(['KDE:' 9 'pC (95% C):= ' num2str(p_I_kde(1),5) ' (' num2str(CI_kde(1),5) ', ' num2str(CI_kde(2),5) ')'])
+disp(['KDE:' 9 'pC (95% CI):= ' num2str(p_I_kde(1),5) ' (' num2str(CI_kde(1),5) ', ' num2str(CI_kde(2),5) ')'])
 
