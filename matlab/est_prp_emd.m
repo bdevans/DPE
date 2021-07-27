@@ -56,7 +56,6 @@ for i_jckknf=1:N_mix
     jckk_mix=mix;
     jckk_mix(i_jckknf)=[];
     i_cdf_mix=distribution2cdf(jckk_mix',bin_min,bin_max,bc);
-    emd_21=sum(abs(i_cdf2-i_cdf1));
     emd_31=sum(abs(i_cdf_mix-i_cdf1));
     emd_32=sum(abs(i_cdf_mix-i_cdf2));
     prv_emd1=(1-emd_31/emd_21);
@@ -79,7 +78,6 @@ for i_mix=1:100
         
         
         i_cdf_mix=distribution2cdf(mixture_rs',bin_min,bin_max,bc);
-        emd_21=sum(abs(i_cdf2-i_cdf1));
         emd_31=sum(abs(i_cdf_mix-i_cdf1));
         emd_32=sum(abs(i_cdf_mix-i_cdf2));
         prv_emd1=(1-emd_31/emd_21);

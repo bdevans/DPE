@@ -15,6 +15,7 @@ produce the following output in Matlab's Command Window (Elapsed time values wil
 on the system):
 
 running
+Warning: Included only for comparison purposes. We do not recomend using the Excess method to analyse data.
 Elapsed time is 11.738661 seconds.
 Elapsed time is 6.805715 seconds.
 Elapsed time is 43.023635 seconds.
