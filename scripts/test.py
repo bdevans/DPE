@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3  # noqa: E999
 
 import os
 import sys
