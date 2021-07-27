@@ -269,14 +269,14 @@ p_C == p1, p_N == p2
 Methods Summary
 ---------------
 
-|               | Means                 | Excess                | EMD                   | KDE                   |
+|               | Excess                | Means                 | EMD                   | KDE                   |
 | ------------- | --------------------- | --------------------- | --------------------- | --------------------- |
-| Advantages    | Simple to calculate. | Simple to calculate. | Computationally cheap. | Accurate |
-|               | Relies only on summary statistics. | Relies only on summary statistics. | ... | ... |
-|               | Works for even highly overlapping distributions. |    |   |
+| **Advantages**    | Simple to calculate. | Simple to calculate. | Computationally cheap. | Accurate. |
+|               | Relies only on summary statistics. | Relies only on summary statistics. |  |  |
+|               |    | Works for even highly overlapping distributions. |   |
 | ------------ | ------------ | ------------ | ------------ | ------------ |
-| Disadvantages | Less accurate when data is not normally distributed. | Less accurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
-|               | Not recommended for data analysis (included for comparison only) |                       |                       | Computationally expensive. |
+| **Disadvantages** | Less accurate when the distributions significantly overlap. | Less accurate when data is not normally distributed. | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
+|               | Not recommended for data analysis (included for comparison only). |                       |                       | Computationally expensive. |
 
 Citation
 --------
