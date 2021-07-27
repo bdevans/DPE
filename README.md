@@ -18,14 +18,15 @@ Table of Contents <!-- omit in toc -->
 - [Installation](#installation)
 - [Running the examples](#running-the-examples)
   - [Expected Output](#expected-output)
-- [Reproducibility](#reproducibility)
+  - [Reproducibility](#reproducibility)
 - [Running on your own data](#running-on-your-own-data)
-- [Pseudocode](#pseudocode)
-- [Explanation of the main function](#explanation-of-the-main-function)
-  - [Inputs](#inputs)
-  - [Outputs](#outputs)
 - [Methods](#methods)
-- [Methods Summary](#methods-summary)
+  - [Pseudocode](#pseudocode)
+  - [Explanation of the main function](#explanation-of-the-main-function)
+    - [Inputs](#inputs)
+    - [Outputs](#outputs)
+  - [Code Snippets](#code-snippets)
+  - [Summary](#summary)
 - [Citation](#citation)
 
 Installation
@@ -103,8 +104,7 @@ Elapsed time = 2503.352 seconds
 
 Additionally a `results` directory will be created with a subdirectory for each data set processed containing a `csv` file with the initial point estimates and bootstrap estimates for each method. 
 
-Reproducibility
----------------
+### Reproducibility
 
 The results are reproducible by default since a seed is set (42) for the pseudo random number generator. This seed may be changed (or set to `None` for a random seed) or set to any integer in the range `[0, 2^32)` to explore variations in results due to stochasticity in sampling. 
 
@@ -117,8 +117,10 @@ Alternatively a `csv` file may be prepared and loaded with the function `dataset
 
 Once the GRS scores have been prepared in a suitable form, they may be passed to the `analyse_mixture()` function as demonstrated in the `run_examples.py` script. Further details about this function are given in the following sections. 
 
-Pseudocode
-----------
+Methods
+-------
+
+### Pseudocode
 
 The main algorithm is as follows. Details of the specific methods may be found in the methods section of the accompanying manuscript. 
 
@@ -145,8 +147,7 @@ for meth in ["Excess", "Means", "EMD", "KDE"]:
 end
 ```
 
-Explanation of the main function
---------------------------------
+### Explanation of the main function
 
 ```python
 def analyse_mixture(scores, bins='fd', methods='all',
@@ -155,7 +156,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
                     n_jobs=1, verbose=1, true_pC=None, logfile=''):
 ```
 
-### Inputs
+#### Inputs
 
 - `scores` (`dict`): A required dictionary of the form, `{'R_C': array_of_cases_scores, 'R_N': array_of_non-cases_scores, 'Mix': array_of_mixture_scores}`.
 - `bins` (`str`): A string specifying the binning method: `['auto', 'fd', 'doane', 'scott', 'rice', 'sturges', 'sqrt']`. Default: `'fd'`. Alternatively, a dictionary, `{'width': bin_width, 'min', min_edge, 'max': max_edge, 'edges': array_of_bin_edges, 'centers': array_of_bin_centers, 'n': number_of_bins}`.
@@ -172,7 +173,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
 - `true_pC` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
 - `logfile` (`str`): Optional filename for the output logs. Default: `"proportion_estimates.log"`.
  
-### Outputs
+#### Outputs
 
 (summary, bootstraps) (`tuple`): A tuple consisting of the following data structures.
 
@@ -188,8 +189,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
 Additionally the logfile is written to the working directory.
 
-Methods
--------
+### Code Snippets
 
 We bootstrap (i.e. sample with replacement) from the available data, systematically varying sample size and mixture proportion. We then apply the following methods to yield estimates of the true proportion and from those, calculate the errors throughout the bootstrap parameter space.
 
@@ -266,8 +266,7 @@ R_C == Ref1, R_N == Ref2
 p_C == p1, p_N == p2
 ``` 
 
-Methods Summary
----------------
+### Summary
 
 |               | Excess                | Means                 | EMD                   | KDE                   |
 | ------------- | --------------------- | --------------------- | --------------------- | --------------------- |
