@@ -184,7 +184,6 @@ def analyse_mixture(scores, bins='fd', methods='all',
 
 Additionally the logfile is written to the working directory.
 
-
 Methods
 -------
 
