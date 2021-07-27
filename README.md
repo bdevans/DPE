@@ -276,7 +276,7 @@ Methods Summary
 |               | Works for even highly overlapping distributions. |    |   |
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 | Disadvantages | Less accurate when data is not normally distributed. | Less accurate when the distributions significantly overlap | Requires a choice of bin size. | Requires a choice of bandwidth and kernel. |
-|               |               |                       |                       | Computationally expensive. |
+|               | Not recommended for data analysis (included for comparison only) |                       |                       | Computationally expensive. |
 
 Citation
 --------
