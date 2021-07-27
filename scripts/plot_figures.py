@@ -11,6 +11,7 @@ Generate manuscript figures.
 import os
 import time
 import warnings
+import json
 
 import pandas as pd
 import numpy as np
@@ -28,7 +29,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.absolute()))
 
 import dpe
 from dpe.utilities import construct_mixture, format_seconds, load_accuracy  # get_fpr_tpr,
-from dpe.datasets import (load_diabetes_data, load_renal_data, load_coeliac_data)
+from dpe.datasets import (load_diabetes_data, load_renal_data, 
+                          load_coeliac_data, load_glaucoma_data)
 from dpe.plots import (plot_roc, plot_distributions, plot_bootstraps,
                        plot_characterisation, plot_selected_violins,
                        get_error_bars)
@@ -60,11 +62,11 @@ methods = {method: True for method in dpe._ALL_METHODS_}
 
 # Configure plots
 output_diabetes_rocs = False
-output_application = {'Diabetes': False, 'Renal': True, 'Coeliac': True}
-output_application_vary_cases = {'Diabetes': False, 'Renal': True, 'Coeliac': False}
-application_xlims = {'Diabetes': None, 'Renal': (0, 0.3), 'Coeliac': (0, 0.3)}
-output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False}
-output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False}
+output_application = {'Diabetes': False, 'Renal': False, 'Coeliac': True, 'Glaucoma': True}
+output_application_vary_cases = {'Diabetes': False, 'Renal': False, 'Coeliac': False, 'Glaucoma': True}
+application_xlims = {'Diabetes': None, 'Renal': (0, 0.3), 'Coeliac': (0, 0.3), 'Glaucoma': (0, 0.3)}
+output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False, 'Glaucoma': False}
+output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False, 'Glaucoma': False}
 average = np.mean  # NOTE: Used in get_error_bars, calculate_bias (and plot_characterisation). Does not apply when using BCa (which implicitly uses the median).
 # deviation = np.std
 
@@ -125,7 +127,8 @@ if __name__ == "__main__":
 
     for data_label, data in [("Diabetes", load_diabetes_data('T1GRS')),
                              ("Coeliac", load_coeliac_data()),
-                             ("Renal", load_renal_data(seed=sample_seed))]:
+                             ("Renal", load_renal_data(seed=sample_seed)),
+                             ("Glaucoma", load_glaucoma_data())]:
 
         # Set random seed
         # np.random.seed(seed)
@@ -137,6 +140,7 @@ if __name__ == "__main__":
         if output_application[data_label]:
 
             res_file = os.path.join(out_dir, f"pe_results_{data_label}.pkl")
+            summary_file = os.path.join(out_dir, f"summary_{data_label}.json")
 
             if FRESH_DATA or not os.path.isfile(res_file):
                 print(f"Running mixture analysis on {data_label} scores...", flush=True)
@@ -153,6 +157,8 @@ if __name__ == "__main__":
 
                 # Save results
                 df_pe.to_pickle(res_file)
+                with open(summary_file, "w") as sf:
+                    json.dump(summary, sf, indent=4)
             else:
                 print(f"Loading {data_label} analysis...", flush=True)
                 df_pe = pd.read_pickle(res_file)
@@ -161,6 +167,8 @@ if __name__ == "__main__":
                 # else:
                 #     warnings.warn(f"Missing data file: {res_file}")
                 #     break
+                with open(summary_file, "r") as sf:
+                    summary = json.load(sf)
 
             # Plot worked examples
             print(f"Plotting application with {data_label} scores...", flush=True)
@@ -189,7 +197,9 @@ if __name__ == "__main__":
                 # with sns.axes_style("whitegrid"):
                 with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
                     ax_ci_ex = fig_ex.add_subplot(gs[0, -1])
-                    plot_bootstraps(df_pe, correct_bias=correct_bias, p_C=p_C,
+                    plot_bootstraps(df_pe, summary,  # for confidence_intervals
+                                    # scores=scores, bins=bins, prepared_methods=methods,
+                                    correct_bias=correct_bias, p_C=p_C,
                                     ax=ax_ci_ex, limits=application_xlims[data_label],
                                     ci_method=ci_method, initial=False, legend=False,
                                     violins=True, orient='h', average=average)
@@ -266,7 +276,7 @@ if __name__ == "__main__":
                                         value_name="Estimate")
                 for m, method in enumerate(methods):
                     method_data = df_construct_tidy.query(f"Method == '{method}'")
-                
+
                     ax = axes[m]
                     sns.lineplot(x="p_C", y="Estimate", data=method_data, err_style="bars", ax=ax)
                     ax.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Perfect Estimator')
@@ -325,6 +335,7 @@ if __name__ == "__main__":
             # Generate multiple mixes
             point_estimates_res_file = os.path.join(out_dir, f"pe_stack_analysis_point_{data_label}.pkl")
             boot_estimates_res_file = os.path.join(out_dir, f"pe_stack_analysis_{data_label}.pkl")
+            summaries_file = os.path.join(out_dir, f"ma_summaries_{data_label}.json")
             if FRESH_DATA:  # or True:
                 print(f"Running mixture analysis with {data_label} scores...", flush=True)
                 t = time.time()  # Start timer
@@ -345,15 +356,18 @@ if __name__ == "__main__":
                 dfs_point = []
                 dfs_boot = []
                 mix_dfs = []
+                summaries = []
 
                 size_bar = tqdm.tqdm(sizes, dynamic_ncols=True)
                 for s, size in enumerate(size_bar):
                     size_bar.set_description(f"Size = {size:6,}")
                     Mixtures = {mix: {} for mix in range(n_seeds)}
                     mix_dfs.append([])
+                    summaries.append([])
 
                     for mix in tqdm.trange(n_seeds, dynamic_ncols=True, desc=" Mix"):  # Redundant loop
                         mix_dist_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{mix:03d}.pkl")
+                        summaries[s].append([])
 
                         prop_bar = tqdm.tqdm(p_stars, dynamic_ncols=True)
                         for p, p_star in enumerate(prop_bar):
@@ -370,6 +384,10 @@ if __name__ == "__main__":
                                                     seed=rng.integers(np.iinfo(np.int32).max, dtype=np.int32),
                                                     n_jobs=-1, verbose=0,
                                                     logfile=os.path.join(out_dir, f"pe_{data_label}_size_{size:05d}_p_C_{p_star:3.2f}.log"))
+                            summaries[s][mix].append(summary)
+                            # summary_file = os.path.join(out_dir, f"ma_{data_label}_size_{size:05d}_mix_{mix:03d}_p_C_{p_star:3.2f}.json")
+                            # with open(summary_file, "w") as sf:
+                            #     json.dump(summary, sf)
                             df_point = df_cm.iloc[[0]].copy()
                             df_point['Size'] = size
                             df_point["p_C"] = p_star
@@ -403,6 +421,8 @@ if __name__ == "__main__":
                 # Save results
                 df_point.to_pickle(point_estimates_res_file)
                 df_boots.to_pickle(boot_estimates_res_file)
+                with open(summaries_file, "w") as sf:
+                    json.dump(summaries, sf)
             else:
                 print(f"Loading mixture analysis with {data_label} scores...", flush=True)
                 if os.path.isfile(point_estimates_res_file):
@@ -415,6 +435,9 @@ if __name__ == "__main__":
                 else:
                     warnings.warn(f"Missing data file: {boot_estimates_res_file}")
                     break
+                if os.path.isfile(summaries_file):
+                    with open(summaries_file, "r") as sf:
+                        summaries = json.load(sf)
                 mix_dfs = []
                 for s, size in enumerate(sizes):
                     mix_dfs.append([])
@@ -426,7 +449,7 @@ if __name__ == "__main__":
             print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
             plot_mixes = [selected_mix]
             for mix in plot_mixes:  # range(n_seeds):
-                fig = plot_selected_violins(scores, bins, df_point, df_boots, # methods, 
+                fig = plot_selected_violins(scores, bins, df_point, df_boots, summaries, # methods, 
                                     p_stars, sizes,
                                     # out_dir, data_label, 
                                     mix_dfs, selected_mix=mix,
@@ -647,3 +670,5 @@ if __name__ == "__main__":
                     # g.despine(left="True")
 
                 plt.savefig(os.path.join(fig_dir, "bootstraps_{}_{}.png".format(mix, data_label)))
+
+    print("\n")
