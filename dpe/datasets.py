@@ -247,3 +247,39 @@ def load_coeliac_data():
     chosen_bins = bins[binning_method]
     chosen_bins["method"] = binning_method
     return scores, chosen_bins, means, medians, p_C
+
+
+def load_glaucoma_data():
+    '''
+    cases 1,  (Diabetes)
+    non-cases 2, (Control)
+    mixture 3
+    '''
+
+    dataset = os.path.join('data', 'glaucoma_data.xls')
+    p_C = 0.066
+    binning_method = 'fd'
+
+    data = pd.read_excel(dataset, header=None, names=['GRS', 'group', 'Diabetes']) #, usecols=[0, 1])
+    data.dropna(inplace=True)  # Remove empty entries
+
+    scores = {'R_C': data.loc[data['group'] == 1, 'GRS'].values,
+              'R_N': data.loc[data['group'] == 2, 'GRS'].values,
+              'Mix': data.loc[data['group'] == 3, 'GRS'].values,
+              # Include the defined truth for the mixture scores
+              'Mix_C': data.loc[data['Diabetes'] == 1, 'GRS'].values,
+              'Mix_N': data.loc[data['Diabetes'] == 0, 'GRS'].values,}
+
+    means = {'R_C': scores['R_C'].mean(),
+             'R_N': scores['R_N'].mean()}
+
+    medians = {"R_C": np.median(scores['R_C']),
+               "R_N": np.median(scores['R_N'])}
+
+    print("Glaucoma Data")
+    # print("==========")
+    # print("Chosen: width = {}".format(bin_width))
+    hist, bins = estimate_bins(scores)
+    chosen_bins = bins[binning_method]
+    chosen_bins["method"] = binning_method
+    return scores, chosen_bins, means, medians, p_C
