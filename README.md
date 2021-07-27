@@ -64,7 +64,7 @@ Optionally, the file `datasets.py` may be edited to change the construction para
 
 ### Expected Output
 
-When running with the parameters N_M = 100 and N_B = 100 on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 40m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time increases considerably with the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, a short simulation for demonstration purposes has been configured in `run_examples.py` by using fewer bootstraps (N_B = 100) than in the manuscript (N_B = 1000), although this can be edited for longer runs if desired. The output produced for the first data set (p_C = 0.25) is given below for N_M = 100 and N_B = 100 parallelised across 8 threads:
+When running with the parameters `N_M = 100` and `N_B = 100` on a 2015 15" Macbook Pro (2.8 GHz Intel Core i7) with 8 threads, processing each data set takes around 40m. The majority of this time is spent running the KDE algorithm (the other three each take approximately 1m each). This run time increases considerably with the number of mixtures generated (`n_mix`) and/or the number of bootstraps generated for each mixture (`n_boot`). Accordingly, a short simulation for demonstration purposes has been configured in `run_examples.py` by using fewer bootstraps (`N_B = 100`) than in the manuscript (`N_B = 1000`), although this can be edited for longer runs if desired. The output produced for the first data set (`p_C = 0.25`) is given below for `N_M = 100` and `N_B = 100` parallelised across 8 threads:
 
 ```
 ================================================================================
@@ -167,7 +167,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
 - `alpha` (`float`): The alpha value for calculating confidence intervals from bootstrap distributions. Default: `0.05`.
 - `ci_method` (`str`): The name of the method used to calculate the confidence intervals Default: `bca`.
 - `correct_bias` (`bool`): A boolean flag specifing whether to apply the bootstrap correction method or not. Default: `False`.
-- `seed` (`int`): An optional value to seed the random number generator with (in the range [0, (2^32)-1]) for reproducibility of sampling used for confidence intervals. Defaults: `None`.
+- `seed` (`int`): An optional value to seed the random number generator with (in the range `[0, (2^32)-1]`) for reproducibility of sampling used for confidence intervals. Defaults: `None`.
 - `n_jobs` (`int`): Number of bootstrap jobs to run in parallel. Default: `1`. (`n_jobs = -1` runs on all CPUs).
 - `verbose` (`int`): Integer to control the level of output (`0`, `1`, `2`). Set to `-1` to turn off all console output except the progress bars.
 - `true_pC` (`float`): Optionally pass the true proportion for showing the comparison with estimated proportion(s).
@@ -175,9 +175,9 @@ def analyse_mixture(scores, bins='fd', methods='all',
  
 #### Outputs
 
-(summary, bootstraps) (`tuple`): A tuple consisting of the following data structures.
+`(summary, bootstraps)` (`tuple`): A tuple consisting of the following data structures.
 
-- summary (`dict`): A nested dictionary with a key for each estimation method within which is a dictionary with the following keys:
+- `summary` (`dict`): A nested dictionary with a key for each estimation method within which is a dictionary with the following keys:
     - `p_C` : the prevalence estimate
     
     Optionally, if bootstrapping is used:
@@ -185,7 +185,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
     - `mean` : the mean of the bootstrapped estimates
     - `std` : the standard deviation of the bootstrap estimates
     - `p_cor_C` : the corrected prevalence estimate when `correct_bias == True`
-- bootstraps (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
+- `bootstraps` (`DataFrame`): A `pandas` dataframe of the proportion estimates. The first row is the point estimate. The remaining `n_boot * n_mix` rows are the bootstrapped estimates. Each column is the name of the estimation method.
 
 Additionally the logfile is written to the working directory.
 

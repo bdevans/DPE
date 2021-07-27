@@ -230,7 +230,7 @@ def calc_conf_intervals(bootstraps,
     Parameters
     ----------
     bootstraps : array
-        The array of bootstrapped p_C estimates (for a particular method).
+        The array of bootstrapped `p_C` estimates (for a particular method).
     estimate : float, optional
         An optional estimate from the original mixture (for a particular method).
     scores : dict, optional
@@ -248,7 +248,7 @@ def calc_conf_intervals(bootstraps,
           'n': number_of_bins}`.
     est_method : dict, optional
         A dictionary of a single method name from the set of methods:
-        {'Excess', 'Means', 'EMD', 'KDE'}, with associated precomputed
+        `{'Excess', 'Means', 'EMD', 'KDE'}`, with associated precomputed
         properties for the BCa CI method.
         e.g. `{'Means': {"mu_C": np.mean(scores["R_C"]),
                          "mu_N": np.mean(scores["R_N"])}}`.
@@ -259,7 +259,7 @@ def calc_conf_intervals(bootstraps,
         NOTE: This does not apply to BCa, which implicitly uses the median.
     alpha : float, optional
         The percentile to use for the confidence intervals (default = 0.05).
-        The returned values are (alpha/2, 1-alpha/2) percentile confidence
+        The returned values are `(alpha/2, 1-alpha/2)` percentile confidence
         intervals.
     ci_method : str, optional
         The name of the method used to calculate the confidence intervals.
@@ -495,7 +495,7 @@ def analyse_mixture(scores, bins='fd', methods='all',
         method or not. Default: `False`.
     seed : int
         An optional value to seed the random number generator with
-        (in the range [0, (2^32)-1]) for reproducibility of sampling used for
+        (in the range `[0, (2^32)-1]`) for reproducibility of sampling used for
         confidence intervals.
         Defaults: `None`.
     n_jobs : int
