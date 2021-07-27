@@ -57,7 +57,7 @@ python scripts/run_examples.py
 
 The proportion estimates and confidence intervals are then generated, with a plain text summary printed to the console (when verbose > 0) and written to a log file (named after the data set file with a `.log` extension). 
 
-The analysis parameters may be changed by editing the `run_examples.py` script. It is recommended to keep the total number of mixture bootstraps (`n_mix * n_boot`) below around 10,000 when using the KDE method, as this may taken a long time to finish. 
+The analysis parameters may be changed by editing the `run_examples.py` script. It is recommended to keep the total number of mixture bootstraps (`n_mix * n_boot`) below around 10,000 when using the KDE method, as this may take a long time to finish. 
 
 Optionally, the file `datasets.py` may be edited to change the construction parameters and generate new data sets to analyse. 
 
