@@ -269,7 +269,7 @@ def calc_conf_intervals(bootstraps,
     average_value = average(bootstraps)
 
     if ci_method.lower() == 'bca':
-        assert estimate is not None and 0.0 <= estimate <= 1.0
+        assert estimate is not None and 0.0 <= estimate <= 1.0, f"{estimate}"
         assert scores is not None
         assert bins is not None
         assert est_method is not None
