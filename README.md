@@ -106,7 +106,7 @@ Additionally a `results` directory will be created with a subdirectory for each 
 
 ### Reproducibility
 
-The results are reproducible by default since a seed is set (42) for the pseudo random number generator. This seed may be changed (or set to `None` for a random seed) or set to any integer in the range `[0, 2^32)` to explore variations in results due to stochasticity in sampling. 
+The results are reproducible by default since a seed is set (`42`) for the pseudo random number generator. This seed may be changed (or set to `None` for a random seed) or set to any integer in the range `[0, 2^32)` to explore variations in results due to stochasticity in sampling. 
 
 Running on your own data
 ------------------------
