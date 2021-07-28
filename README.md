@@ -40,15 +40,15 @@ Installation
 
 This should take approximately 1-2 minutes to complete, depending on the speed of your internet connection and the number of dependencies already satisfied. 
 
-The examples given were tested with Python 3.8.2 on macOS 11.4 (20F71) running in a Docker container (version 20.10.7, build f0df350). The exact packages installed with `conda` during testing are given in `.devcontainer/frozen_environment.yml`. 
+The examples given were tested with Python 3.8.2 on macOS 11.4 (20F71) running in a Docker container (version 20.10.7, build f0df350). The exact packages installed with `conda` during testing are given in [`.devcontainer/frozen_environment.yml`](https://github.com/bdevans/DPE/blob/main/.devcontainer/frozen_environment.yml). 
 
 Running the examples
 --------------------
 
 Three main code files are relevant for review purposes:
-1. `scripts/run_examples.py` the main script for applying the proportion estimation algorithms to the example data sets.
-2. `dpe/datasets.py` has utilities for generating, loading and saving synthetic data sets.
-3. `dpe/estimate.py` has the main routines for estimating proportions in a mixture distribution.
+1. [`scripts/run_examples.py`](https://github.com/bdevans/DPE/blob/main/scripts/run_examples.py) the main script for applying the proportion estimation algorithms to the example data sets.
+2. [`dpe/datasets.py`](https://github.com/bdevans/DPE/blob/main/dpe/datasets.py) has utilities for generating, loading and saving synthetic data sets.
+3. [`dpe/estimate.py`](https://github.com/bdevans/DPE/blob/main/dpe/estimate.py) has the main routines for estimating proportions in a mixture distribution.
 
 Once the requirements are installed (and the environment activated if necessary) run the example script with:
 
@@ -115,7 +115,7 @@ The main requirement is to prepare a dictionary (`dict`) containing the keys `R_
 
 Alternatively a `csv` file may be prepared and loaded with the function `datasets.load_dataset(filename)` as demonstrated in the `run_examples.py` script. The `csv` file should contain the header `Group,GRS` followed by pairs of `code,score` values (one per line for each GRS score) where code is `1` for the Cases Reference distribution, `2` for the Non-cases Reference distribution and `3` for the Mixture distribution. 
 
-Once the GRS scores have been prepared in a suitable form, they may be passed to the `analyse_mixture()` function as demonstrated in the `run_examples.py` script. Further details about this function are given in the following sections. 
+Once the GRS scores have been prepared in a suitable form, they may be passed to the [`analyse_mixture()`](#explanation-of-the-main-function) function as demonstrated in the `run_examples.py` script. Further details about this function are given in the following sections. 
 
 Methods
 -------
