@@ -21,7 +21,7 @@ example_proportions = [0.25, 0.50, 0.75]  # List of p_C values
 # Main parameters to edit
 n_mix = 100  # Number of mixtures to create based on the initial point estimate
 n_boot = 100  # 1000  # Number of bootstraps to create (for each mixture)
-load_data = True  # Change this to False to generate new datasets
+load_data = False  # Change this to False to generate new datasets
 
 # Less frequently changed parameters
 seed = 42  # Set this to seed the PRNG for reproducibility of results
