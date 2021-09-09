@@ -34,6 +34,9 @@ bins = 'fd'  # Use Freedman-Diaconis rule for binning data by default
 methods = 'all'  # ["Excess", "Means", "EMD", "KDE"]  # Alternatively pass a list of chosen methods
 verbose = 1  # Set the level of console output verbosity (0, 1, 2, 3. -1 : Progress bars only)
 
+# Set up the data directory
+data_dir = os.path.join(project_dir, "data")
+os.makedirs(data_dir, exist_ok=True)
 
 print('=' * 80)
 for p_C in example_proportions:

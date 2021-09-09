@@ -53,7 +53,6 @@ Three main code files are relevant for review purposes:
 Once the requirements are installed (and the environment activated if necessary) run the example script with:
 
 ```
-mkdir data/
 python scripts/run_examples.py
 ```
 
