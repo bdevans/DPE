@@ -42,7 +42,7 @@ print('=' * 80)
 for p_C in example_proportions:
 
     dataset = f'example_pC{int(round(100*p_C)):03}'
-    dataset_file = os.path.join(project_dir, "data", f'{dataset}.csv')
+    dataset_file = os.path.join(data_dir, f'{dataset}.csv')
     print(f'Running on example dataset: p_C = {p_C}')
     if load_data:
         # Load the example dataset
