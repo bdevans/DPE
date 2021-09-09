@@ -37,6 +37,9 @@ verbose = 1  # Set the level of console output verbosity (0, 1, 2, 3. -1 : Progr
 # Set up the data directory
 data_dir = os.path.join(project_dir, "data")
 os.makedirs(data_dir, exist_ok=True)
+# Set up the results directory
+results_dir = os.path.join(project_dir, "results")
+os.makedirs(results_dir, exist_ok=True)
 
 print('=' * 80)
 for p_C in example_proportions:
@@ -57,7 +60,7 @@ for p_C in example_proportions:
         ds.save_dataset(scores, dataset_file)
 
     # Create output directory
-    out_dir = os.path.join(project_dir, "results", dataset)
+    out_dir = os.path.join(results_dir, dataset)
     os.makedirs(out_dir, exist_ok=True)
 
     t = time.time()  # Start timer
