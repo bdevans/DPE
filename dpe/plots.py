@@ -492,15 +492,13 @@ def plot_bootstraps(df_pe, summary=None,
     if orient == 'v':
         ax.errorbar(x=x, y=y, yerr=errors, fmt='none', markersize=14, c=c, lw=2, markeredgecolor=c_edge,
                     capsize=12, capthick=2, label=error_label, zorder=10)
-
         # Add grey border around error bars
         ax.errorbar(x=x, y=y, yerr=errors, fmt='none', c=c_edge, lw=3, capsize=14, capthick=6)
     elif orient == 'h':
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=14, c=c, lw=1.25, markeredgecolor=c_edge,
-                    capsize=12, capthick=1, label=error_label, zorder=10)
-
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', markersize=10, c=c, lw=1, markeredgecolor=c_edge,
+                    capsize=6, capthick=1, label=error_label, zorder=10)
         # Add grey border around error bars
-        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=2, capsize=14, capthick=4)
+        ax.errorbar(x=x, y=y, xerr=errors, fmt='none', c=c_edge, lw=3, capsize=7, capthick=3)
 
 
     if correct_bias:
@@ -574,8 +572,8 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
         assert len(figsize) == 2
     fig_select = plt.figure(figsize=figsize)
     gs = plt.GridSpec(nrows=len(sizes), ncols=2, width_ratios=[2, 3],
-                      hspace=0.15, wspace=0.15,
-                      left=0.05, right=0.96, bottom=0.08, top=0.97)
+                      hspace=0.17, wspace=0.16,
+                      left=0.05, right=0.96, bottom=0.10, top=0.95)
 
     for si, size in enumerate(sizes):
         print(f"Size = {size} [#{si}/{len(sizes)}]: ", end='', flush=True)
@@ -623,7 +621,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
             print(f"p_C = {p_star} [#{p}/{len(p_stars)}]; ", end='', flush=True)
 
             # Add annotations for p_C
-            ax_vio.axvline(x=p_star, ymin=0, ymax=1, ls='--', lw=3, zorder=0, color=palette[p+1])
+            ax_vio.axvline(x=p_star, ymin=0, ymax=1, ls='--', lw=2, zorder=0, color=palette[p+1])
                        #label="Ground Truth: {:3.2}".format(p_star))
 
             # Add shading around the true values
@@ -642,7 +640,7 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
                 warnings.simplefilter("ignore", category=FutureWarning)
     #            g = sns.violinplot(x='Estimate', y='Size', hue='Method', data=df, ax=ax_vio, orient='h', cut=0, linewidth=2)
                 sns.violinplot(x='Estimate', y='Method', data=df_b, ax=ax_vio,
-                               orient='h', cut=0, linewidth=2, inner=None,
+                               orient='h', cut=0, linewidth=1, inner=None,
                                color=palette[p+1], saturation=0.7)
 
 #            handles, labels = g.get_legend_handles_labels()
@@ -737,17 +735,17 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
 
                 # Add grey border around error bars
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none',
-                                c=(0.45, 0.45, 0.45), lw=5, capsize=14, capthick=5)
+                                c=(0.45, 0.45, 0.45), lw=3, capsize=9, capthick=3)
 
                 ax_vio.errorbar(x=x, y=y, xerr=errors, fmt='none', c=palette[p+1],
-                                markersize=12, lw=2, capsize=12, capthick=2,
+                                markersize=8, lw=1, capsize=8, capthick=1,
                                 markeredgecolor=(0.45, 0.45, 0.45),
                                 label=f"Confidence Intervals ({1-alpha:3.1%})")
 
                 if correct_bias:
                     ax_vio.plot(x, y, '*', c=palette[p+1], markersize=12, markeredgecolor=(0.45, 0.45, 0.45), label="Corrected", zorder=20)
                 else:
-                    ax_vio.plot(x, y, 'o', c=palette[p+1], markersize=9, markeredgecolor=(0.45, 0.45, 0.45), zorder=20)  # label=r"$\hat{p}_C$", 
+                    ax_vio.plot(x, y, 'o', c=palette[p+1], markersize=5, markeredgecolor=(0.45, 0.45, 0.45), zorder=20)  # label=r"$\hat{p}_\mathrm{C}$", 
                     ax_vio.plot(x, y, '.', c=(0.45, 0.45, 0.45), markersize=2, markeredgecolor=(0.45, 0.45, 0.45), label=r"$\hat{p}_C$", zorder=30)
 
         print()

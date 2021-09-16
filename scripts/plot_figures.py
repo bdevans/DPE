@@ -72,17 +72,23 @@ average = np.mean  # NOTE: Used in get_error_bars, calculate_bias (and plot_char
 
 # Set plotting style
 mpl.rc('figure', figsize=(10, 8))
-mpl.rc('font', size=14)
-mpl.rc('axes', titlesize=14)    # fontsize of the axes title
-mpl.rc('axes', labelsize=14)    # fontsize of the x and y labels
-mpl.rc('xtick', labelsize=12)   # fontsize of the tick labels
-mpl.rc('ytick', labelsize=12)   # fontsize of the tick labels
-mpl.rc('legend', fontsize=11)   # legend fontsize
-mpl.rc('figure', titlesize=14)  # fontsize of the figure title
+mpl.rc('font', family='sans-serif', size=12)  # Helvetica
+mpl.rc('axes', titlesize=12)    # fontsize of the axes title
+mpl.rc('axes', labelsize=10)    # fontsize of the x and y labels
+mpl.rc('xtick', labelsize=8)   # fontsize of the tick labels
+mpl.rc('ytick', labelsize=8)   # fontsize of the tick labels
+mpl.rc('legend', fontsize=7)   # legend fontsize
+mpl.rc('figure', titlesize=8)  # fontsize of the figure title
 mpl.rc('lines', linewidth=2)
-mpl.rc('figure', dpi=100)
-mpl.rc('savefig', dpi=600)
+mpl.rc('figure', dpi=300)
+mpl.rc('savefig', dpi=1200)
 mpl.rc('mpl_toolkits', legacy_colorbar=False)  # Supress MatplotlibDeprecationWarning
+# Subfigures: lower case 12pt Helvetica: a, b, c
+# 8pt Helvetica for figure text
+# Page size (210 x 276 mm)
+# Figure width 178mm
+fig_width = 178 / 25.4  # mm * 0.03937007874
+# Save to pdf or eps or 1,200 DPI rasters if not possible
 # mpl.style.use('seaborn')
 # plt.style.use('seaborn-white')
 sns.set_style("ticks")
@@ -172,15 +178,14 @@ if __name__ == "__main__":
 
             # Plot worked examples
             print(f"Plotting application with {data_label} scores...", flush=True)
-            with mpl.rc_context({'axes.labelsize': 11, 
-                                'xtick.labelsize': 10, 
-                                'ytick.labelsize': 10,
-                                'legend.fontsize': 9}):
-                fig_ex = plt.figure(figsize=(12, 3.7))
-                # gs = plt.GridSpec(nrows=1, ncols=2, hspace=0.15, wspace=0.15,
-                #                   left=0.08, right=0.95, bottom=0.15, top=0.96)
-                gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.3, wspace=0.25,
-                                left=0.08, right=0.95, bottom=0.15, top=0.96)
+            # with mpl.rc_context({'axes.labelsize': 11, 
+            #                     'xtick.labelsize': 10, 
+            #                     'ytick.labelsize': 10,
+            #                     'legend.fontsize': 9}):
+            # fig_ex = plt.figure(figsize=(12, 3.7))
+            fig_ex = plt.figure(figsize=(fig_width, fig_width/3))  # *3.7/12
+            gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.3, wspace=0.25,
+                            left=0.08, right=0.95, bottom=0.20, top=0.85)
 
                 # sns.set_style("ticks")
                 with sns.axes_style("ticks"):
@@ -276,7 +281,7 @@ if __name__ == "__main__":
             # Plot results
             print("Plotting analysis of p_C vs. constructed p_C with {} scores...".format(data_label), flush=True)
             with sns.axes_style("whitegrid"):
-                fig, axes = plt.subplots(nrows=1, ncols=len(methods), sharex=True, sharey=True, figsize=(12, 4))
+                fig, axes = plt.subplots(nrows=1, ncols=len(methods), sharex=True, sharey=True, figsize=(fig_width, fig_width/3))
                 df_construct_tidy = df_construct.melt(var_name="Method",
                                         id_vars=["p_C", "Mix"],
                                         value_name="Estimate")
@@ -454,13 +459,15 @@ if __name__ == "__main__":
             # Plot selected violins
             print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
             plot_mixes = [selected_mix]
+            figsize = (fig_width, len(sizes)*fig_width*0.3)
             for mix in plot_mixes:  # range(n_seeds):
                 fig = plot_selected_violins(scores, bins, df_point, df_boots, summaries, # methods, 
                                     p_stars, sizes,
                                     # out_dir, data_label, 
                                     mix_dfs, selected_mix=mix,
                                     add_ci=True, alpha=0.05, ci_method=ci_method,
-                                    correct_bias=correct_bias, average=average)
+                                    correct_bias=correct_bias, average=average,
+                                    figsize=figsize)
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.png'))
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.svg'), transparent=True)
 
