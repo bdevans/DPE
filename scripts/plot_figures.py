@@ -229,11 +229,12 @@ if __name__ == "__main__":
                 # if application_xlims[data_label]:
                 #     ax_ci_ex.set_xlim(*application_xlims[data_label])
 
-                fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
-                fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
+            fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
+            fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
+            fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.pdf'), transparent=True)
 
         if output_application_vary_cases[data_label]:
-            
+
             assert "Mix_C" in scores and "Mix_N" in scores
             res_file = os.path.join(out_dir, f"pe_results_vary_cases_{data_label}.pkl")
 
@@ -291,7 +292,7 @@ if __name__ == "__main__":
                 df_construct = pd.read_pickle(res_file)
 
             # Plot results
-            print("Plotting analysis of p_C vs. constructed p_C with {} scores...".format(data_label), flush=True)
+            print(f"Plotting analysis of p_C vs. constructed p_C with {data_label} scores...", flush=True)
             with sns.axes_style("whitegrid"):
                 fig, axes = plt.subplots(nrows=1, ncols=len(methods), sharex=True, sharey=True, figsize=(fig_width, fig_width/3))
                 df_construct_tidy = df_construct.melt(var_name="Method",
@@ -316,6 +317,7 @@ if __name__ == "__main__":
 
             fig.savefig(os.path.join(fig_dir, f'estimation_test_{data_label}.png'))
             fig.savefig(os.path.join(fig_dir, f'estimation_test_{data_label}.svg'), transparent=True)
+            fig.savefig(os.path.join(fig_dir, f'estimation_test_{data_label}.pdf'), transparent=True)
 
 
         if output_characterisation[data_label]:
@@ -328,10 +330,11 @@ if __name__ == "__main__":
 
             # Plot point estimates of p1
             if bool(point_estimates):
-                print("Plotting characterisation of {} scores...".format(data_label), flush=True)
+                print(f"Plotting characterisation of {data_label} scores...", flush=True)
                 fig = plot_characterisation(point_estimates, proportions, sample_sizes, average=average)
-                fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.png'.format(data_label)))
-                fig.savefig(os.path.join(fig_dir, 'point_characterise_{}.svg'.format(data_label)), transparent=True)
+                fig.savefig(os.path.join(fig_dir, f'point_characterise_{data_label}.png'))
+                fig.savefig(os.path.join(fig_dir, f'point_characterise_{data_label}.svg'), transparent=True)
+                fig.savefig(os.path.join(fig_dir, f'point_characterise_{data_label}.pdf'), transparent=True)
 
             # Plot bootstrapped estimates of p1
             if False:  # bool(boots_estimates):
@@ -469,7 +472,7 @@ if __name__ == "__main__":
                         mix_dfs[s].append(pd.read_pickle(mix_dist_file))
 
             # Plot selected violins
-            print("Plotting violins of constructed mixtures with {} scores...".format(data_label), flush=True)
+            print(f"Plotting violins of constructed mixtures with {data_label} scores...", flush=True)
             plot_mixes = [selected_mix]
             figsize = (fig_width, len(sizes)*fig_width*0.3)
             for mix in plot_mixes:  # range(n_seeds):
@@ -482,6 +485,7 @@ if __name__ == "__main__":
                                     figsize=figsize)
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.png'))
                 fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.svg'), transparent=True)
+                fig.savefig(os.path.join(fig_dir, f'violin_selection_{mix}_{data_label}.pdf'), transparent=True)
 
 
 
