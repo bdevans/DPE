@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import seaborn as sns
 import tqdm
 
@@ -203,15 +204,21 @@ if __name__ == "__main__":
                 ax_roc_ex.text(-0.25, 1.1, "b", 
                     transform=ax_roc_ex.transAxes, size=12, weight='bold')
 
-                # with sns.axes_style("whitegrid"):
-                with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
-                    ax_ci_ex = fig_ex.add_subplot(gs[0, -1])
-                    plot_bootstraps(df_pe, summary,  # for confidence_intervals
-                                    # scores=scores, bins=bins, prepared_methods=methods,
-                                    correct_bias=correct_bias, p_C=p_C,
-                                    ax=ax_ci_ex, limits=application_xlims[data_label],
-                                    ci_method=ci_method, initial=False, legend=False,
-                                    violins=True, orient='h', average=average)
+            # with sns.axes_style("whitegrid"):
+            with sns.axes_style("ticks", 
+                                {"axes.grid": True, 
+                                 "axes.grid.which": "both", 
+                                 "axes.spines.left": False, 
+                                 "ytick.left": False}):
+                ax_ci_ex = fig_ex.add_subplot(gs[0, -1])
+                plot_bootstraps(df_pe, summary,  # for confidence_intervals
+                                # scores=scores, bins=bins, prepared_methods=methods,
+                                correct_bias=correct_bias, p_C=p_C,
+                                ax=ax_ci_ex, limits=application_xlims[data_label],
+                                ci_method=ci_method, initial=False, legend=False,
+                                violins=True, orient='h', average=average)
+                ax_ci_ex.xaxis.set_major_locator(ticker.MultipleLocator(base=0.05))
+                # ax_ci_ex.xaxis.set_minor_locator(ticker.MultipleLocator(base=0.05))
                 ax_ci_ex.text(-0.25, 1.1, "c", 
                     transform=ax_ci_ex.transAxes, size=12, weight='bold')
                 # if application_xlims[data_label]:

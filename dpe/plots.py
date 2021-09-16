@@ -1,4 +1,4 @@
-import os
+# import os
 import warnings
 import string
 
@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+import matplotlib.ticker as ticker
 from mpl_toolkits.axes_grid1 import AxesGrid
 import seaborn as sns
 from sklearn.metrics import auc
@@ -658,6 +659,8 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
 #            ax_vio.get_yticklabels().set_visible(False)
             # ax_vio.set(xlim=(0, 1))
             ax_vio.set(xlim=(-0.02, 1.02))
+            ax_vio.xaxis.set_major_locator(ticker.MultipleLocator(base=0.1))
+            # ax_vio.xaxis.set_minor_locator(ticker.MultipleLocator(base=0.05))
 
             if add_ci:  # Add confidence intervals
 #                # The true value will be within these bars for 95% of samples (not measures)
@@ -761,14 +764,16 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
                 ax_mix.get_legend().set_visible(False)
 
         # Remove y axis
-        # Set ticks at the ground truth values and do not trim
-        ax_vio.set_xticks([0, *p_stars, 1])
-        # Do not show labels for 0.00 and 1.00 to avoid crowding
-#        vio_xlabs = ax_vio_base.get_xticklabels()
-        vio_xlabs = ax_vio.get_xticks().tolist()
-#        vio_xlabs[0] = ''
-#        vio_xlabs[-1] = ''
-        ax_vio.set_xticklabels(vio_xlabs)
+        reduced_xticks = False
+        if reduced_xticks:
+            # Set ticks at the ground truth values and do not trim
+            ax_vio.set_xticks([0, *p_stars, 1])
+    #        vio_xlabs = ax_vio_base.get_xticklabels()
+            vio_xlabs = ax_vio.get_xticks().tolist()
+            # Do not show labels for 0.00 and 1.00 to avoid crowding
+    #        vio_xlabs[0] = ''
+    #        vio_xlabs[-1] = ''
+            ax_vio.set_xticklabels(vio_xlabs)
 #        ax_vio_base.set_xticklabels()
         sns.despine(ax=ax_vio, top=True, bottom=False, left=True, right=True, trim=True) #trim=False)
 #        ax_vio.set_yticks([])
