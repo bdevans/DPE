@@ -1,5 +1,6 @@
 import os
 import warnings
+import string
 
 import numpy as np
 import pandas as pd
@@ -781,7 +782,16 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
         ax_mix.set_yticks([])
         ax_mix.set_yticklabels([])
         # ax_mix.set_ylabel("")
-        ax_mix.set_ylabel(r"$n={:,}$".format(size), fontweight='heavy', fontsize=16)
+        ax_mix.set_ylabel(f"$n={size:,}$", fontweight='heavy') #, fontsize=12)
+
+        label_subplots = True
+        if label_subplots:
+            ax_mix.text(-0.07, 1.01,
+                string.ascii_lowercase[2 * (len(sizes) - si - 1)],
+                transform=ax_mix.transAxes, size=12, weight='bold')
+            ax_vio.text(-0.07, 1.01,
+                string.ascii_lowercase[2 * (len(sizes) - si - 1) + 1],
+                transform=ax_vio.transAxes, size=12, weight='bold')
 #    g.invert_yaxis()
     # ax_vio_base.set_xlabel(r"Estimated prevalence ($\hat{p}_C$)")  # $p_1$
     ax_vio_base.set_xlabel("Mixture prevalence")

@@ -186,6 +186,8 @@ if __name__ == "__main__":
                 with sns.axes_style("ticks"):
                     ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
                     plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+                ax_dists_ex.text(-0.25, 1.1, "a", 
+                    transform=ax_dists_ex.transAxes, size=12, weight='bold')
 
                 with sns.axes_style("ticks"):
                     ax_roc_ex = fig_ex.add_subplot(gs[0, 1])
@@ -193,6 +195,8 @@ if __name__ == "__main__":
                     sns.despine(ax=ax_roc_ex, top=True, right=True, trim=True)
                     ax_roc_ex.set_xlim([0, 1.01])  # Prevent clipping of line
                     ax_roc_ex.set_ylim([0, 1.01])  # Prevent clipping of line
+                ax_roc_ex.text(-0.25, 1.1, "b", 
+                    transform=ax_roc_ex.transAxes, size=12, weight='bold')
 
                 # with sns.axes_style("whitegrid"):
                 with sns.axes_style("ticks", {"axes.grid": True, "axes.spines.left": False, 'ytick.left': False}):
@@ -203,8 +207,10 @@ if __name__ == "__main__":
                                     ax=ax_ci_ex, limits=application_xlims[data_label],
                                     ci_method=ci_method, initial=False, legend=False,
                                     violins=True, orient='h', average=average)
-                    # if application_xlims[data_label]:
-                    #     ax_ci_ex.set_xlim(*application_xlims[data_label])
+                ax_ci_ex.text(-0.25, 1.1, "c", 
+                    transform=ax_ci_ex.transAxes, size=12, weight='bold')
+                # if application_xlims[data_label]:
+                #     ax_ci_ex.set_xlim(*application_xlims[data_label])
 
                 fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.png'))
                 fig_ex.savefig(os.path.join(fig_dir, f'application_{data_label}.svg'), transparent=True)
