@@ -200,12 +200,12 @@ if __name__ == "__main__":
                 ax_dists_ex.text(-0.25, 1.1, "a", 
                     transform=ax_dists_ex.transAxes, size=12, weight='bold')
 
-                with sns.axes_style("ticks"):
-                    ax_roc_ex = fig_ex.add_subplot(gs[0, 1])
-                    plot_roc(scores, bins, full_labels=False, ax=ax_roc_ex)
-                    sns.despine(ax=ax_roc_ex, top=True, right=True, trim=True)
-                    ax_roc_ex.set_xlim([0, 1.01])  # Prevent clipping of line
-                    ax_roc_ex.set_ylim([0, 1.01])  # Prevent clipping of line
+            with sns.axes_style("ticks"):
+                ax_roc_ex = fig_ex.add_subplot(gs[0, 1])
+                plot_roc(scores, bins, full_labels=False, ax=ax_roc_ex)
+                sns.despine(ax=ax_roc_ex, top=True, right=True, trim=True)
+                ax_roc_ex.set_xlim([0, 1.01])  # Prevent clipping of line
+                ax_roc_ex.set_ylim([0, 1.01])  # Prevent clipping of line
                 ax_roc_ex.text(-0.25, 1.1, "b", 
                     transform=ax_roc_ex.transAxes, size=12, weight='bold')
 
