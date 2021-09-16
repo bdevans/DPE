@@ -547,17 +547,25 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
                           p_stars, sizes, #out_dir, data_label, 
                           mix_dfs, selected_mix=0,
                           add_ci=True, alpha=0.05, ci_method="bca",
-                          correct_bias=False, average=np.mean):  # , fig_dir=""):
+                          correct_bias=False, average=np.mean,
+                          proportionate_colouring=False, figsize=None):  # , fig_dir=""):
 
     c = sns.color_palette()[-3]  # 'gray'
 #    palette=["#023EFF", "#FF7C00", "#1AC938", "#E8000B", "#8B2BE2",
 #             "#9F4800", "#F14CC1", "#A3A3A3", "#FFC400", "#00D7FF"]  # bright
 #    palette = sns.color_palette().as_hex()
-    palette = sns.color_palette("coolwarm", len(p_stars)+2).as_hex()  # "hls"
+    # proportionate_colouring = False  # TODO: This should be enabled for general usage
+    if proportionate_colouring:
+        palette = sns.color_palette("coolwarm", n_colors=101, desat=0.8).as_hex()  # "hls"
+        size_indices = [int(round(100 * p)) for p in p_stars]
+    else:
+        palette = sns.color_palette("coolwarm", len(p_stars)+2).as_hex()  # "hls"
     # sns.palplot(sns.diverging_palette(255, 40, s=50, l=70, n=5, center="dark"))
     # palette = sns.diverging_palette(255, 40, s=50, l=70, n=5, center="dark").as_hex()
     if len(palette) % 2 == 1:
         palette[len(palette)//2] = '#bbbbbb'
+    if proportionate_colouring:
+        palette = [palette[0], *[palette[s] for s in size_indices], palette[-1]]
     print(palette)
 
     fig_select = plt.figure(figsize=(12, 3*len(sizes)))
