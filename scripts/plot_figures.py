@@ -66,6 +66,7 @@ output_diabetes_rocs = False
 output_application = {'Diabetes': False, 'Renal': False, 'Coeliac': True, 'Glaucoma': True}
 output_application_vary_cases = {'Diabetes': False, 'Renal': False, 'Coeliac': False, 'Glaucoma': True}
 application_xlims = {'Diabetes': None, 'Renal': (0, 0.3), 'Coeliac': (0, 0.3), 'Glaucoma': (0, 0.3)}
+application_legend_bbox = {'Diabetes': None, 'Renal': None, 'Coeliac': (0.6, 0.85), 'Glaucoma': None}
 output_analysis = {'Diabetes': True, 'Renal': False, 'Coeliac': False, 'Glaucoma': False}
 output_characterisation = {'Diabetes': False, 'Renal': False, 'Coeliac': False, 'Glaucoma': False}
 average = np.mean  # NOTE: Used in get_error_bars, calculate_bias (and plot_characterisation). Does not apply when using BCa (which implicitly uses the median).
@@ -188,10 +189,14 @@ if __name__ == "__main__":
             gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.3, wspace=0.25,
                             left=0.08, right=0.95, bottom=0.20, top=0.85)
 
-                # sns.set_style("ticks")
-                with sns.axes_style("ticks"):
-                    ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
-                    plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+            # sns.set_style("ticks")
+            with sns.axes_style("ticks"):
+                ax_dists_ex = fig_ex.add_subplot(gs[0, 0])
+                plot_distributions(scores, bins, data_label, ax=ax_dists_ex)
+                if application_legend_bbox[data_label]:
+                    bbox = application_legend_bbox[data_label]
+                    ax_dists_ex.legend(bbox_to_anchor=bbox,
+                        bbox_transform=ax_dists_ex.transAxes)
                 ax_dists_ex.text(-0.25, 1.1, "a", 
                     transform=ax_dists_ex.transAxes, size=12, weight='bold')
 
