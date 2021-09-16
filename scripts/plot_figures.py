@@ -287,8 +287,8 @@ if __name__ == "__main__":
                     ax.set_xticks(ticks)
                     ax.set_yticks(ticks)
                     if m == 0:
-                        ax.set_ylabel(r"$\hat{p}_C$ (Estimate)")
-                    ax.set_xlabel(r"$p_C$ (Ground Truth)")
+                        ax.set_ylabel(r"$\hat{p}_\mathrm{C}$ (Estimate)")
+                    ax.set_xlabel(r"$p_\mathrm{C}$ (Ground Truth)")
                     ax.set_title(method)
 
             fig.savefig(os.path.join(fig_dir, f'estimation_test_{data_label}.png'))

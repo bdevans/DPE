@@ -322,15 +322,13 @@ def plot_distributions(scores, bins, data_label, norm=False, despine=True, ax=No
     with sns.axes_style("ticks") and warnings.catch_warnings():
         warnings.simplefilter("ignore", category=FutureWarning)
         sns.distplot(scores['R_C'], bins=bins['edges'], norm_hist=norm,
-                     label="$R_C: n={:,}$".format(len(scores['R_C'])),
-                     # label="$R_1: n={:,}$".format(len(scores['R_C'])),
+                     label=f"$\mathrm{{R_C}}: n={len(scores['R_C']):,}$",
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[-1])
         sns.distplot(scores['R_N'], bins=bins['edges'], norm_hist=norm,
-                     label="$R_N: n={:,}$".format(len(scores['R_N'])),
-                     # label="$R_2: n={:,}$".format(len(scores['R_N'])),
+                     label=f"$\mathrm{{R_N}}: n={len(scores['R_N']):,}$",
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[0])
         sns.distplot(scores['Mix'], bins=bins['edges'], norm_hist=norm,
-                     label=r"$\tilde{{M}}: n={:,}$".format(len(scores['Mix'])),
+                     label=f"$\\widetilde{{\mathrm{{M}}}}: n={len(scores['Mix']):,}$",
                      ax=ax, kde_kws={'bw': bins['width']}, color=palette[2])
 
         if despine:
@@ -398,13 +396,13 @@ def plot_bootstraps(df_pe, summary=None,
             ax.yaxis.tick_right()
 
     if p_C:  # Add ground truth
-        truth_label = r"$p_C = {:4.3}$".format(p_C)
+        truth_label = f"$p_\mathrm{{C}} = {p_C:4.3}$"
         if orient == 'v':
             ax.axhline(y=p_C, xmin=0, xmax=1, ls='--', c='#aaaaaa',
-                       label=truth_label)  # "Ground Truth: {:4.3}".format(p_C))
+                       label=truth_label)
         elif orient == 'h':
             ax.axvline(x=p_C, ymin=0, ymax=1, ls='--', c='#aaaaaa',
-                       label=truth_label)  # "Ground Truth: {:4.3}".format(p_C))
+                       label=truth_label)
 
     # Add confidence intervals # TODO: Refactor
 #    if orient == 'v':
@@ -508,8 +506,8 @@ def plot_bootstraps(df_pe, summary=None,
         # ax.plot(x, y, '*', markersize=14, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
         ax.plot(x, y, 'o', markersize=10, c=c, markeredgecolor=c_edge, label="Corrected", zorder=20)
     else:
-        ax.plot(x, y, 'o', markersize=6, c=c, markeredgecolor=c_edge, zorder=20)
-        ax.plot(x, y, '.', markersize=2, c=c_edge, markeredgecolor=c_edge, label=r"$\hat{p}_C$", zorder=30)
+        ax.plot(x, y, 'o', markersize=5, c=c, markeredgecolor=c_edge, zorder=20)
+        ax.plot(x, y, '.', markersize=2, c=c_edge, markeredgecolor=c_edge, label=r"$\hat{p}_\mathrm{C}$", zorder=30)
 
     if orient == 'v':
         ax.yaxis.tick_left()
@@ -609,13 +607,15 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
             warnings.simplefilter("ignore", category=FutureWarning)
             sns.distplot(scores["R_N"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True}, # hist=True, norm_hist=True, kde=False)#,
-                         label=r"$p_C=0.0\ (R_N)$", ax=ax_mix, color=palette[0])
+                         label=r"$p_\mathrm{C}=0.0\ (\mathrm{R_N})$", ax=ax_mix, color=palette[0])
             for p, p_star in enumerate(p_stars):
                 sns.distplot(df_mixes[p_star], bins=bins['edges'], hist=False,
-                             label=r"$p_C={}$".format(p_star), ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
+                            #  label=r"$p_{\mathrm{{C}}}={}$".format(p_star), 
+                             label=f"$p_\mathrm{{C}}={p_star}$",
+                             ax=ax_mix, color=palette[p+1])  # \tilde{{M}}: n={},
             sns.distplot(scores["R_C"], bins=bins['edges'], hist=False, kde=True,
                          kde_kws={"shade": True},
-                         label=r"$p_C=1.0\ (R_C)$", ax=ax_mix, color=palette[len(p_stars)+1])
+                         label=r"$p_\mathrm{C}=1.0\ (\mathrm{R_C})$", ax=ax_mix, color=palette[len(p_stars)+1])
 
         # Plot violins of bootstrapped estimates
         for p, p_star in enumerate(p_stars):
