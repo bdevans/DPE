@@ -568,7 +568,12 @@ def plot_selected_violins(scores, bins, df_point, df_boots, summaries, #methods,
         palette = [palette[0], *[palette[s] for s in size_indices], palette[-1]]
     print(palette)
 
-    fig_select = plt.figure(figsize=(12, 3*len(sizes)))
+    if figsize is None:
+        figsize = (12, 3*len(sizes))
+    else:
+        assert isinstance(figsize, (tuple, list))
+        assert len(figsize) == 2
+    fig_select = plt.figure(figsize=figsize)
     gs = plt.GridSpec(nrows=len(sizes), ncols=2, width_ratios=[2, 3],
                       hspace=0.15, wspace=0.15,
                       left=0.05, right=0.96, bottom=0.08, top=0.97)
