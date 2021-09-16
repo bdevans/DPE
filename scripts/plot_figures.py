@@ -187,7 +187,7 @@ if __name__ == "__main__":
             # fig_ex = plt.figure(figsize=(12, 3.7))
             fig_ex = plt.figure(figsize=(fig_width, fig_width/3))  # *3.7/12
             gs = plt.GridSpec(nrows=1, ncols=3, hspace=0.3, wspace=0.25,
-                            left=0.08, right=0.95, bottom=0.20, top=0.85)
+                            left=0.08, right=0.95, bottom=0.20, top=0.8)
 
             # sns.set_style("ticks")
             with sns.axes_style("ticks"):
