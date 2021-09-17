@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the article from preferred-citation and the software itself."
+authors:
+- family-names: "Evans"
+  given-names: "Benjamin"
+  orcid: "https://orcid.org/0000-0002-1734-6070"
+- family-names: "Slowinski"
+  given-names: "Piotr"
+  orcid: "https://orcid.org/0000-0002-6612-9902"
+title: "Distribution Proportion Estimation"
+version: 1.0.0
+doi: 10.5281/zenodo.5512651
+date-released: 2021-09-16
+url: "https://github.com/bdevans/DPE"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Evans"
+    given-names: "Benjamin D."
+    orcid: "https://orcid.org/0000-0002-1734-6070"
+  - family-names: "Slowinski"
+    given-names: "Piotr"
+    orcid: "https://orcid.org/0000-0002-6612-9902"
+  - family-names: "Hattersley"
+    given-names: "Andrew T."
+  - family-names: "Jones"
+    given-names: "Samuel E."
+    orcid: "http://orcid.org/0000-0003-0153-922X"
+  - family-names: "Sharp"
+    given-names: "Seth"
+  - family-names: "Kimmitt"
+    given-names: "Robert A."
+  - family-names: "Weedon"
+    given-names: "Michael N."
+  - family-names: "Oram"
+    given-names: "Richard A."
+  - family-names: "Tsaneva-Atanasova"
+    given-names: "Krasimira"
+    orcid: "http://orcid.org/0000-0002-6294-7051"
+  - family-names: "Thomas"
+    given-names: "Nicholas J."
+  doi: "10.1101/2020.02.20.20025528"
+  journal: "medRxiv"
+  month: 7
+  start: 1 # First page number
+  end: 29 # Last page number
+  title: "Estimating population level disease prevalence using genetic risk scores"
+  issue: 1
+  volume: 1
+  year: 2021
+  abstract: "Clinical classification is essential for estimating disease prevalence but is difficult, often requiring complex investigations. The widespread availability of population level genetic data makes novel genetic stratification techniques a highly attractive alternative. We propose a generalizable mathematical framework for determining disease prevalence within a cohort using genetic risk scores. We compare and evaluate methods based on the means of genetic risk scores’ distributions; the Earth Mover’s Distance between distributions; a linear combination of kernel density estimates of distributions; and an Excess method. We demonstrate the performance of genetic stratification to produce robust prevalence estimates. Specifically, we show that robust estimates of prevalence are still possible even with rarer diseases, smaller cohort sizes and less discriminative genetic risk scores, highlighting the general utility of these approaches. Genetic stratification techniques offer exciting new research tools, enabling unbiased insights into disease prevalence and clinical characteristics unhampered by clinical classification criteria."
