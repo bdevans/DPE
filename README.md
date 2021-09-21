@@ -133,7 +133,7 @@ CI <-- {}  # Dictionary (hashtable) of confidence intervals (2-tuple)
 for meth in ["Excess", "Means", "EMD", "KDE"]:
     p^hat[meth] <-- get_point_estimate({R_C, R_N, Mix}, bins, meth)  # Proportion of cases
     # Calculate confidence intervals around the initial proportion estimates
-    p^mbe[meth] = []  # Create empty list of estimates for each method
+    p^mbe[meth] <-- []  # Create empty list of estimates for each method
     for m in 1 to N_M:  # Number of Monte Carlo mixtures
         Mix_meth_m <-- get_monte_carlo_mixture({R_C, R_N}, p^hat[meth])
         for b in 1 to N_B:  # Number of bootstraps
