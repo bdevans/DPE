@@ -5,7 +5,7 @@ Methods for estimating the prevalence of cases in a mixture population based on 
 
 [![GitHub license](https://img.shields.io/github/license/bdevans/DPE)](https://github.com/bdevans/DPE/blob/master/LICENSE.txt)
 ![Workflow](https://github.com/bdevans/DPE/actions/workflows/python-package.yml/badge.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5512651.svg)](https://doi.org/10.5281/zenodo.5512651) 
-[**DOI: 10.1101/2020.02.20.20025528**](https://doi.org/10.1101/2020.02.20.20025528)
+[:page_facing_up: **DOI: 10.1101/2020.02.20.20025528**](https://doi.org/10.1101/2020.02.20.20025528)
 
 ------------------------------------------------------------------------
 
