@@ -279,18 +279,20 @@ p_C == p1, p_N == p2
 Citation
 --------
 
-If you use this software, please cite our accompanying [publication](https://doi.org/10.1101/2020.02.20.20025528):
+If you use this software, please cite our accompanying [publication](https://doi.org/10.1038/s41467-021-26501-7):
 
 ```bibtex
-@article {Evans2020.02.20.20025528,
+@article{EvansSlowinskiEstimatingDiseasePrevalence2021,
 	author = {Evans, Benjamin D. and S{\l}owi{\'n}ski, Piotr and Hattersley, Andrew T. and Jones, Samuel E. and Sharp, Seth and Kimmitt, Robert A. and Weedon, Michael N. and Oram, Richard A. and Tsaneva-Atanasova, Krasimira and Thomas, Nicholas J.},
-	title = {Estimating population level disease prevalence using genetic risk scores},
-	elocation-id = {2020.02.20.20025528},
+	title = {Estimating disease prevalence in large datasets using genetic risk scores},
+	volume = {12},
+	number = {1},
+	pages = {6441},
+	journal = {Nature Communications},
+	issn = {2041-1723},
 	year = {2021},
-	doi = {10.1101/2020.02.20.20025528},
-	publisher = {Cold Spring Harbor Laboratory Press},
-	URL = {https://www.medrxiv.org/content/early/2021/02/27/2020.02.20.20025528},
-	eprint = {https://www.medrxiv.org/content/early/2021/02/27/2020.02.20.20025528.full.pdf},
-	journal = {medRxiv}
+	month = nov,
+	url = {https://www.nature.com/articles/s41467-021-26501-7},
+	doi = {10.1038/s41467-021-26501-7},
 }
 ```
